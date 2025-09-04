@@ -1,4 +1,4 @@
-/* style.css para ServiConnect - Versão Final e Responsiva */
+/* style.css para ServiConnect - v7.1 Final com Correção de Alinhamento e Responsividade */
 
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Montserrat:wght@400;500;600;700&display=swap');
 
@@ -59,7 +59,7 @@ h2::after {
     border-radius: 2px;
 }
 
-/* --- BOTÕES --- */
+/* BOTÕES */
 .btn {
     display: inline-block;
     padding: 12px 30px;
@@ -69,8 +69,6 @@ h2::after {
     transition: all 0.3s ease;
     border: none;
     cursor: pointer;
-    font-family: 'Poppins', sans-serif;
-    letter-spacing: 0.5px;
     text-align: center;
 }
 
@@ -94,8 +92,8 @@ h2::after {
 .btn-header:hover {
     background: #ffd700;
     border-color: #ffd700;
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-subtle);
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-medium);
 }
 
 /* --- HEADER --- */
@@ -111,7 +109,6 @@ header {
     padding: 10px 0;
     border-bottom: 1px solid var(--light-grey);
 }
-
 .top-bar .container {
     max-width: 1400px;
     display: flex;
@@ -124,6 +121,11 @@ header {
     max-width: 160px;
     height: auto;
     flex-shrink: 0;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+}
+.logo:hover {
+    transform: scale(1.05);
+    opacity: 0.9;
 }
 
 .search-area {
@@ -137,18 +139,13 @@ header {
     border: 1px solid #ddd;
     border-right: none;
     border-radius: 8px 0 0 8px;
-    font-family: 'Poppins', sans-serif;
-    font-size: 0.95em;
-    color: var(--text-color);
 }
-.search-area input:focus { outline: 2px solid var(--secondary-yellow); }
 .search-area button {
     background: var(--primary-blue);
     color: var(--white-color);
     border: none;
     padding: 0 20px;
     cursor: pointer;
-    font-size: 1.1em;
     border-radius: 0 8px 8px 0;
 }
 
@@ -159,8 +156,7 @@ header {
     flex-shrink: 0;
 }
 .user-actions .btn {
-    width: 240px;
-    padding: 12px 10px;
+    padding: 12px 25px;
     font-size: 0.9em;
     white-space: nowrap;
 }
@@ -168,9 +164,17 @@ header {
     color: var(--primary-blue);
     text-decoration: none;
     font-weight: 600;
+    padding: 8px 15px;
+    border-radius: 50px;
     white-space: nowrap;
+    transition: all 0.3s ease;
+}
+.user-actions .login-link:hover {
+    background-color: var(--light-grey);
+    transform: translateY(-2px);
 }
 
+/* MENU */
 .bottom-bar {
     background: var(--light-grey);
     border-bottom: 1px solid #e0e0e0;
@@ -191,6 +195,11 @@ header {
     font-weight: 500;
     padding: 8px 0;
     position: relative;
+    display: inline-block;
+    transition: transform 0.3s ease;
+}
+.bottom-bar nav a:hover {
+    transform: translateY(-2px);
 }
 .bottom-bar nav a::after {
     content: '';
@@ -199,12 +208,9 @@ header {
     height: 3px;
     background: var(--secondary-yellow);
     bottom: -5px;
-    left: 50%;
-    transform: translateX(-50%);
-    transition: width 0.3s ease-out;
-    border-radius: 2px;
+    left: 0;
+    transition: width 0.3s ease;
 }
-.bottom-bar nav a:hover { color: var(--secondary-yellow); }
 .bottom-bar nav a:hover::after { width: 100%; }
 
 /* --- HERO --- */
@@ -231,94 +237,175 @@ header {
     background: rgba(10, 25, 47, 0.6);
     z-index: 1;
 }
-.hero .container {
-    position: relative;
-    z-index: 2;
-    max-width: 800px;
-}
-.hero h1 {
-    font-size: 4.5em;
-    font-weight: 800;
-    color: var(--white-color);
-    line-height: 1.1;
-    margin-bottom: 20px;
-    text-shadow: 2px 2px 15px rgba(0, 0, 0, 0.7);
-}
-.hero p {
-    font-size: 1.4em;
-    font-weight: 400;
-    max-width: 700px;
-    margin: 0 auto;
-    color: rgba(255, 255, 255, 0.9);
-}
+.hero .container { position: relative; z-index: 2; max-width: 800px; }
+.hero h1 { font-size: 4.5em; font-weight: 800; color: var(--white-color); text-shadow: 2px 2px 15px rgba(0, 0, 0, 0.7); }
+.hero p { font-size: 1.4em; max-width: 700px; margin: 20px auto 0; }
 
 /* --- SEÇÕES --- */
-section { padding: 80px 0; background-color: var(--white-color); margin-bottom: 20px; box-shadow: var(--shadow-subtle); border-radius: 8px; }
+section {
+    padding: 80px 0;
+    background-color: var(--white-color);
+    margin-bottom: 20px;
+    box-shadow: var(--shadow-subtle);
+    border-radius: 8px;
+}
 section:nth-of-type(even) { background-color: var(--light-grey); }
-#sobre .sobre-layout, #como-funciona .como-funciona-layout { display: grid; grid-template-columns: 1fr 1.2fr; gap: 60px; align-items: center; margin-top: 40px; }
-#sobre .sobre-imagem img { width: 100%; max-width: 550px; height: auto; border-radius: 10px; box-shadow: var(--shadow-medium); }
-#funcionalidades-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 30px; margin-top: 40px; }
-.card { background: var(--white-color); padding: 35px; border-radius: 12px; box-shadow: var(--shadow-subtle); border: 1px solid #E0E0E0; text-align: center; }
-.card h3 { color: var(--primary-blue); font-size: 1.6em; margin-top: 0; margin-bottom: 15px; }
-#como-funciona .coluna { background: var(--white-color); padding: 40px; border-radius: 12px; box-shadow: var(--shadow-subtle); border: 1px solid #E0E0E0; }
-#como-funciona .coluna h3 { font-size: 1.8em; }
-#como-funciona .coluna ol { list-style-type: none; padding: 0; counter-reset: step-counter; }
-#como-funciona .coluna li { font-size: 1.1em; margin-bottom: 18px; padding-left: 45px; position: relative; }
-#como-funciona .coluna li::before { counter-increment: step-counter; content: counter(step-counter); position: absolute; left: 0; top: 50%; transform: translateY(-50%); width: 30px; height: 30px; background-color: var(--secondary-yellow); color: var(--primary-blue); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.9em; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); }
-footer { background: var(--primary-blue); color: var(--light-grey); text-align: center; padding: 60px 0; font-size: 0.95em; }
-footer p { margin: 5px 0; }
-.social-icons { margin-bottom: 20px; }
-.social-icons a { color: var(--light-grey); font-size: 1.6em; margin: 0 18px; transition: all 0.3s ease; }
-.social-icons a:hover { color: var(--secondary-yellow); transform: scale(1.1) translateY(-3px); }
-.fade-in-section { opacity: 0; transform: translateY(40px); transition: opacity 0.8s ease-out, transform 0.8s ease-out; }
-.fade-in-section.is-visible { opacity: 1; transform: translateY(0); }
 
-/* =========== MEDIA QUERIES PARA RESPONSIVIDADE =========== */
-
-/* Telas de Tablet */
-@media (max-width: 1024px) {
-    h2 { font-size: 2.4em; }
-    .hero h1 { font-size: 3.5em; }
-    .top-bar .container { gap: 15px; }
-    .search-area { display: none; } /* Oculta a busca para dar espaço */
-    .user-actions .btn { width: auto; padding: 10px 20px; font-size: 0.85em;}
+/* --- Ajuste: colunas iguais para sobre e como-funciona --- */
+#sobre .sobre-layout, #como-funciona .como-funciona-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr; /* agora as duas colunas têm mesma largura */
+    gap: 60px;
+    align-items: center;
+    margin-top: 40px;
 }
 
-/* Telas de Celular */
+.sobre-imagem img {
+    width: 100%;
+    border-radius: 10px;
+    box-shadow: var(--shadow-medium);
+    transition: transform 0.3s ease;
+}
+.sobre-imagem img:hover { transform: scale(1.03); }
+
+.funcionalidades-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 30px;
+    margin-top: 40px;
+}
+.card {
+    background: var(--white-color);
+    padding: 35px;
+    border-radius: 12px;
+    box-shadow: var(--shadow-subtle);
+    border: 1px solid #E0E0E0;
+    text-align: center;
+    transition: all 0.3s ease;
+}
+.card:hover {
+    transform: translateY(-10px);
+    box-shadow: var(--shadow-medium);
+}
+.card h3 { color: var(--primary-blue); font-size: 1.6em; margin-top: 0; }
+
+#como-funciona .coluna {
+    background: var(--white-color);
+    padding: 40px;
+    border-radius: 12px;
+    box-shadow: var(--shadow-subtle);
+    border: 1px solid #E0E0E0;
+    display: flex;
+    flex-direction: column;
+}
+
+/* === Correções específicas para "Como Funciona" === */
+/* garante colunas iguais e mantém alinhamento interno */
+#como-funciona .como-funciona-layout {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 48px;
+    align-items: stretch;
+}
+
+/* normaliza o box-sizing e o texto interno das colunas */
+#como-funciona .coluna {
+    box-sizing: border-box;
+    padding: 40px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    text-align: left;
+    min-height: 220px; /* mantém altura parecida entre colunas */
+}
+
+/* título igual para as duas colunas */
+#como-funciona .coluna h3 {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--primary-blue);
+    margin: 0 0 16px 0;
+    line-height: 1.1;
+}
+
+/* lista alinhada e espaçada igual nas duas colunas */
+#como-funciona .coluna ol {
+    margin: 0;
+    padding-left: 1.05rem; /* ajuste fino para os números ficarem alinhados */
+    list-style-position: outside;
+    color: var(--text-color);
+    line-height: 1.8;
+}
+
+/* espaçamento entre itens da lista */
+#como-funciona .coluna ol li {
+    margin-bottom: 10px;
+}
+
+/* --- FOOTER --- */
+footer {
+    background: var(--primary-blue);
+    color: var(--light-grey);
+    text-align: center;
+    padding: 60px 0;
+}
+.social-icons a {
+    color: var(--light-grey);
+    font-size: 1.6em;
+    margin: 0 18px;
+    display: inline-block;
+    transition: all 0.3s ease;
+}
+.social-icons a:hover {
+    color: var(--secondary-yellow);
+    transform: scale(1.1) rotate(10deg);
+}
+
+/* =========== MEDIA QUERIES =========== */
+@media (max-width: 1024px) {
+    .container { width: 95%; }
+}
+
 @media (max-width: 768px) {
-    header {
-        position: static; /* <<< CABEÇALHO DEIXA DE SER FIXO */
-    }
+    header { position: static; }
     .top-bar .container {
-        flex-direction: row; /* Mantém logo e ações na mesma linha */
-        justify-content: space-between;
+        flex-wrap: wrap;
+        justify-content: center;
+        text-align: center;
     }
-    .search-area, .user-actions .login-link, .user-actions .btn-secondary {
-        display: none; /* Oculta busca, login e profissional para simplificar */
+    .logo { margin-bottom: 10px; }
+    .search-area {
+        width: 100%;
+        max-width: 100%;
+        order: 3;
+        margin-top: 10px;
     }
-    .user-actions .btn-header {
-        width: auto; /* Deixa o botão crescer conforme o texto */
-    }
-    .bottom-bar {
-        display: none; /* <<< MENU DE NAVEGAÇÃO INFERIOR OCULTO */
-    }
+    .user-actions { order: 2; }
+    .bottom-bar { display: none; }
+    h2 { font-size: 2.2em; }
     .hero { height: 70vh; }
     .hero h1 { font-size: 2.8em; }
-    .hero p { font-size: 1.1em; }
-    h2 { font-size: 2em; }
-    section { padding: 60px 0; }
     #sobre .sobre-layout, #como-funciona .como-funciona-layout {
         grid-template-columns: 1fr;
-        gap: 40px;
+        text-align: center;
     }
-    #sobre .sobre-imagem { order: -1; } /* Imagem vai para cima do texto */
+
+    /* responsividade específica para como-funciona */
+    #como-funciona .coluna {
+        text-align: center;
+        min-height: auto;
+    }
+    #como-funciona .coluna h3 { margin-bottom: 12px; }
+    #como-funciona .coluna ol { padding-left: 0.8rem; }
 }
 
-/* Telas Pequenas */
 @media (max-width: 480px) {
-    .container { width: 95%; padding: 0 10px;}
+    .user-actions {
+        flex-direction: column;
+        width: 100%;
+        gap: 10px;
+    }
+    .user-actions .btn { width: 100%; }
+    h2 { font-size: 2em; }
     .hero h1 { font-size: 2.2em; }
-    .hero p { font-size: 1em; }
-    h2 { font-size: 1.8em; }
-    .card, #como-funciona .coluna { padding: 25px; }
 }

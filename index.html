@@ -6,32 +6,49 @@
     <meta name="description" content="ServiConnect: Conectando empresas a prestadores de serviços terceirizados de forma prática e segura.">
     <title>ServiConnect - Conectando Empresas e Serviços</title>
     
+    <!-- CSS principal -->
     <link rel="stylesheet" href="style.css">
-    
+
+    <!-- Fonte Poppins -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet">
 
+    <!-- Ícones -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 </head>
 <body>
 
+    <!-- HEADER -->
     <header>
         <div class="top-bar">
             <div class="container">
+                <!-- LOGO -->
                 <img src="logo.jpg" alt="Logo da ServiConnect" class="logo">
                 
+                <!-- BARRA DE PESQUISA -->
                 <div class="search-area">
                     <input type="text" placeholder="Buscar por serviços (ex: limpeza, segurança)...">
-                    <button type="submit" aria-label="Buscar">🔍</button>
+                    <button type="submit" aria-label="Buscar">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                    </button>
                 </div>
 
+                <!-- BOTÕES DE AÇÃO -->
                 <div class="user-actions">
                     <a href="#" class="login-link">Entrar</a>
-                    <a href="#" class="btn btn-secondary">Sou Profissional / Busco Vagas</a>
-                    <a href="#" class="btn btn-header">Para Empresas</a>
+                    <a href="#" class="btn btn-secondary">Sou Profissional</a>
+                    <a href="#" class="btn btn-header">Cadastrar Empresa</a>
                 </div>
+
+                <!-- BOTÃO MENU MOBILE -->
+                <button class="mobile-nav-toggle" aria-controls="primary-navigation" aria-expanded="false">
+                    <span class="sr-only">Abrir Menu</span>
+                    <i class="fa-solid fa-bars"></i>
+                </button>
             </div>
         </div>
-        <div class="bottom-bar">
+
+        <!-- MENU -->
+        <div class="bottom-bar" id="primary-navigation">
             <div class="container">
                  <nav>
                     <ul>
@@ -45,6 +62,7 @@
         </div>
     </header>
 
+    <!-- HERO -->
     <section class="hero">
         <div class="container">
             <h1>A Conexão Certa para Sua Empresa</h1>
@@ -52,7 +70,8 @@
         </div>
     </section>
 
-    <section id="sobre" class="fade-in-section">
+    <!-- SOBRE -->
+    <section id="sobre">
         <div class="container">
             <h2>Sobre a ServiConnect</h2>
             <div class="sobre-layout">
@@ -67,7 +86,8 @@
         </div>
     </section>
 
-    <section id="funcionalidades" class="fade-in-section">
+    <!-- FUNCIONALIDADES -->
+    <section id="funcionalidades">
         <div class="container">
             <h2>Nossas Funcionalidades</h2>
             <div class="funcionalidades-grid">
@@ -99,7 +119,8 @@
         </div>
     </section>
 
-    <section id="como-funciona" class="fade-in-section">
+    <!-- COMO FUNCIONA -->
+    <section id="como-funciona">
         <div class="container">
             <h2>Como Funciona</h2>
             <div class="como-funciona-layout">
@@ -123,6 +144,7 @@
         </div>
     </section>
 
+    <!-- FOOTER -->
     <footer id="contato">
         <div class="container">
             <div class="social-icons">
@@ -130,11 +152,12 @@
                 <a href="#" aria-label="Página da ServiConnect no Instagram"><i class="fa-brands fa-instagram"></i></a>
                 <a href="#" aria-label="Página da ServiConnect no LinkedIn"><i class="fa-brands fa-linkedin-in"></i></a>
             </div>
-            <p>Entre em contato conosco: contato@serviconnect.com</p>
+            <p>Entre em contato conosco: <a href="mailto:contato@serviconnect.com">contato@serviconnect.com</a></p>
             <p>&copy; 2025 ServiConnect. Todos os direitos reservados.</p>
         </div>
     </footer>
 
+    <!-- SCRIPT -->
     <script src="script.js"></script>
 
 </body>
