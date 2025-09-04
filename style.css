@@ -1,0 +1,335 @@
+/* style.css para ServiConnect - Versão Final */
+
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap');
+
+:root {
+    --primary-color: #0A2342;   /* Azul Escuro Principal */
+    --secondary-color: #FFC107; /* Amarelo Vibrante */
+    --dark-color: #0A2342;
+    --light-color: #f8f9fa;
+    --text-color: #34495e;
+    --white-color: #ffffff;
+    --shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: 'Poppins', sans-serif;
+    line-height: 1.7;
+    margin: 0;
+    padding: 0;
+    color: var(--text-color);
+    background-color: var(--white-color);
+}
+
+.container {
+    width: 90%;
+    max-width: 1200px; /* Aumentado para o novo header */
+    margin: auto;
+    overflow: hidden;
+    padding: 0 20px;
+}
+
+h1, h2, h3 {
+    color: var(--dark-color);
+    font-weight: 700;
+}
+
+/* --- NOVO CABEÇALHO COM DUAS BARRAS --- */
+header {
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.top-bar {
+    background: var(--primary-color);
+    padding: 15px 0;
+}
+
+.top-bar .container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.logo {
+    max-width: 150px;
+}
+
+.search-area {
+    display: flex;
+    width: 40%;
+}
+
+.search-area input {
+    width: 100%;
+    padding: 10px;
+    border: none;
+    border-radius: 5px 0 0 5px;
+    font-family: 'Poppins', sans-serif;
+}
+
+.search-area button {
+    padding: 10px 15px;
+    border: none;
+    background: var(--secondary-color);
+    color: var(--dark-color);
+    cursor: pointer;
+    border-radius: 0 5px 5px 0;
+    font-size: 1.2em;
+}
+
+.user-actions {
+    display: flex;
+    align-items: center;
+}
+
+.user-actions .login-link, .user-actions .register-link {
+    color: var(--white-color);
+    text-decoration: none;
+    font-weight: 600;
+    margin: 0 15px;
+    transition: color 0.3s ease;
+}
+
+.user-actions .login-link:hover, .user-actions .register-link:hover {
+    color: var(--secondary-color);
+}
+
+.btn-header {
+    margin-top: 0;
+    padding: 10px 20px;
+}
+
+.bottom-bar {
+    background: #f1f1f1;
+    padding: 5px 0;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.bottom-bar nav {
+    display: flex;
+    justify-content: center;
+}
+
+.bottom-bar nav ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.bottom-bar nav li {
+    display: inline;
+    margin: 0 20px;
+}
+
+.bottom-bar nav a {
+    color: var(--text-color);
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.9em;
+    padding: 10px 0;
+    transition: color 0.3s ease;
+}
+
+.bottom-bar nav a:hover {
+    color: var(--primary-color);
+}
+
+
+/* --- SEÇÃO HERO COM IMAGEM DE FUNDO --- */
+.hero {
+    position: relative;
+    height: 80vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    color: var(--white-color);
+    background: url('https://images.pexels.com/photos/3184418/pexels-photo-3184418.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1') no-repeat center center/cover;
+}
+
+.hero::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(10, 35, 66, 0.7);
+}
+
+.hero .container {
+    position: relative;
+    z-index: 2;
+}
+
+.hero h1 {
+    font-size: 3.5em;
+    font-weight: 800;
+    color: var(--white-color);
+    text-shadow: 2px 2px 10px rgba(0, 0, 0, 0.5);
+}
+
+.hero p {
+    font-size: 1.3em;
+    max-width: 600px;
+    margin: 15px auto 0 auto;
+}
+
+.btn {
+    display: inline-block;
+    background: var(--secondary-color);
+    color: var(--dark-color);
+    padding: 14px 28px;
+    text-decoration: none;
+    border-radius: 50px;
+    margin-top: 30px;
+    font-weight: 600;
+    box-shadow: var(--shadow);
+    transition: transform 0.3s ease, background-color 0.3s ease;
+}
+
+.btn:hover {
+    transform: translateY(-3px);
+    background-color: #ffca2c;
+}
+
+section {
+    padding: 80px 0;
+}
+
+section:nth-of-type(even) {
+    background: var(--light-color);
+}
+
+section h2 {
+    text-align: center;
+    font-size: 2.8em;
+    margin-bottom: 50px;
+    position: relative;
+    padding-bottom: 15px;
+}
+
+section h2::after {
+    content: '';
+    position: absolute;
+    width: 100px;
+    height: 4px;
+    background: var(--secondary-color);
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+/* --- LAYOUT "SOBRE NÓS" --- */
+.sobre-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+    align-items: center;
+}
+
+.sobre-imagem img {
+    width: 100%;
+    border-radius: 10px;
+    box-shadow: var(--shadow);
+}
+
+/* --- LAYOUT "FUNCIONALIDADES" --- */
+.funcionalidades-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 25px;
+}
+
+.card {
+    background: var(--white-color);
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: var(--shadow);
+    border-top: 4px solid var(--secondary-color);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+}
+
+.card h3 {
+    margin-top: 0;
+    color: var(--primary-color);
+}
+
+/* --- LAYOUT "COMO FUNCIONA" --- */
+.como-funciona-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+}
+
+.coluna {
+    background: var(--light-color);
+    padding: 30px;
+    border-radius: 10px;
+}
+.coluna h3 {
+    color: var(--primary-color);
+}
+
+
+footer {
+    background: var(--dark-color);
+    color: var(--white-color);
+    text-align: center;
+    padding: 40px 0;
+}
+
+
+/* --- RESPONSIVIDADE --- */
+@media(max-width: 992px) { /* Ajustado para telas menores que desktops */
+    .search-area {
+        display: none; /* Esconde a busca em telas menores */
+    }
+    .top-bar .container {
+        justify-content: space-between;
+    }
+}
+
+@media(max-width: 768px) {
+    .hero {
+        height: 60vh;
+    }
+    .hero h1 {
+        font-size: 2.5em;
+    }
+    section h2 {
+        font-size: 2.2em;
+    }
+    .sobre-layout, .como-funciona-layout {
+        grid-template-columns: 1fr;
+    }
+    .user-actions .login-link, .user-actions .register-link {
+        display: none; /* Esconde login/cadastro em telas muito pequenas */
+    }
+    .btn-header {
+        padding: 8px 16px;
+    }
+}
+
+.fade-in-section {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+}
+
+.fade-in-section.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+}
