@@ -1,13 +1,11 @@
-/* style.css para ServiConnect - Versão Final com Ajuste de Cor na Bottom Bar */
+/* style.css para ServiConnect - Versão Final e Responsiva */
 
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Montserrat:wght@400;500;600;700&display=swap');
 
 :root {
     --primary-blue: #0A192F;
     --secondary-yellow: #FFC400;
-    --light-blue: #ADD8E6;
-    --dark-grey: #333333;
-    --light-grey: #F5F5F5; /* Cor "gelo" */
+    --light-grey: #F5F5F5;
     --white-color: #ffffff;
     --text-color: #4A4A4A;
     --shadow-subtle: 0 4px 12px rgba(0, 0, 0, 0.08);
@@ -76,7 +74,6 @@ h2::after {
     text-align: center;
 }
 
-/* --- BOTÕES DO HEADER COM NOVAS REGRAS --- */
 .btn-secondary {
     background: transparent;
     color: var(--primary-blue);
@@ -90,19 +87,18 @@ h2::after {
 }
 
 .btn-header {
-    background: transparent;
+    background: var(--secondary-yellow);
     color: var(--primary-blue);
-    border: 2px solid var(--primary-blue);
+    border: 2px solid var(--secondary-yellow);
 }
 .btn-header:hover {
-    background: var(--secondary-yellow);
-    border-color: var(--secondary-yellow);
-    color: var(--primary-blue);
+    background: #ffd700;
+    border-color: #ffd700;
     transform: translateY(-2px);
     box-shadow: var(--shadow-subtle);
 }
 
-/* --- HEADER COM AJUSTES FINAIS --- */
+/* --- HEADER --- */
 header {
     background-color: var(--white-color);
     box-shadow: 0 2px 10px rgba(0,0,0,0.05);
@@ -134,22 +130,18 @@ header {
     flex-grow: 1;
     max-width: 500px;
     display: flex;
-    border-radius: 8px;
-    overflow: hidden;
-    border: 1px solid var(--light-grey);
-    transition: box-shadow 0.3s ease;
 }
-.search-area:focus-within { box-shadow: 0 0 0 3px rgba(255, 196, 0, 0.4); }
 .search-area input {
-    flex-grow: 1;
+    width: 100%;
     padding: 12px 18px;
-    border: none;
+    border: 1px solid #ddd;
+    border-right: none;
+    border-radius: 8px 0 0 8px;
     font-family: 'Poppins', sans-serif;
     font-size: 0.95em;
     color: var(--text-color);
 }
-.search-area input::placeholder { color: #A0A0A0; }
-.search-area input:focus { outline: none; }
+.search-area input:focus { outline: 2px solid var(--secondary-yellow); }
 .search-area button {
     background: var(--primary-blue);
     color: var(--white-color);
@@ -157,9 +149,8 @@ header {
     padding: 0 20px;
     cursor: pointer;
     font-size: 1.1em;
-    transition: background-color 0.3s ease;
+    border-radius: 0 8px 8px 0;
 }
-.search-area button:hover { background-color: #081425; }
 
 .user-actions {
     display: flex;
@@ -167,35 +158,25 @@ header {
     gap: 15px;
     flex-shrink: 0;
 }
-
 .user-actions .btn {
-    flex-grow: 1;
+    width: 240px;
     padding: 12px 10px;
     font-size: 0.9em;
     white-space: nowrap;
-    min-width: 150px;
 }
-
 .user-actions .login-link {
     color: var(--primary-blue);
     text-decoration: none;
     font-weight: 600;
-    transition: color 0.3s ease;
-    padding: 8px 15px;
     white-space: nowrap;
 }
-.user-actions .login-link:hover { color: var(--secondary-yellow); }
 
 .bottom-bar {
-    background: var(--light-grey); /* <<< NOVA COR "GELO" */
-    /* backdrop-filter: blur(8px); REMOVIDO */
-    /* -webkit-backdrop-filter: blur(8px); REMOVIDO */
-    border-bottom: 1px solid rgba(229, 229, 229, 0.6);
+    background: var(--light-grey);
+    border-bottom: 1px solid #e0e0e0;
     padding: 10px 0;
 }
-.bottom-bar .container {
-    max-width: 1400px;
-}
+.bottom-bar .container { max-width: 1400px; }
 .bottom-bar nav ul {
     list-style: none;
     padding: 0;
@@ -210,7 +191,6 @@ header {
     font-weight: 500;
     padding: 8px 0;
     position: relative;
-    transition: color 0.3s ease;
 }
 .bottom-bar nav a::after {
     content: '';
@@ -272,44 +252,73 @@ header {
     color: rgba(255, 255, 255, 0.9);
 }
 
-/* ... O restante do seu CSS continua igual ... */
+/* --- SEÇÕES --- */
 section { padding: 80px 0; background-color: var(--white-color); margin-bottom: 20px; box-shadow: var(--shadow-subtle); border-radius: 8px; }
 section:nth-of-type(even) { background-color: var(--light-grey); }
 #sobre .sobre-layout, #como-funciona .como-funciona-layout { display: grid; grid-template-columns: 1fr 1.2fr; gap: 60px; align-items: center; margin-top: 40px; }
-#sobre .sobre-imagem { text-align: center; }
-#sobre .sobre-imagem img { width: 100%; max-width: 550px; height: auto; border-radius: 10px; box-shadow: var(--shadow-medium); transition: transform 0.3s ease; }
-#sobre .sobre-imagem img:hover { transform: scale(1.02); }
-#sobre .sobre-texto p { font-size: 1.1em; margin-bottom: 20px; color: var(--text-color); }
-#funcionalidades { padding-top: 60px; padding-bottom: 100px; }
-.funcionalidades-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 30px; margin-top: 40px; }
-.card { background: var(--white-color); padding: 35px; border-radius: 12px; box-shadow: var(--shadow-subtle); border: 1px solid #E0E0E0; text-align: center; display: flex; flex-direction: column; justify-content: space-between; transition: all 0.3s ease; transform-style: preserve-3d; transform: perspective(1000px); will-change: transform; }
-.card:hover { transform: translateY(-8px) scale(1.02); box-shadow: var(--shadow-medium); }
+#sobre .sobre-imagem img { width: 100%; max-width: 550px; height: auto; border-radius: 10px; box-shadow: var(--shadow-medium); }
+#funcionalidades-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 30px; margin-top: 40px; }
+.card { background: var(--white-color); padding: 35px; border-radius: 12px; box-shadow: var(--shadow-subtle); border: 1px solid #E0E0E0; text-align: center; }
 .card h3 { color: var(--primary-blue); font-size: 1.6em; margin-top: 0; margin-bottom: 15px; }
-.card p { font-size: 0.95em; color: var(--text-color); line-height: 1.5; }
-.card::before { content: '⭐'; font-size: 2.5em; color: var(--secondary-yellow); margin-bottom: 15px; display: block; }
-.funcionalidades-grid .card:nth-child(1)::before { content: '🏢'; }
-.funcionalidades-grid .card:nth-child(2)::before { content: '📝'; }
-.funcionalidades-grid .card:nth-child(3)::before { content: '📨'; }
-.funcionalidades-grid .card:nth-child(4)::before { content: '🤝'; }
-.funcionalidades-grid .card:nth-child(5)::before { content: '✨'; }
-.funcionalidades-grid .card:nth-child(6)::before { content: '📞'; }
-#como-funciona { padding-bottom: 100px; }
-#como-funciona .como-funciona-layout { grid-template-columns: 1fr 1fr; margin-top: 40px; }
-#como-funciona .coluna { background: var(--white-color); padding: 40px; border-radius: 12px; box-shadow: var(--shadow-subtle); border: 1px solid #E0E0E0; transition: transform 0.3s ease; }
-#como-funciona .coluna:hover { transform: translateY(-5px); box-shadow: var(--shadow-medium); }
-#como-funciona .coluna h3 { color: var(--primary-blue); font-size: 1.8em; margin-top: 0; margin-bottom: 25px; text-align: center; }
+#como-funciona .coluna { background: var(--white-color); padding: 40px; border-radius: 12px; box-shadow: var(--shadow-subtle); border: 1px solid #E0E0E0; }
+#como-funciona .coluna h3 { font-size: 1.8em; }
 #como-funciona .coluna ol { list-style-type: none; padding: 0; counter-reset: step-counter; }
-#como-funciona .coluna li { font-size: 1.1em; margin-bottom: 18px; padding-left: 45px; position: relative; color: var(--text-color); }
+#como-funciona .coluna li { font-size: 1.1em; margin-bottom: 18px; padding-left: 45px; position: relative; }
 #como-funciona .coluna li::before { counter-increment: step-counter; content: counter(step-counter); position: absolute; left: 0; top: 50%; transform: translateY(-50%); width: 30px; height: 30px; background-color: var(--secondary-yellow); color: var(--primary-blue); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.9em; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); }
 footer { background: var(--primary-blue); color: var(--light-grey); text-align: center; padding: 60px 0; font-size: 0.95em; }
-footer p { margin: 0; padding: 5px 0; }
-footer a { color: var(--secondary-yellow); text-decoration: none; }
-footer a:hover { text-decoration: underline; }
-.social-icons { margin-bottom: 20px; text-align: center; }
-.social-icons a { color: var(--light-grey); font-size: 1.6em; margin: 0 18px; text-decoration: none; transition: all 0.3s ease; display: inline-block; }
+footer p { margin: 5px 0; }
+.social-icons { margin-bottom: 20px; }
+.social-icons a { color: var(--light-grey); font-size: 1.6em; margin: 0 18px; transition: all 0.3s ease; }
 .social-icons a:hover { color: var(--secondary-yellow); transform: scale(1.1) translateY(-3px); }
 .fade-in-section { opacity: 0; transform: translateY(40px); transition: opacity 0.8s ease-out, transform 0.8s ease-out; }
 .fade-in-section.is-visible { opacity: 1; transform: translateY(0); }
-@media (max-width: 1024px) { .hero h1 { font-size: 3.5em; } .hero p { font-size: 1.3em; } h2 { font-size: 2.2em; margin-bottom: 40px; } .bottom-bar nav ul { gap: 25px; } .search-area { max-width: 350px; } .user-actions { gap: 10px; } }
-@media (max-width: 768px) { .top-bar .container { flex-direction: column; text-align: center; } .search-area { width: 100%; max-width: 100%; margin-top: 15px; } .user-actions { width: 100%; justify-content: center; margin-top: 15px; flex-wrap: wrap; } .user-actions .btn { padding: 8px 20px; font-size: 0.9em; } .hero { height: 70vh; } .hero h1 { font-size: 2.8em; } .hero p { font-size: 1.1em; } #sobre .sobre-layout, #como-funciona .como-funciona-layout { grid-template-columns: 1fr; gap: 40px; } #sobre .sobre-imagem { order: -1; } .funcionalidades-grid { grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); } .card { padding: 30px; } .bottom-bar nav ul { flex-direction: column; gap: 15px; align-items: center; } }
-@media (max-width: 480px) { .logo { max-width: 120px; } .hero h1 { font-size: 2em; } .hero p { font-size: 1em; } h2 { font-size: 1.8em; } section { padding: 60px 0; } .card { padding: 25px; } .bottom-bar nav a { font-size: 0.9em; } }
+
+/* =========== MEDIA QUERIES PARA RESPONSIVIDADE =========== */
+
+/* Telas de Tablet */
+@media (max-width: 1024px) {
+    h2 { font-size: 2.4em; }
+    .hero h1 { font-size: 3.5em; }
+    .top-bar .container { gap: 15px; }
+    .search-area { display: none; } /* Oculta a busca para dar espaço */
+    .user-actions .btn { width: auto; padding: 10px 20px; font-size: 0.85em;}
+}
+
+/* Telas de Celular */
+@media (max-width: 768px) {
+    header {
+        position: static; /* <<< CABEÇALHO DEIXA DE SER FIXO */
+    }
+    .top-bar .container {
+        flex-direction: row; /* Mantém logo e ações na mesma linha */
+        justify-content: space-between;
+    }
+    .search-area, .user-actions .login-link, .user-actions .btn-secondary {
+        display: none; /* Oculta busca, login e profissional para simplificar */
+    }
+    .user-actions .btn-header {
+        width: auto; /* Deixa o botão crescer conforme o texto */
+    }
+    .bottom-bar {
+        display: none; /* <<< MENU DE NAVEGAÇÃO INFERIOR OCULTO */
+    }
+    .hero { height: 70vh; }
+    .hero h1 { font-size: 2.8em; }
+    .hero p { font-size: 1.1em; }
+    h2 { font-size: 2em; }
+    section { padding: 60px 0; }
+    #sobre .sobre-layout, #como-funciona .como-funciona-layout {
+        grid-template-columns: 1fr;
+        gap: 40px;
+    }
+    #sobre .sobre-imagem { order: -1; } /* Imagem vai para cima do texto */
+}
+
+/* Telas Pequenas */
+@media (max-width: 480px) {
+    .container { width: 95%; padding: 0 10px;}
+    .hero h1 { font-size: 2.2em; }
+    .hero p { font-size: 1em; }
+    h2 { font-size: 1.8em; }
+    .card, #como-funciona .coluna { padding: 25px; }
+}
