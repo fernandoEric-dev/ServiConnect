@@ -32,6 +32,9 @@ body {
     margin: 0 auto;
     padding: 0 15px;
 }
+.frase{
+    color: #ffffff;
+}
 
 h1, h2, h3 {
     font-family: 'Montserrat', sans-serif;
@@ -39,6 +42,12 @@ h1, h2, h3 {
     font-weight: 700;
     margin-bottom: 25px;
 }
+
+/* destaque amarelo no Connect */
+.highlight {
+    color: var(--secondary-yellow);
+}
+
 
 h2 {
     font-size: 2.8em;
