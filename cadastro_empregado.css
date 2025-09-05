@@ -1,4 +1,4 @@
-/* CSS simples para o formulário de cadastro ServiConnect */
+/* CSS simples para o formulário de cadastro de Currículo */
 
 form {
     max-width: 600px;
@@ -13,19 +13,10 @@ form {
 /* Título do formulário */
 form h2 {
     text-align: center;
-    color: gold; /* azul primário */
-    font-size: 2em; /* aumenta o tamanho */
-    font-weight: 700; /* deixa mais forte */
+    color: #0B1D51; /* azul escuro */
+    font-size: 2em;
+    font-weight: 700;
     margin-bottom: 10px;
-}
-
-/* Subtítulo / descrição do formulário */
-form p {
-    text-align: center;
-    color: #000000; /* preto */
-    font-size: 1.1em;
-    margin-bottom: 30px;
-    opacity: 0.8;
 }
 
 /* Espaçamento entre os campos */
@@ -38,7 +29,7 @@ form label {
     display: block;
     margin-bottom: 6px;
     font-weight: 500;
-    color: #0A192F; /* azul primário */
+    color: #0B1D51; /* azul escuro */
 }
 
 /* Campos de input, select e textarea */
@@ -58,36 +49,15 @@ form input:focus,
 form select:focus,
 form textarea:focus {
     outline: none;
-    border-color: #FFC400; /* amarelo secundário */
-    box-shadow: 0 0 5px rgba(255,196,0,0.5);
+    border-color: #0B1D51; /* azul escuro no foco */
+    box-shadow: 0 0 5px rgba(11,29,81,0.5);
 }
 
 /* Botão de envio */
 form button[type="submit"] {
     width: 100%;
     padding: 12px 0;
-    background-color: #FFC400; /* amarelo secundário */
-    color: #0A192F; /* azul primário */
-    font-weight: 600;
-    font-size: 1em;
-    border: none;
-    border-radius: 50px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    margin-bottom: 10px;
-}
-
-form button[type="submit"]:hover {
-    background-color: #e6b800; /* tom mais escuro de amarelo ao passar o mouse */
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-}
-
-/* Botão de limpar */
-form button[type="reset"] {
-    width: 100%;
-    padding: 12px 0;
-    background-color: #0A192F; /* azul primário */
+    background-color: #0B1D51; /* azul escuro */
     color: #ffffff; /* texto branco */
     font-weight: 600;
     font-size: 1em;
@@ -97,8 +67,8 @@ form button[type="reset"] {
     transition: all 0.3s ease;
 }
 
-form button[type="reset"]:hover {
-    background-color: #023070; /* tom mais claro de azul ao passar o mouse */
+form button[type="submit"]:hover {
+    background-color: #081540; /* azul ainda mais escuro ao passar o mouse */
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(0,0,0,0.15);
 }
