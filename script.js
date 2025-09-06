@@ -1,6 +1,20 @@
 document.addEventListener('DOMContentLoaded', () => {
 
-    // --- ANIMAÇÃO DE FADE-IN AO ROLAR A PÁGINA ---
+    // --- CÓDIGO NOVO PARA HEADER QUE ENCOLHE ---
+    const header = document.querySelector('header');
+    if (header) { // Verifica se o header existe
+        window.onscroll = function() {
+            // Se o scroll passar de 80 pixels, adiciona a classe, senão, remove.
+            if (document.body.scrollTop > 80 || document.documentElement.scrollTop > 80) {
+                header.classList.add('compacto');
+            } else {
+                header.classList.remove('compacto');
+            }
+        };
+    }
+
+
+    // --- ANIMAÇÃO DE FADE-IN AO ROLAR A PÁGINA (Seu código original) ---
     const sections = document.querySelectorAll('.fade-in-section');
     if (sections.length > 0) {
         const observer = new IntersectionObserver((entries) => {
@@ -14,7 +28,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
 
-    // --- ANIMAÇÃO DE INCLINAÇÃO (TILT) NOS CARDS ---
+    // --- ANIMAÇÃO DE INCLINAÇÃO (TILT) NOS CARDS (Seu código original) ---
     const cards = document.querySelectorAll('.card');
     cards.forEach(card => {
         card.addEventListener('mousemove', (e) => {
@@ -38,7 +52,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // --- CÓDIGO PARA O MENU HAMBURGER ---
+    // --- CÓDIGO PARA O MENU HAMBURGER (Seu código original) ---
     const primaryNav = document.getElementById('primary-navigation');
     const navToggle = document.querySelector('.mobile-nav-toggle');
 

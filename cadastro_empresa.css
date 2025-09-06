@@ -1,111 +1,127 @@
-/* CSS simples para o formulário de cadastro ServiConnect */
+/* CSS para Formulário de Cadastro ServiConnect (cadastro_empresa.css) */
 
-form {
-    max-width: 600px;
-    margin: 40px auto;
-    padding: 30px;
-    background-color: #ffffff; /* branco */
-    border-radius: 10px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+/* --- Importação da Fonte --- */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&family=Montserrat:wght@700&display=swap');
+
+/* --- Variáveis de Cor (Consistente com o site principal) --- */
+:root {
+    --primary-blue: #0A192F;
+    --secondary-yellow: #FFC400;
+    --light-grey: #F5F5F5;
+    --white-color: #ffffff;
+    --text-color: #4A4A4A;
+    --border-color: #DDE2E7;
+    --shadow-subtle: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+/* --- Estilos Globais da Página --- */
+body {
     font-family: 'Poppins', sans-serif;
+    background-color: var(--light-grey);
+    color: var(--text-color);
+    line-height: 1.6;
+    margin: 0;
+    padding: 40px 20px; /* Espaçamento para o formulário não colar nas bordas */
 }
 
-/* Título do formulário */
+/* --- Container Principal do Formulário --- */
+form {
+    max-width: 650px;
+    margin: 0 auto;
+    padding: 35px 40px;
+    background-color: var(--white-color);
+    border-radius: 12px;
+    box-shadow: var(--shadow-subtle);
+    border-top: 6px solid var(--primary-blue); /* Detalhe visual da marca */
+}
+
+/* --- Cabeçalho do Formulário --- */
 form h2 {
+    font-family: 'Montserrat', sans-serif;
+    color: var(--primary-blue);
+    font-size: 2em;
+    font-weight: 700;
     text-align: center;
-    color: gold; /* azul primário */
-    font-size: 2em; /* aumenta o tamanho */
-    font-weight: 700; /* deixa mais forte */
-    margin-bottom: 10px;
+    margin-top: 0;
+    margin-bottom: 8px;
 }
 
-/* Subtítulo / descrição do formulário */
 form p {
     text-align: center;
-    color: #000000; /* preto */
+    color: var(--text-color);
     font-size: 1.1em;
-    margin-bottom: 30px;
-    opacity: 0.8;
+    margin-bottom: 35px;
+    opacity: 0.9;
 }
 
-/* Espaçamento entre os campos */
+/* --- Estilo dos Campos (Inputs, Select, Textarea) --- */
 form div {
-    margin-bottom: 20px;
+    margin-bottom: 22px; /* Espaçamento entre os campos */
 }
 
-/* Labels dos campos */
 form label {
     display: block;
-    margin-bottom: 6px;
-    font-weight: 500;
-    color: #0A192F; /* azul primário */
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: var(--primary-blue);
+    font-size: 0.95em;
 }
 
-/* Campos de input, select e textarea */
 form input,
 form select,
 form textarea {
     width: 100%;
-    padding: 10px 12px;
-    border: 1px solid #ccc;
-    border-radius: 6px;
+    padding: 12px 16px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
     font-size: 1em;
     font-family: 'Poppins', sans-serif;
+    background-color: #fdfdfd;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    box-sizing: border-box; /* Garante que padding não afete a largura total */
 }
 
-/* Foco nos campos */
+/* Efeito de Foco */
 form input:focus,
 form select:focus,
 form textarea:focus {
     outline: none;
-    border-color: #FFC400; /* amarelo secundário */
-    box-shadow: 0 0 5px rgba(255,196,0,0.5);
+    border-color: var(--secondary-yellow);
+    box-shadow: 0 0 0 3px rgba(255, 196, 0, 0.3);
 }
 
-/* Botão de envio */
+/* --- Botão de Envio --- */
 form button[type="submit"] {
     width: 100%;
-    padding: 12px 0;
-    background-color: #FFC400; /* amarelo secundário */
-    color: #0A192F; /* azul primário */
+    padding: 14px 20px;
+    background-color: var(--secondary-yellow);
+    color: var(--primary-blue);
     font-weight: 600;
-    font-size: 1em;
+    font-size: 1.1em;
     border: none;
     border-radius: 50px;
     cursor: pointer;
     transition: all 0.3s ease;
-    margin-bottom: 10px;
+    margin-top: 15px; /* Espaço extra antes do botão */
 }
 
 form button[type="submit"]:hover {
-    background-color: #e6b800; /* tom mais escuro de amarelo ao passar o mouse */
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    background-color: #e6b800; /* Amarelo um pouco mais escuro */
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
 }
 
-/* Botão de limpar */
-form button[type="reset"] {
-    width: 100%;
-    padding: 12px 0;
-    background-color: #0A192F; /* azul primário */
-    color: #ffffff; /* texto branco */
-    font-weight: 600;
-    font-size: 1em;
-    border: none;
-    border-radius: 50px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-}
-
-form button[type="reset"]:hover {
-    background-color: #023070; /* tom mais claro de azul ao passar o mouse */
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-}
-
-/* Responsividade simples */
+/* --- Responsividade para Celulares --- */
 @media (max-width: 480px) {
+    body {
+        padding: 20px 10px;
+    }
+
     form {
-        padding: 20px;
+        padding: 25px;
+    }
+
+    form h2 {
+        font-size: 1.8em;
     }
 }
