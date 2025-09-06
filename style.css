@@ -1,4 +1,4 @@
-/* style.css para ServiConnect - v7.1 Final com Correção de Performance na Animação do Header */
+/* style.css para ServiConnect - v7.1 Final com Correção de Alinhamento e Responsividade */
 
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Montserrat:wght@400;500;600;700&display=swap');
 
@@ -112,13 +112,13 @@ header {
     position: sticky;
     top: 0;
     z-index: 1000;
-    transition: all 0.4s ease;
+    transition: all 0.4s ease; /* Adicionado para transição suave do header inteiro */
 }
 
 .top-bar {
     padding: 10px 0;
     border-bottom: 1px solid var(--light-grey);
-    transition: padding 0.4s ease;
+    transition: padding 0.4s ease; /* Adicionado para transição suave */
 }
 .top-bar .container {
     max-width: 1400px;
@@ -132,7 +132,7 @@ header {
     max-width: 160px;
     height: auto;
     flex-shrink: 0;
-    transition: transform 0.3s ease, opacity 0.3s ease, max-width 0.4s ease;
+    transition: transform 0.3s ease, opacity 0.3s ease, max-width 0.4s ease; /* Transição de max-width adicionada */
 }
 .logo:hover {
     transform: scale(1.05);
@@ -185,13 +185,14 @@ header {
     transform: translateY(-2px);
 }
 
-/* MENU - CÓDIGO MODIFICADO PARA PERFORMANCE */
+/* MENU */
 .bottom-bar {
     background: var(--light-grey);
     border-bottom: 1px solid #e0e0e0;
     padding: 10px 0;
-    transition: transform 0.4s ease, opacity 0.4s ease, visibility 0.4s ease; /* Transição leve */
-    visibility: visible; /* Adicionado para controle da animação */
+    transition: all 0.4s ease; /* Adicionado para transição suave */
+    max-height: 100px; /* Altura inicial para animar */
+    overflow: hidden;
 }
 .bottom-bar .container { max-width: 1400px; }
 .bottom-bar nav ul {
@@ -267,7 +268,7 @@ section:nth-of-type(even) { background-color: var(--light-grey); }
 /* --- Ajuste: colunas iguais para sobre e como-funciona --- */
 #sobre .sobre-layout, #como-funciona .como-funciona-layout {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr 1fr; /* agora as duas colunas têm mesma largura */
     gap: 60px;
     align-items: center;
     margin-top: 40px;
@@ -313,12 +314,14 @@ section:nth-of-type(even) { background-color: var(--light-grey); }
 }
 
 /* === Correções específicas para "Como Funciona" === */
+/* garante colunas iguais e mantém alinhamento interno */
 #como-funciona .como-funciona-layout {
     grid-template-columns: repeat(2, 1fr);
     gap: 48px;
     align-items: stretch;
 }
 
+/* normaliza o box-sizing e o texto interno das colunas */
 #como-funciona .coluna {
     box-sizing: border-box;
     padding: 40px;
@@ -326,9 +329,10 @@ section:nth-of-type(even) { background-color: var(--light-grey); }
     flex-direction: column;
     justify-content: flex-start;
     text-align: left;
-    min-height: 220px;
+    min-height: 220px; /* mantém altura parecida entre colunas */
 }
 
+/* título igual para as duas colunas */
 #como-funciona .coluna h3 {
     font-family: 'Montserrat', sans-serif;
     font-size: 1.15rem;
@@ -338,14 +342,16 @@ section:nth-of-type(even) { background-color: var(--light-grey); }
     line-height: 1.1;
 }
 
+/* lista alinhada e espaçada igual nas duas colunas */
 #como-funciona .coluna ol {
     margin: 0;
-    padding-left: 1.05rem;
+    padding-left: 1.05rem; /* ajuste fino para os números ficarem alinhados */
     list-style-position: outside;
     color: var(--text-color);
     line-height: 1.8;
 }
 
+/* espaçamento entre itens da lista */
 #como-funciona .coluna ol li {
     margin-bottom: 10px;
 }
@@ -370,14 +376,16 @@ footer {
 }
 
 
-/* --- NOVAS REGRAS PARA HEADER COMPACTO - CÓDIGO MODIFICADO PARA PERFORMANCE --- */
+/* --- NOVAS REGRAS PARA HEADER COMPACTO --- */
 header.compacto .logo {
     max-width: 130px; /* Logo fica um pouco menor */
 }
 header.compacto .bottom-bar {
+    max-height: 0; /* Faz a barra de menu desaparecer */
+    padding-top: 0;
+    padding-bottom: 0;
     opacity: 0;
-    transform: translateY(-100%); /* Animação leve de deslize para cima */
-    visibility: hidden; /* Esconde de verdade após a animação */
+    border-color: transparent; /* Esconde a borda também */
 }
 
 
@@ -410,6 +418,7 @@ header.compacto .bottom-bar {
         text-align: center;
     }
 
+    /* responsividade específica para como-funciona */
     #como-funciona .coluna {
         text-align: center;
         min-height: auto;

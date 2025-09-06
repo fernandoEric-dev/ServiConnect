@@ -1,28 +1,38 @@
 document.addEventListener('DOMContentLoaded', () => {
 
-    // --- CÓDIGO CORRIGIDO PARA O HEADER COM BASE NA DIREÇÃO DA ROLAGEM ---
+    // --- NOVA FUNÇÃO DEBOUNCE ---
+    // Esta função recebe outra função e um tempo de espera (delay)
+    // e retorna uma nova versão da função que só executa após o tempo de espera.
+    function debounce(func, delay = 100) {
+        let timeoutId;
+        return function(...args) {
+            clearTimeout(timeoutId);
+            timeoutId = setTimeout(() => {
+                func.apply(this, args);
+            }, delay);
+        };
+    }
+
+    // --- CÓDIGO DO HEADER MODIFICADO PARA USAR DEBOUNCE ---
     const header = document.querySelector('header');
     if (header) {
-        let lastScrollTop = 0; // Variável para guardar a última posição do scroll
-        const scrollThreshold = 100; // Ponto a partir do qual o header pode encolher
+        const scrollThreshold = 80;
 
-        window.addEventListener('scroll', function() {
+        // 1. Criamos uma função separada para a lógica de rolagem
+        const handleScroll = () => {
             let scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-
-            // Condição para rolar PARA BAIXO
-            // Esconde o header apenas se o scroll for para baixo e já tiver passado a altura do threshold
-            if (scrollTop > lastScrollTop && scrollTop > scrollThreshold) {
+            if (scrollTop > scrollThreshold) {
                 header.classList.add('compacto');
-            } 
-            // Condição para rolar PARA CIMA
-            // Sempre mostra o header ao rolar para cima
-            else if (scrollTop < lastScrollTop) {
+            } else {
                 header.classList.remove('compacto');
             }
+        };
 
-            // Atualiza a última posição do scroll para a próxima verificação
-            lastScrollTop = scrollTop <= 0 ? 0 : scrollTop;
-        });
+        // 2. Usamos a função debounce para criar uma versão otimizada
+        const debouncedScrollHandler = debounce(handleScroll, 10); // A verificação ocorrerá 10ms após o fim da rolagem
+
+        // 3. Adicionamos o listener com a nova função otimizada
+        window.addEventListener('scroll', debouncedScrollHandler);
     }
 
 
