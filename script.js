@@ -1,26 +1,26 @@
 document.addEventListener('DOMContentLoaded', () => {
 
-    // --- CÓDIGO CORRIGIDO PARA HEADER QUE ENCOLHE (EVITA "FLICKERING") ---
+    // --- CÓDIGO CORRIGIDO PARA O HEADER COM BASE NA DIREÇÃO DA ROLAGEM ---
     const header = document.querySelector('header');
-    if (header) { // Verifica se o header existe
-        let lastScrollTop = 0;
-        const scrollThreshold = 80; // Mantive seu valor de 80px
+    if (header) {
+        let lastScrollTop = 0; // Variável para guardar a última posição do scroll
+        const scrollThreshold = 100; // Ponto a partir do qual o header pode encolher
 
         window.addEventListener('scroll', function() {
             let scrollTop = window.pageYOffset || document.documentElement.scrollTop;
 
             // Condição para rolar PARA BAIXO
+            // Esconde o header apenas se o scroll for para baixo e já tiver passado a altura do threshold
             if (scrollTop > lastScrollTop && scrollTop > scrollThreshold) {
-                // Adiciona a classe apenas se não a tiver
                 header.classList.add('compacto');
             } 
             // Condição para rolar PARA CIMA
-            else if (scrollTop < lastScrollTop && scrollTop < scrollThreshold) {
-                // Remove a classe apenas se a tiver
+            // Sempre mostra o header ao rolar para cima
+            else if (scrollTop < lastScrollTop) {
                 header.classList.remove('compacto');
             }
 
-            // Atualiza a última posição do scroll
+            // Atualiza a última posição do scroll para a próxima verificação
             lastScrollTop = scrollTop <= 0 ? 0 : scrollTop;
         });
     }
