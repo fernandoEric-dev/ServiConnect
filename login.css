@@ -1,0 +1,132 @@
+/* Reset Básico */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    /* Fonte moderna e limpa */
+    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; 
+}
+
+/* Corpo e Fundo */
+body {
+    /* Fundo gradiente sutil para profundidade */
+    background: linear-gradient(135deg, #e0e5ec 0%, #f9f9f9 100%); 
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 20px;
+}
+
+/* Container do Formulário (O Coração do Soft UI/Neumorphism) */
+div {
+    background-color: #ffffff;
+    padding: 40px; /* Mais padding para parecer mais espaçoso */
+    border-radius: 16px; /* Bordas bem arredondadas */
+    width: 100%;
+    max-width: 380px; /* Levemente mais estreito e focado */
+    text-align: center;
+    /* Sombra suave e moderna (Efeito 'flutuante' ou Neumorphism sutil) */
+    box-shadow: 
+        10px 10px 30px rgba(174, 174, 192, 0.4), /* Sombra inferior/direita */
+        -10px -10px 30px rgba(255, 255, 255, 0.9); /* Sombra superior/esquerda */
+    transition: transform 0.3s ease-in-out;
+}
+
+div:hover {
+    transform: translateY(-5px); /* Efeito sutil de levantar ao passar o mouse */
+}
+
+/* Título */
+h2 {
+    color: #003366; /* Azul Escuro */
+    margin-bottom: 30px;
+    font-size: 2em; /* Título maior e com mais destaque */
+    font-weight: 600;
+}
+
+/* Grupos de Input */
+form > div {
+    text-align: left;
+    margin-bottom: 20px;
+    background-color: transparent;
+    padding: 0;
+    box-shadow: none;
+}
+
+label {
+    display: block;
+    margin-bottom: 8px;
+    color: #003366; /* Label em Azul Escuro */
+    font-weight: 500;
+    font-size: 0.95em;
+}
+
+/* Inputs */
+input[type="text"],
+input[type="password"] {
+    width: 100%;
+    padding: 14px; /* Mais padding interno */
+    border: 1px solid #e0e0e0; /* Borda bem clara */
+    border-radius: 8px;
+    font-size: 1em;
+    color: #333;
+    background-color: #f7f7f7; /* Fundo suave nos inputs */
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+/* Foco Moderno (Amarelo Dourado) */
+input[type="text"]:focus,
+input[type="password"]:focus {
+    border-color: #FFD700; /* Borda Amarela no foco */
+    /* Efeito de brilho suave e moderno */
+    box-shadow: 0 0 0 3px rgba(255, 215, 0, 0.3); 
+    background-color: #ffffff;
+    outline: none; 
+}
+
+/* Botão Principal */
+button[type="submit"] {
+    background-color: #003366; /* Azul Escuro Principal */
+    color: #FFD700; /* Texto Amarelo Dourado */
+    padding: 14px 15px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1.1em;
+    font-weight: 700;
+    width: 100%;
+    margin-top: 25px;
+    /* Transição para suavizar o hover */
+    transition: background-color 0.3s, box-shadow 0.3s, transform 0.1s;
+}
+
+/* Interação do Botão (Hover e Active) */
+button[type="submit"]:hover {
+    background-color: #004080; /* Azul Escuro levemente mais claro */
+    box-shadow: 0 5px 15px rgba(0, 51, 102, 0.3); /* Sombra para dar profundidade */
+}
+
+button[type="submit"]:active {
+    background-color: #003366;
+    transform: translateY(1px); /* Efeito de 'click' sutil */
+    box-shadow: 0 2px 10px rgba(0, 51, 102, 0.2);
+}
+
+p {
+    margin-top: 30px;
+    font-size: 0.95em;
+}
+
+/* Link de Recuperação de Senha */
+a {
+    color: #003366; /* Link em Azul Escuro */
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.3s;
+}
+
+a:hover {
+    color: #FFD700; /* Destaque em Amarelo Dourado no hover */
+    text-decoration: underline;
+}
