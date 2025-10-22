@@ -1,0 +1,56 @@
+# ServiConnect
+
+## Nome do Projeto
+ServiConnect - Conectando Empresas e Serviços
+
+## Alunos Integrantes
+* Paulo Vinicius
+* Fernando Eric
+* Paulo Quintino
+
+## Descrição do Sistema Simulado
+
+O **ServiConnect** é uma plataforma digital que visa **conectar empresas contratantes a prestadoras de serviços terceirizados** (como limpeza, segurança, manutenção, etc.) de forma prática, segura e transparente.
+
+### Principais Funcionalidades:
+
+1.  **Página Principal (`index.html`):**
+    * **Interface Amigável:** Layout com `header`, barra de pesquisa de serviços e botões de ação (Entrar, Sou Profissional/Buscar Vagas, Cadastrar Empresa).
+    * **Visão Geral:** Seções de "Sobre Nós", "Funcionalidades" e "Como Funciona" que detalham o propósito da plataforma.
+    * **Busca:** Permite buscar serviços (ex: limpeza, segurança).
+    * **Navegação:** Menu com links para seções principais e informações de contato.
+
+2.  **Cadastro de Empresas (`cadastro_empresa.html`):**
+    * Formulário dedicado ao registro de empresas.
+    * Permite diferenciar a empresa entre **"Empresa Terceirizada"** (prestadora de serviço) e **"Empresa Contratante"**.
+    * Campos de dados essenciais: Nome da Empresa, CNPJ, Telefone, Nome do Responsável, E-mail, Descrição dos Serviços, Regiões Atendidas e Horário de Funcionamento.
+
+3.  **Cadastro de Profissionais / Empregados (`cadastro_empregado.html`):**
+    * Formulário para indivíduos que buscam vagas/oportunidades (sugerido pelo botão "Sou Profissional/Buscar Vagas" na `index.html`).
+    * Focado no registro de currículos e informações pessoais: E-mail, Senha, CPF, RG, Data de Nascimento, CEP.
+    * Recurso de **Envio de Currículo (PDF)**, indicando um sistema de gestão de currículos ou candidaturas.
+
+ 4. Tela de Login (`login.html`)
+
+| Elemento | Tipo de Campo / Ação | Propósito |
+| :--- | :--- | :--- |
+| **Login Unificado** | `input type="text"` | Recebe o identificador unificado: **CPF (Profissional) ou CNPJ (Empresa)**. |
+| **Segurança** | `input type="password"` | Recebe a **Senha** de acesso, ocultando os caracteres. |
+| **Ação** | Botão "Entrar" | Envia as credenciais para o sistema de autenticação. |
+| **Recuperação** | Link "Esqueci minha senha" | Permite ao usuário iniciar o processo de recuperação de acesso. |
+
+## Descrição do Sistema Simulado
+### Fluxo Principal Simulado (Atores e Ações):
+
+O sistema atende três tipos de atores principais, controlando o acesso e a interação através de telas simuladas de Cadastro e Login:
+
+| Ator | Telas de Entrada | Fluxo de Negócio Simulado (Atual) |
+| :--- | :--- | :--- |
+| **1. Empresas Contratantes** | `cadastro_empresa.html` e `login.html` | Cadastram-se, publicam demandas de serviço (vagas/projetos), recebem e analisam propostas de fornecedores qualificados. |
+| **2. Prestadores de Serviço (Empresas Terceirizadas)** | `cadastro_empresa.html` e `login.html` | Cadastram-se, detalham seus serviços, encontram oportunidades publicadas, enviam propostas e estabelecem o acordo de serviço. |
+| **3. Profissionais Individuais / Empregados** | `cadastro_empregado.html` e `login.html` | Cadastram seus dados e **currículo**, buscando oportunidades de emprego nas empresas terceirizadas ou contratantes. |
+
+**Acesso:** O acesso de todos os atores é consolidado na tela de **Login** (`login.html`), que aceita tanto **CPF** (para Profissionais) quanto **CNPJ** (para Empresas).
+
+**Visão de Futuro:** O sistema é projetado para, em futuras implementações, gerenciar contratos e **interligar o processo de pagamento** para garantir a segurança e a transparência financeira de todas as transações, complementando o ciclo de conexão e avaliação.
+
