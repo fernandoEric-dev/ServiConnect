@@ -262,7 +262,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ====================================================
-    // 5. VALIDAÇÃO DE LOGIN (login.html)
+    // 5. VALIDAÇÃO DE LOGIN (login.html) - MODO SIMULAÇÃO
     // ====================================================
 
     const formLogin = document.getElementById('formLogin');
@@ -271,18 +271,15 @@ document.addEventListener('DOMContentLoaded', () => {
         const inputIdentificacao = document.getElementById('identificacao');
         const inputSenhaLogin = document.getElementById('senhaLogin');
 
-        // Lógica de Máscara Dinâmica (CPF ou CNPJ) em tempo real
+        // Lógica de Máscara Dinâmica (Mantida)
         if (inputIdentificacao) {
             inputIdentificacao.addEventListener('input', (e) => {
                 let value = e.target.value.replace(/\D/g, '');
                 
-                // Checa o tamanho para aplicar a máscara correta
                 if (value.length <= 11) {
-                    // Aplica Máscara CPF (até 11 dígitos)
                     applyMask(inputIdentificacao, '999.999.999-99');
                     inputIdentificacao.maxLength = 14;
                 } else {
-                    // Aplica Máscara CNPJ (mais de 11 dígitos)
                     applyMask(inputIdentificacao, '99.999.999/9999-99');
                     inputIdentificacao.maxLength = 18;
                 }
@@ -290,51 +287,46 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
 
-        // VALIDAÇÃO NO ENVIO
+        // VALIDAÇÃO E SIMULAÇÃO DE REDIRECIONAMENTO
         formLogin.addEventListener('submit', (e) => {
             e.preventDefault();
 
             const docValue = inputIdentificacao.value;
             const docLimpo = docValue.replace(/\D/g, '');
 
-            // 1. Checa se o campo está preenchido minimamente
-            if (docLimpo.length < 11) {
-                alert('Erro: O campo CPF/CNPJ está incompleto.');
-                inputIdentificacao.focus();
-                return;
-            }
-
+            // 1. Validação Lógica MÍNIMA (para determinar o tipo)
             let valido = false;
             let tipo = '';
 
-            // 2. Tenta validar como CPF
             if (docLimpo.length === 11) {
                 valido = validarCPF(docLimpo);
-                tipo = 'CPF';
-            } 
-            // 3. Tenta validar como CNPJ
-            else if (docLimpo.length === 14) {
+                tipo = 'empregado';
+            } else if (docLimpo.length === 14) {
                 valido = validarCNPJ(docLimpo);
-                tipo = 'CNPJ';
+                tipo = 'empresa';
             }
 
-            // 4. Checa a validação lógica final
             if (!valido) {
-                alert(`Erro: O ${tipo || 'documento'} digitado é inválido. Por favor, verifique.`);
+                alert('Erro: CPF ou CNPJ inválido. Por favor, digite um documento válido para simular o login.');
                 inputIdentificacao.focus();
                 return;
             }
 
-            // 5. Valida a senha 
-            if (inputSenhaLogin.value.length < 6) {
-                alert('Erro: A senha deve ter no mínimo 6 caracteres.');
-                inputSenhaLogin.focus();
-                return;
+            // SIMULAÇÃO DE REGRA PARA ADMIN: Se o CNPJ/CPF for 999.xxxxxx, simula ADMIN
+            let role = tipo;
+            if (docLimpo.startsWith('999')) {
+                role = 'admin';
             }
-            
-            // Se tudo passou (Validação Lógica e Senha)
-            alert(`Sucesso! Login validado como ${tipo}. Agora, o sistema tentaria autenticar esta conta no servidor.`);
-            // formLogin.submit(); // Descomente esta linha para o envio real
+
+            // SIMULAÇÃO DE LOGIN BEM-SUCEDIDO: REDIRECIONAMENTO IMEDIATO
+            let redirectUrl = '';
+            if (role === 'admin') {
+                redirectUrl = 'admin.html';
+            } else {
+                redirectUrl = `dashboard.html?role=${role}`;
+            }
+
+            window.location.href = redirectUrl;
         });
     }
 

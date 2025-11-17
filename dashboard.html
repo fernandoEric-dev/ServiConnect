@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard | ServiConnect</title>
+    <link rel="stylesheet" href="css/style.css"> 
+    <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+</head>
+<body>
+    <div class="dashboard-box">
+        <h1 id="welcomeTitle" class="dashboard-title">Carregando...</h1>
+        <p id="welcomeMessage" class="dashboard-message">Acesso confirmado. Selecione uma ação abaixo para começar.</p>
+        
+        <div class="action-grid" id="dashboardActions">
+        </div>
+
+        <div class="logout-link">
+            <a href="login.html" class="btn btn-secondary"><i class="fa-solid fa-right-from-bracket"></i> Sair da Conta</a>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const role = urlParams.get('role');
+            const titleElement = document.getElementById('welcomeTitle');
+            const actionsContainer = document.getElementById('dashboardActions');
+            const baseActions = [];
+            
+            // --- Lógica de Adaptação (Simulação Visual) ---
+            if (role === 'empresa' || role === 'empregado') {
+                if (role === 'empresa') {
+                    titleElement.innerHTML = 'Área da <span style="color:#FFC400;">Empresa</span>';
+                    baseActions.push(
+                        { icon: 'fa-file-signature', text: 'Publicar Nova Demanda', link: '#post_job' },
+                        { icon: 'fa-briefcase', text: 'Gerenciar Propostas', link: '#manage_proposals' },
+                        { icon: 'fa-star', text: 'Avaliar Serviços Concluídos', link: '#ratings' }
+                    );
+                } else if (role === 'empregado') {
+                    titleElement.innerHTML = 'Área do <span style="color:#FFC400;">Profissional</span>';
+                    baseActions.push(
+                        { icon: 'fa-magnifying-glass', text: 'Buscar Vagas e Demandas', link: '#find_jobs' },
+                        { icon: 'fa-id-card', text: 'Editar Perfil / Currículo', link: 'cadastro_empregado.html' },
+                        { icon: 'fa-history', text: 'Propostas Enviadas', link: '#sent_proposals' }
+                    );
+                }
+
+                // Renderiza as ações na tela
+                baseActions.forEach(action => {
+                    const item = document.createElement('a');
+                    item.href = action.link;
+                    item.classList.add('action-item');
+                    item.innerHTML = `<i class="fa-solid ${action.icon}"></i><span>${action.text}</span>`;
+                    actionsContainer.appendChild(item);
+                });
+            } else if (role === 'admin') {
+                window.location.href = 'admin.html'; // Redireciona o admin para o painel dedicado
+            } else {
+                 titleElement.innerHTML = 'Acesso Inválido';
+            }
+        });
+    </script>
+</body>
+</html>
