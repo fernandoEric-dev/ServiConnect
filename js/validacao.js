@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
 
     // ====================================================
-    // 1. FUNÇÕES GERAIS DE MÁSCARA
+    // 1. FUNÇÕES GERAIS DE MÁSCARA E VALIDAÇÃO (MANTIDAS)
     // ====================================================
 
     function applyMask(input, pattern) {
@@ -19,30 +19,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
         input.value = maskedValue;
-    }
-
-    // ====================================================
-    // 2. FUNÇÕES GERAIS DE VALIDAÇÃO LÓGICA
-    // ====================================================
-
-    function validarCPF(cpf) {
-        cpf = cpf.replace(/[^\d]/g, '');
-        if (cpf.length !== 11 || /^(\d)\1{10}$/.test(cpf)) return false;
-
-        let soma = 0;
-        let resto;
-        for (let i = 1; i <= 9; i++) soma = soma + parseInt(cpf.substring(i - 1, i)) * (11 - i);
-        resto = (soma * 10) % 11;
-        if ((resto === 10) || (resto === 11)) resto = 0;
-        if (resto !== parseInt(cpf.substring(9, 10))) return false;
-
-        soma = 0;
-        for (let i = 1; i <= 10; i++) soma = soma + parseInt(cpf.substring(i - 1, i)) * (12 - i);
-        resto = (soma * 10) % 11;
-        if ((resto === 10) || (resto === 11)) resto = 0;
-        if (resto !== parseInt(cpf.substring(10, 11))) return false;
-
-        return true;
     }
 
     function validarCNPJ(cnpj) {
@@ -78,32 +54,23 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function validarSenhas(senha, confirmarSenha) {
+        // Assume que a senha de login (no login.php) só precisa de um mínimo de 6 caracteres
+        if (typeof confirmarSenha === 'undefined') {
+            return senha.length >= 6;
+        }
         return senha === confirmarSenha && senha.length >= 6;
     }
 
     // FUNÇÃO REAL: VERIFICAR CNPJ ATIVO (Usando Open CNPJ)
     async function verificarCNPJ_API(cnpj) {
         const cnpjLimpo = cnpj.replace(/[^\d]/g, ''); 
-        
         try {
             const response = await fetch(`https://api.opencnpj.org/${cnpjLimpo}`);
-
-            if (response.status === 404) {
-                return { status: 'inativo', mensagem: 'CNPJ não encontrado ou não ativo no cadastro da API (404).' };
-            }
-
             if (response.ok) {
                 const data = await response.json();
-                
-                return { 
-                    status: 'ativo', 
-                    mensagem: `CNPJ encontrado. Razão Social: ${data.razao_social}`,
-                    dados: data 
-                };
+                return { status: 'ativo', mensagem: `CNPJ encontrado. Razão Social: ${data.razao_social}`, dados: data };
             }
-            
-            return { status: 'erro', mensagem: `Erro na API: ${response.status} ${response.statusText}` };
-
+            return { status: 'inativo', mensagem: 'CNPJ não encontrado ou inativo.' };
         } catch (error) {
             return { status: 'erro_rede', mensagem: `Falha na comunicação com a API Open CNPJ: ${error.message}` };
         }
@@ -111,158 +78,128 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     // ====================================================
-    // 3. INICIALIZAÇÃO E VALIDAÇÃO DE EMPREGADO (formCadastroEmpregado)
-    // ====================================================
-
-    const formEmpregado = document.getElementById('formCadastroEmpregado');
-
-    if (formEmpregado) {
-        const inputCpf = document.getElementById('cpf');
-        const inputTelefone = document.getElementById('telefone');
-        const inputCep = document.getElementById('cep');
-        const submitButtonEmpregado = formEmpregado.querySelector('button[type="submit"]');
-
-        // Máscaras (Mantidas)
-        if (inputCpf) inputCpf.addEventListener('input', () => applyMask(inputCpf, '999.999.999-99'));
-        
-        if (inputTelefone) {
-            inputTelefone.addEventListener('input', () => {
-                const pattern = inputTelefone.value.replace(/\D/g, '').length > 10 ? '(99) 99999-9999' : '(99) 9999-9999';
-                applyMask(inputTelefone, pattern);
-            });
-        }
-
-        if (inputCep) inputCep.addEventListener('input', () => applyMask(inputCep, '99999-999'));
-
-
-        // VALIDAÇÃO NO ENVIO
-        formEmpregado.addEventListener('submit', async (e) => {
-            e.preventDefault();
-
-            // 1. Validações Locais
-            const cpfValue = document.getElementById('cpf').value;
-            const senhaValue = document.getElementById('senha').value;
-            const confirmarSenhaValue = document.getElementById('confirmarSenha').value;
-
-            // Checa todas as validações locais ANTES de simular o envio
-            if (!validarCPF(cpfValue)) {
-                alert('Erro (Empregado): O CPF digitado é inválido.');
-                document.getElementById('cpf').focus();
-                return;
-            }
-
-            if (!validarSenhas(senhaValue, confirmarSenhaValue)) {
-                alert('Erro (Empregado): As senhas não coincidem ou são muito curtas (mínimo 6 caracteres).');
-                document.getElementById('senha').focus();
-                return;
-            }
-            
-            if (document.getElementById('telefone').value.replace(/\D/g, '').length < 10) {
-                alert('Erro (Empregado): O telefone está incompleto.');
-                document.getElementById('telefone').focus();
-                return;
-            }
-            
-            // Se as validações locais passaram, simula o processo de cadastro
-            
-            // 2. Muda o estado visual
-            submitButtonEmpregado.disabled = true; 
-            submitButtonEmpregado.textContent = 'Finalizando Cadastro... Aguarde!';
-            
-            // 3. SIMULA o processamento de back-end (500ms)
-            await new Promise(resolve => setTimeout(resolve, 500)); 
-            
-            // 4. Constrói a URL final de redirecionamento com a mensagem de sucesso e login
-            const msg = encodeURIComponent("Cadastro realizado com sucesso! Retorne à página de login para acessar seu perfil."); 
-            const urlFinal = `verificacao_status.html?status=sucesso&mensagem=${msg}`;
-            
-            // 5. Redireciona o usuário para a página de status
-            window.location.href = urlFinal;
-        });
-    }
-
-    // ====================================================
-    // 4. INICIALIZAÇÃO E VALIDAÇÃO DE EMPRESA (formCadastroEmpresa - REDIRECIONAMENTO)
+    // 2. INICIALIZAÇÃO E VALIDAÇÃO DE EMPRESA (CADASTRO)
     // ====================================================
 
     const formEmpresa = document.getElementById('formCadastroEmpresa');
 
     if (formEmpresa) {
-        const inputCnpj = document.getElementById('cnpj');
-        const inputTipo = document.getElementById('tipo');
-        const inputTelefoneEmpresa = document.getElementById('telefoneEmpresa');
         const submitButton = formEmpresa.querySelector('button[type="submit"]');
 
-        // Máscaras (Manter listeners)
-        if (inputCnpj) inputCnpj.addEventListener('input', () => applyMask(inputCnpj, '99.999.999/9999-99'));
+        // Mapeamento das máscaras (CNPJ e Telefone)
+        const inputCnpj = document.getElementById('cnpj');
+        const inputTelefoneEmpresa = document.getElementById('telefoneEmpresa');
+        const inputCepEmpresa = document.getElementById('cepEmpresa');
         
+        if (inputCnpj) inputCnpj.addEventListener('input', () => applyMask(inputCnpj, '99.999.999/9999-99'));
+        if (inputCepEmpresa) inputCepEmpresa.addEventListener('input', () => applyMask(inputCepEmpresa, '99999-999'));
         if (inputTelefoneEmpresa) {
             inputTelefoneEmpresa.addEventListener('input', () => {
                 const pattern = inputTelefoneEmpresa.value.replace(/\D/g, '').length > 10 ? '(99) 99999-9999' : '(99) 9999-9999';
                 applyMask(inputTelefoneEmpresa, pattern);
             });
         }
+        
+        // Função para mapear todos os campos (CRÍTICO para o Back-end)
+        const getFormFields = () => {
+             return {
+                nome: document.getElementById('nome').value,
+                cnpj: document.getElementById('cnpj').value,
+                tipo: document.getElementById('tipo').value, 
+                email_acesso: document.getElementById('emailAcesso').value,
+                senha: document.getElementById('senha').value,
+                confirmarSenha: document.getElementById('confirmarSenha').value,
+                
+                telefoneEmpresa: document.getElementById('telefoneEmpresa').value,
+                responsavel: document.getElementById('responsavel').value,
+                descricao: document.getElementById('descricao').value,
+                regiao: document.getElementById('regiao').value,
+                horario: document.getElementById('horario').value,
+
+                cepEmpresa: document.getElementById('cepEmpresa').value,
+                logradouroEmpresa: document.getElementById('logradouroEmpresa').value,
+                numeroEmpresa: document.getElementById('numeroEmpresa').value,
+                complementoEmpresa: document.getElementById('complementoEmpresa').value,
+                bairroEmpresa: document.getElementById('bairroEmpresa').value,
+                cidadeEmpresa: document.getElementById('cidadeEmpresa').value,
+                estadoEmpresa: document.getElementById('estadoEmpresa').value,
+            };
+        };
 
 
-        // VALIDAÇÃO E VERIFICAÇÃO ASYNC NO ENVIO
+        // VALIDAÇÃO E ENVIO ASSÍNCRONO NO CADASTRO
         formEmpresa.addEventListener('submit', async (e) => { 
             e.preventDefault();
 
+            const dados = getFormFields();
+
             // 1. Validações Locais
-            const cnpjValue = inputCnpj.value;
-            const senhaValue = document.getElementById('senha').value;
-            const confirmarSenhaValue = document.getElementById('confirmarSenha').value;
-
-
-            if (!validarCNPJ(cnpjValue)) {
+            if (!validarCNPJ(dados.cnpj)) {
                 alert('Erro (Empresa): O CNPJ digitado é inválido no formato.');
-                inputCnpj.focus();
+                document.getElementById('cnpj').focus();
                 return;
             }
-            if (!validarSenhas(senhaValue, confirmarSenhaValue)) {
+            if (!validarSenhas(dados.senha, dados.confirmarSenha)) {
                 alert('Erro (Empresa): As senhas não coincidem ou são muito curtas (mínimo 6 caracteres).');
                 document.getElementById('senha').focus();
                 return;
             }
-            if (inputTipo.value === "") {
-                alert('Erro (Empresa): Por favor, selecione o tipo de empresa.');
-                inputTipo.focus();
-                return;
-            }
-            if (inputTelefoneEmpresa.value.replace(/\D/g, '').length < 10) {
-                 alert('Erro (Empresa): O telefone está incompleto.');
-                 inputTelefoneEmpresa.focus();
+            if (dados.tipo === "") {
+                 alert('Erro (Empresa): Por favor, selecione o Tipo de Empresa.');
+                 document.getElementById('tipo').focus();
                  return;
             }
             
-            // --- INÍCIO DA VERIFICAÇÃO CNPJ E REDIRECIONAMENTO ---
-            
-            // 1. Muda o estado visual
+            // --- 2. INÍCIO DA VERIFICAÇÃO CNPJ E ENVIO ---
             submitButton.disabled = true; 
             submitButton.textContent = 'Verificando CNPJ... Aguarde!';
             
-            // 2. Chama a API
-            const resultado = await verificarCNPJ_API(cnpjValue);
+            // Chama a API de CNPJ
+            const resultadoCNPJ = await verificarCNPJ_API(dados.cnpj);
             
-            // 3. Constrói a URL final de redirecionamento
-            let urlFinal = '';
-            if (resultado.status === 'ativo') {
-                const msg = encodeURIComponent("Obrigado por se juntar à ServiConnect!");
-                urlFinal = `verificacao_status.html?status=sucesso&mensagem=${msg}`;
-            } else {
-                const msg = encodeURIComponent(resultado.mensagem + ". Por favor, verifique o CNPJ digitado.");
-                urlFinal = `verificacao_status.html?status=erro&mensagem=${msg}`;
+            if (resultadoCNPJ.status !== 'ativo') {
+                submitButton.disabled = false;
+                submitButton.textContent = 'Cadastrar Empresa';
+                alert(`ERRO DE VERIFICAÇÃO: ${resultadoCNPJ.mensagem}`);
+                return;
             }
+
+            // --- 3. CNPJ VÁLIDO. ENVIA PARA O BACK-END PHP ---
+            submitButton.textContent = 'Finalizando Cadastro...';
             
-            // 4. Redireciona o usuário para a página de status
-            window.location.href = urlFinal;
-            
-            // --- FIM DA VERIFICAÇÃO CNPJ E REDIRECIONAMENTO ---
+            try {
+                // Requisição Fetch para o Controller PHP
+                const response = await fetch('backend/controllers/CadastroEmpresaController.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(dados) // Envia todos os dados como JSON
+                });
+                
+                const resultadoCadastro = await response.json();
+
+                // 4. Lida com a resposta do Servidor
+                if (resultadoCadastro.success) {
+                    // Redireciona DIRETAMENTE para a página de Login após sucesso
+                    alert(resultadoCadastro.message + ' Você será redirecionado para a tela de Login.');
+                    window.location.href = 'login.php'; 
+                } else {
+                    // Erro do PHP (ex: CNPJ duplicado)
+                    const msg = encodeURIComponent(resultadoCadastro.message);
+                    const urlFinal = `verificacao_status.html?status=erro&mensagem=${msg}`;
+                    window.location.href = urlFinal;
+                }
+
+            } catch (error) {
+                alert('Erro na comunicação com o servidor. Verifique o XAMPP e a URL do Controller.');
+            } finally {
+                 submitButton.disabled = false;
+                 submitButton.textContent = 'Cadastrar Empresa';
+            }
         });
     }
 
     // ====================================================
-    // 5. VALIDAÇÃO DE LOGIN (login.html)
+    // 3. VALIDAÇÃO DE LOGIN (login.php) - FINAL
     // ====================================================
 
     const formLogin = document.getElementById('formLogin');
@@ -270,71 +207,66 @@ document.addEventListener('DOMContentLoaded', () => {
     if (formLogin) {
         const inputIdentificacao = document.getElementById('identificacao');
         const inputSenhaLogin = document.getElementById('senhaLogin');
+        const submitButtonLogin = document.getElementById('submitButtonLogin'); 
 
-        // Lógica de Máscara Dinâmica (CPF ou CNPJ) em tempo real
+        // Máscara CNPJ no Login
         if (inputIdentificacao) {
-            inputIdentificacao.addEventListener('input', (e) => {
-                let value = e.target.value.replace(/\D/g, '');
-                
-                // Checa o tamanho para aplicar a máscara correta
-                if (value.length <= 11) {
-                    // Aplica Máscara CPF (até 11 dígitos)
-                    applyMask(inputIdentificacao, '999.999.999-99');
-                    inputIdentificacao.maxLength = 14;
-                } else {
-                    // Aplica Máscara CNPJ (mais de 11 dígitos)
-                    applyMask(inputIdentificacao, '99.999.999/9999-99');
-                    inputIdentificacao.maxLength = 18;
-                }
+            inputIdentificacao.addEventListener('input', () => {
+                applyMask(inputIdentificacao, '99.999.999/9999-99');
             });
         }
 
-
-        // VALIDAÇÃO NO ENVIO
-        formLogin.addEventListener('submit', (e) => {
+        // VALIDAÇÃO E ENVIO NO LOGIN (FINAL)
+        formLogin.addEventListener('submit', async (e) => {
             e.preventDefault();
 
             const docValue = inputIdentificacao.value;
-            const docLimpo = docValue.replace(/\D/g, '');
+            const docLimpo = docValue.replace(/\D/g, ''); // CNPJ limpo
+            const senhaValue = inputSenhaLogin.value;
 
-            // 1. Checa se o campo está preenchido minimamente
-            if (docLimpo.length < 11) {
-                alert('Erro: O campo CPF/CNPJ está incompleto.');
+            // 1. Validações Locais
+            if (docLimpo.length !== 14 || !validarCNPJ(docLimpo)) {
+                alert('Erro: O campo CNPJ deve conter 14 dígitos e ser válido.');
                 inputIdentificacao.focus();
                 return;
             }
-
-            let valido = false;
-            let tipo = '';
-
-            // 2. Tenta validar como CPF
-            if (docLimpo.length === 11) {
-                valido = validarCPF(docLimpo);
-                tipo = 'CPF';
-            } 
-            // 3. Tenta validar como CNPJ
-            else if (docLimpo.length === 14) {
-                valido = validarCNPJ(docLimpo);
-                tipo = 'CNPJ';
-            }
-
-            // 4. Checa a validação lógica final
-            if (!valido) {
-                alert(`Erro: O ${tipo || 'documento'} digitado é inválido. Por favor, verifique.`);
-                inputIdentificacao.focus();
-                return;
-            }
-
-            // 5. Valida a senha 
-            if (inputSenhaLogin.value.length < 6) {
+            if (senhaValue.length < 6) {
                 alert('Erro: A senha deve ter no mínimo 6 caracteres.');
                 inputSenhaLogin.focus();
                 return;
             }
             
-            // Se tudo passou (Validação Lógica e Senha)
-            alert(`Sucesso! Login validado como ${tipo}. Agora, o sistema tentaria autenticar esta conta no servidor.`);
-            // formLogin.submit(); // Descomente esta linha para o envio real
+            // --- 2. ENVIO PARA O BACK-END (AUTENTICAÇÃO) ---
+            submitButtonLogin.disabled = true;
+            submitButtonLogin.textContent = 'Verificando Acesso...';
+
+            try {
+                // Requisição Fetch para o Controller de Autenticação
+                const response = await fetch('backend/controllers/AuthController.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        identificacao: docLimpo, // Envia CNPJ limpo
+                        senha: senhaValue
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    // Login bem-sucedido: redireciona para o dashboard correto
+                    alert(result.message);
+                    window.location.href = result.redirect; 
+                } else {
+                    alert('Falha no Login: ' + result.message);
+                }
+
+            } catch (error) {
+                alert('Erro de comunicação com o servidor.');
+            } finally {
+                submitButtonLogin.disabled = false;
+                submitButtonLogin.textContent = 'Entrar';
+            }
         });
     }
 
