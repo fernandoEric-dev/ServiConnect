@@ -107,20 +107,28 @@
 
 
     <h3 style="margin-top: 40px;">6. Experiência Profissional</h3>
-    <div id="experiencia-container">
-        <div class="bloco-experiencia">
-            <label for="empresa_1">Empresa</label>
-            <input type="text" id="empresa_1" name="empresa[]" placeholder="Nome da empresa" required>
-            <label for="cargo_1">Cargo Ocupado</label>
-            <input type="text" id="cargo_1" name="cargo_exp[]" placeholder="Ex: Agente de Portaria" required>
-            <label for="desc_atividades_1">Principais Atividades (Resumo)</label>
-            <textarea id="desc_atividades_1" name="atividades[]" rows="3" placeholder="Descreva suas responsabilidades e conquistas." required></textarea>
-            <label for="periodo_exp_1">Período</label>
-            <input type="text" id="periodo_exp_1" name="periodo_exp[]" placeholder="Ex: Jan/2021 - Dez/2023" required>
-            <hr>
-        </div>
+    
+    <div style="margin-bottom: 20px;">
+        <input type="checkbox" id="semExperienciaCheckbox" name="sem_experiencia">
+        <label for="semExperienciaCheckbox" style="font-weight: 500; color: #4A4A4A;">Marcar se não possuir experiência profissional.</label>
     </div>
-    <button type="button" id="addExperienciaBtn" class="btn-secondary" style="margin-bottom: 25px;">+ Adicionar outra Experiência</button>
+
+    <div id="experienciaContent"> 
+        <div id="experiencia-container">
+            <div class="bloco-experiencia">
+                <label for="empresa_1">Empresa</label>
+                <input type="text" id="empresa_1" name="empresa[]" placeholder="Nome da empresa" required>
+                <label for="cargo_1">Cargo Ocupado</label>
+                <input type="text" id="cargo_1" name="cargo_exp[]" placeholder="Ex: Agente de Portaria" required>
+                <label for="desc_atividades_1">Principais Atividades (Resumo)</label>
+                <textarea id="desc_atividades_1" name="atividades[]" rows="3" placeholder="Descreva suas responsabilidades e conquistas." required></textarea>
+                <label for="periodo_exp_1">Período</label>
+                <input type="text" id="periodo_exp_1" name="periodo_exp[]" placeholder="Ex: Jan/2021 - Dez/2023" required>
+                <hr>
+            </div>
+        </div>
+        <button type="button" id="addExperienciaBtn" class="btn-secondary" style="margin-bottom: 25px;">+ Adicionar outra Experiência</button>
+    </div>
     
     
     <h3 style="margin-top: 40px;">7. Habilidades e Anexos</h3>
@@ -141,7 +149,7 @@
 
 <script src="js/validacao.js"></script>
 <script src="js/cep_api.js"></script>
-<script src="js/perfil_builder.js"></script>
+<script src="js/perfil_cadastro.js"></script>
 
 </body>
 </html>

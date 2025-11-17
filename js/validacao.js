@@ -81,8 +81,37 @@ document.addEventListener('DOMContentLoaded', () => {
         return senha === confirmarSenha && senha.length >= 6;
     }
 
+    // FUNÇÃO REAL: VERIFICAR CNPJ ATIVO (Usando Open CNPJ)
+    async function verificarCNPJ_API(cnpj) {
+        const cnpjLimpo = cnpj.replace(/[^\d]/g, ''); 
+        
+        try {
+            const response = await fetch(`https://api.opencnpj.org/${cnpjLimpo}`);
+
+            if (response.status === 404) {
+                return { status: 'inativo', mensagem: 'CNPJ não encontrado ou não ativo no cadastro da API (404).' };
+            }
+
+            if (response.ok) {
+                const data = await response.json();
+                
+                return { 
+                    status: 'ativo', 
+                    mensagem: `CNPJ encontrado. Razão Social: ${data.razao_social}`,
+                    dados: data 
+                };
+            }
+            
+            return { status: 'erro', mensagem: `Erro na API: ${response.status} ${response.statusText}` };
+
+        } catch (error) {
+            return { status: 'erro_rede', mensagem: `Falha na comunicação com a API Open CNPJ: ${error.message}` };
+        }
+    }
+
+
     // ====================================================
-    // 3. INICIALIZAÇÃO E VALIDAÇÃO DE EMPREGADO
+    // 3. INICIALIZAÇÃO E VALIDAÇÃO DE EMPREGADO (formCadastroEmpregado)
     // ====================================================
 
     const formEmpregado = document.getElementById('formCadastroEmpregado');
@@ -91,11 +120,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const inputCpf = document.getElementById('cpf');
         const inputTelefone = document.getElementById('telefone');
         const inputCep = document.getElementById('cep');
+        const submitButtonEmpregado = formEmpregado.querySelector('button[type="submit"]');
 
-        // Máscara CPF
+        // Máscaras (Mantidas)
         if (inputCpf) inputCpf.addEventListener('input', () => applyMask(inputCpf, '999.999.999-99'));
         
-        // Máscara Telefone (com 9º dígito)
         if (inputTelefone) {
             inputTelefone.addEventListener('input', () => {
                 const pattern = inputTelefone.value.replace(/\D/g, '').length > 10 ? '(99) 99999-9999' : '(99) 9999-9999';
@@ -103,18 +132,19 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
 
-        // Máscara CEP
         if (inputCep) inputCep.addEventListener('input', () => applyMask(inputCep, '99999-999'));
 
 
         // VALIDAÇÃO NO ENVIO
-        formEmpregado.addEventListener('submit', (e) => {
+        formEmpregado.addEventListener('submit', async (e) => {
             e.preventDefault();
 
+            // 1. Validações Locais
             const cpfValue = document.getElementById('cpf').value;
             const senhaValue = document.getElementById('senha').value;
             const confirmarSenhaValue = document.getElementById('confirmarSenha').value;
 
+            // Checa todas as validações locais ANTES de simular o envio
             if (!validarCPF(cpfValue)) {
                 alert('Erro (Empregado): O CPF digitado é inválido.');
                 document.getElementById('cpf').focus();
@@ -128,33 +158,44 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             
             if (document.getElementById('telefone').value.replace(/\D/g, '').length < 10) {
-                 alert('Erro (Empregado): O telefone está incompleto.');
-                 document.getElementById('telefone').focus();
-                 return;
+                alert('Erro (Empregado): O telefone está incompleto.');
+                document.getElementById('telefone').focus();
+                return;
             }
-
-            alert('Perfil de Empregado validado e pronto para envio!');
-            // formEmpregado.submit(); 
+            
+            // Se as validações locais passaram, simula o processo de cadastro
+            
+            // 2. Muda o estado visual
+            submitButtonEmpregado.disabled = true; 
+            submitButtonEmpregado.textContent = 'Finalizando Cadastro... Aguarde!';
+            
+            // 3. SIMULA o processamento de back-end (500ms)
+            await new Promise(resolve => setTimeout(resolve, 500)); 
+            
+            // 4. Constrói a URL final de redirecionamento com a mensagem de sucesso e login
+            const msg = encodeURIComponent("Cadastro realizado com sucesso! Retorne à página de login para acessar seu perfil."); 
+            const urlFinal = `verificacao_status.html?status=sucesso&mensagem=${msg}`;
+            
+            // 5. Redireciona o usuário para a página de status
+            window.location.href = urlFinal;
         });
     }
 
     // ====================================================
-    // 4. INICIALIZAÇÃO E VALIDAÇÃO DE EMPRESA (NOVO BLOCO)
+    // 4. INICIALIZAÇÃO E VALIDAÇÃO DE EMPRESA (formCadastroEmpresa - REDIRECIONAMENTO)
     // ====================================================
 
     const formEmpresa = document.getElementById('formCadastroEmpresa');
 
     if (formEmpresa) {
         const inputCnpj = document.getElementById('cnpj');
-        const inputTelefoneEmpresa = document.getElementById('telefoneEmpresa');
-        const inputCepEmpresa = document.getElementById('cepEmpresa');
         const inputTipo = document.getElementById('tipo');
+        const inputTelefoneEmpresa = document.getElementById('telefoneEmpresa');
+        const submitButton = formEmpresa.querySelector('button[type="submit"]');
 
-
-        // Máscara CNPJ
+        // Máscaras (Manter listeners)
         if (inputCnpj) inputCnpj.addEventListener('input', () => applyMask(inputCnpj, '99.999.999/9999-99'));
         
-        // Máscara Telefone Empresa
         if (inputTelefoneEmpresa) {
             inputTelefoneEmpresa.addEventListener('input', () => {
                 const pattern = inputTelefoneEmpresa.value.replace(/\D/g, '').length > 10 ? '(99) 99999-9999' : '(99) 9999-9999';
@@ -162,36 +203,139 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
 
-        // Máscara CEP Empresa
-        if (inputCepEmpresa) inputCepEmpresa.addEventListener('input', () => applyMask(inputCepEmpresa, '99999-999'));
 
-
-        // VALIDAÇÃO NO ENVIO
-        formEmpresa.addEventListener('submit', (e) => {
+        // VALIDAÇÃO E VERIFICAÇÃO ASYNC NO ENVIO
+        formEmpresa.addEventListener('submit', async (e) => { 
             e.preventDefault();
 
-            const cnpjValue = document.getElementById('cnpj').value;
+            // 1. Validações Locais
+            const cnpjValue = inputCnpj.value;
+            const senhaValue = document.getElementById('senha').value;
+            const confirmarSenhaValue = document.getElementById('confirmarSenha').value;
+
 
             if (!validarCNPJ(cnpjValue)) {
-                alert('Erro (Empresa): O CNPJ digitado é inválido.');
-                document.getElementById('cnpj').focus();
+                alert('Erro (Empresa): O CNPJ digitado é inválido no formato.');
+                inputCnpj.focus();
                 return;
             }
-            
+            if (!validarSenhas(senhaValue, confirmarSenhaValue)) {
+                alert('Erro (Empresa): As senhas não coincidem ou são muito curtas (mínimo 6 caracteres).');
+                document.getElementById('senha').focus();
+                return;
+            }
             if (inputTipo.value === "") {
                 alert('Erro (Empresa): Por favor, selecione o tipo de empresa.');
                 inputTipo.focus();
                 return;
             }
-            
             if (inputTelefoneEmpresa.value.replace(/\D/g, '').length < 10) {
                  alert('Erro (Empresa): O telefone está incompleto.');
                  inputTelefoneEmpresa.focus();
                  return;
             }
             
-            alert('Cadastro de Empresa validado e pronto para envio!');
-            // formEmpresa.submit();
+            // --- INÍCIO DA VERIFICAÇÃO CNPJ E REDIRECIONAMENTO ---
+            
+            // 1. Muda o estado visual
+            submitButton.disabled = true; 
+            submitButton.textContent = 'Verificando CNPJ... Aguarde!';
+            
+            // 2. Chama a API
+            const resultado = await verificarCNPJ_API(cnpjValue);
+            
+            // 3. Constrói a URL final de redirecionamento
+            let urlFinal = '';
+            if (resultado.status === 'ativo') {
+                const msg = encodeURIComponent("Obrigado por se juntar à ServiConnect!");
+                urlFinal = `verificacao_status.html?status=sucesso&mensagem=${msg}`;
+            } else {
+                const msg = encodeURIComponent(resultado.mensagem + ". Por favor, verifique o CNPJ digitado.");
+                urlFinal = `verificacao_status.html?status=erro&mensagem=${msg}`;
+            }
+            
+            // 4. Redireciona o usuário para a página de status
+            window.location.href = urlFinal;
+            
+            // --- FIM DA VERIFICAÇÃO CNPJ E REDIRECIONAMENTO ---
         });
     }
+
+    // ====================================================
+    // 5. VALIDAÇÃO DE LOGIN (login.html)
+    // ====================================================
+
+    const formLogin = document.getElementById('formLogin');
+
+    if (formLogin) {
+        const inputIdentificacao = document.getElementById('identificacao');
+        const inputSenhaLogin = document.getElementById('senhaLogin');
+
+        // Lógica de Máscara Dinâmica (CPF ou CNPJ) em tempo real
+        if (inputIdentificacao) {
+            inputIdentificacao.addEventListener('input', (e) => {
+                let value = e.target.value.replace(/\D/g, '');
+                
+                // Checa o tamanho para aplicar a máscara correta
+                if (value.length <= 11) {
+                    // Aplica Máscara CPF (até 11 dígitos)
+                    applyMask(inputIdentificacao, '999.999.999-99');
+                    inputIdentificacao.maxLength = 14;
+                } else {
+                    // Aplica Máscara CNPJ (mais de 11 dígitos)
+                    applyMask(inputIdentificacao, '99.999.999/9999-99');
+                    inputIdentificacao.maxLength = 18;
+                }
+            });
+        }
+
+
+        // VALIDAÇÃO NO ENVIO
+        formLogin.addEventListener('submit', (e) => {
+            e.preventDefault();
+
+            const docValue = inputIdentificacao.value;
+            const docLimpo = docValue.replace(/\D/g, '');
+
+            // 1. Checa se o campo está preenchido minimamente
+            if (docLimpo.length < 11) {
+                alert('Erro: O campo CPF/CNPJ está incompleto.');
+                inputIdentificacao.focus();
+                return;
+            }
+
+            let valido = false;
+            let tipo = '';
+
+            // 2. Tenta validar como CPF
+            if (docLimpo.length === 11) {
+                valido = validarCPF(docLimpo);
+                tipo = 'CPF';
+            } 
+            // 3. Tenta validar como CNPJ
+            else if (docLimpo.length === 14) {
+                valido = validarCNPJ(docLimpo);
+                tipo = 'CNPJ';
+            }
+
+            // 4. Checa a validação lógica final
+            if (!valido) {
+                alert(`Erro: O ${tipo || 'documento'} digitado é inválido. Por favor, verifique.`);
+                inputIdentificacao.focus();
+                return;
+            }
+
+            // 5. Valida a senha 
+            if (inputSenhaLogin.value.length < 6) {
+                alert('Erro: A senha deve ter no mínimo 6 caracteres.');
+                inputSenhaLogin.focus();
+                return;
+            }
+            
+            // Se tudo passou (Validação Lógica e Senha)
+            alert(`Sucesso! Login validado como ${tipo}. Agora, o sistema tentaria autenticar esta conta no servidor.`);
+            // formLogin.submit(); // Descomente esta linha para o envio real
+        });
+    }
+
 });

@@ -1,0 +1,267 @@
+/* admin.css */
+
+/* Garantindo que as variáveis de cor estejam disponíveis (do style.css) */
+/* Se não estivessem no style.css, precisaríamos importá-las aqui: */
+/*
+:root {
+    --primary-blue: #0A192F; 
+    --secondary-yellow: #FFC400; 
+    --light-grey: #F5F5F5; 
+    --white-color: #ffffff; 
+    --text-color: #4A4A4A; 
+}
+*/
+
+/* Reset Básico e Layout Principal */
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Poppins', sans-serif;
+    color: var(--text-color);
+}
+
+.admin-container {
+    display: flex;
+    min-height: 100vh;
+}
+
+/* --- SIDEBAR (Menu Lateral) --- */
+.sidebar {
+    width: 250px;
+    background-color: var(--primary-blue);
+    color: var(--white-color);
+    padding: 20px;
+    box-shadow: 2px 0 15px rgba(0, 0, 0, 0.2);
+    flex-shrink: 0; 
+    transition: width 0.3s ease;
+}
+
+.logo-area {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.logo-admin {
+    width: 80px;
+    height: 80px;
+    object-fit: cover;
+    border-radius: 50%;
+    border: 3px solid var(--secondary-yellow);
+    margin-bottom: 10px;
+}
+
+.sidebar h3 {
+    color: var(--secondary-yellow); 
+    font-size: 1.2em;
+    margin: 0;
+    font-family: 'Montserrat', sans-serif;
+}
+
+/* Navegação */
+.admin-nav ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.admin-nav li a {
+    display: flex;
+    align-items: center;
+    padding: 12px 15px;
+    color: var(--light-grey);
+    text-decoration: none;
+    border-radius: 6px;
+    margin-bottom: 8px;
+    transition: background-color 0.2s, color 0.2s;
+    font-weight: 500;
+}
+
+.admin-nav li a:hover,
+.admin-nav li.active a {
+    background-color: #1a3a69; 
+    color: var(--white-color);
+}
+
+.admin-nav i {
+    margin-right: 10px;
+    font-size: 1.1em;
+}
+
+.admin-nav .logout-link a {
+    margin-top: 40px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding-top: 15px;
+    color: var(--secondary-yellow); 
+}
+.admin-nav .logout-link a:hover {
+    background-color: var(--secondary-yellow);
+    color: var(--primary-blue);
+}
+
+/* --- CONTEÚDO PRINCIPAL --- */
+.main-content {
+    flex-grow: 1;
+    padding: 30px;
+    background-color: var(--light-grey);
+    overflow-x: hidden; /* Previne rolagem lateral */
+}
+
+.content-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #ddd;
+}
+
+.content-header h1 {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 2em;
+    color: var(--primary-blue);
+    margin: 0;
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 500;
+}
+
+.user-info .user-icon {
+    font-size: 1.8em;
+    color: var(--primary-blue);
+}
+
+/* WIDGETS */
+.dashboard-widgets {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 20px;
+    margin-bottom: 40px;
+}
+
+.widget {
+    background: var(--white-color);
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+    border-left: 5px solid var(--secondary-yellow);
+    transition: transform 0.3s;
+}
+.widget:hover {
+    transform: translateY(-3px);
+}
+
+.icon-widget {
+    font-size: 2em;
+    color: var(--primary-blue);
+    margin-bottom: 10px;
+}
+
+.widget-title {
+    margin: 0 0 5px 0;
+    color: #666;
+    font-weight: 500;
+    font-size: 0.9em;
+}
+
+.widget-value {
+    font-size: 2em;
+    font-weight: 800;
+    color: var(--primary-blue);
+    margin: 0;
+}
+
+/* ATIVIDADE RECENTE */
+.recent-activity {
+    background: var(--white-color);
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+}
+.recent-activity h2 {
+    font-size: 1.5em;
+    color: var(--primary-blue);
+    margin-top: 0;
+}
+
+.activity-list p {
+    border-bottom: 1px dashed #eee;
+    padding: 10px 0;
+    margin: 0;
+    font-size: 0.95em;
+}
+.activity-list p:last-child {
+    border-bottom: none;
+}
+
+/* =========== RESPONSIVIDADE =========== */
+
+@media (max-width: 1024px) {
+    .sidebar {
+        width: 200px; /* Sidebar um pouco mais fina */
+    }
+}
+
+@media (max-width: 768px) {
+    .admin-container {
+        flex-direction: column; /* Colapsa em uma única coluna */
+    }
+    .sidebar {
+        width: 100%; /* Sidebar ocupa toda a largura */
+        padding: 15px 20px;
+    }
+    .sidebar .logo-area {
+        display: flex;
+        align-items: center;
+        text-align: left;
+        margin-bottom: 15px;
+    }
+    .logo-admin {
+        margin-right: 15px;
+        margin-bottom: 0;
+    }
+    .admin-nav ul {
+        display: flex; /* Menu de navegação fica horizontal */
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+    .admin-nav li {
+        flex-grow: 1;
+    }
+    .admin-nav li a {
+        justify-content: center; /* Centraliza o conteúdo */
+        padding: 8px 10px;
+        font-size: 0.9em;
+    }
+    .admin-nav i {
+        margin-right: 5px;
+    }
+    .admin-nav .logout-link {
+        margin-top: 10px;
+        border-top: none;
+        width: 100%;
+    }
+
+    .main-content {
+        padding: 20px;
+    }
+    .content-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    .content-header h1 {
+        margin-bottom: 10px;
+    }
+}
+
+@media (max-width: 480px) {
+    .admin-nav ul {
+        flex-direction: column;
+    }
+    .admin-nav li a {
+        justify-content: flex-start;
+    }
+}
