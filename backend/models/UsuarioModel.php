@@ -15,6 +15,30 @@ class UsuarioModel {
         return $stmt->rowCount() > 0;
     }
 
+
+    // backend/models/UsuarioModel.php (Adicione este novo método à classe)
+
+/**
+ * READ: Busca todas as empresas com o papel 'terceirizada' para exibir no feed do Contratante.
+ */
+public function buscarTerceirizadas() {
+    $sql = "
+        SELECT 
+            u.id as usuario_id,
+            e.nome_empresa,
+            e.descricao_servicos,
+            e.area_atuacao,
+            e.regioes_atendidas,
+            e.foto_path
+        FROM usuarios u
+        JOIN empresas e ON u.id = e.usuario_id
+        WHERE u.user_role = 'terceirizada'
+    ";
+    $stmt = $this->pdo->prepare($sql);
+    $stmt->execute();
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+
     // 2. Insere na tabela 'usuarios' e retorna o ID
     public function cadastrarUsuario(array $data): ?int {
         // Certifique-se de que os nomes das colunas estão corretos:
@@ -59,7 +83,10 @@ class UsuarioModel {
             $data['bairro'],
             $data['cidade'],
             $data['estado']
+
+            
         ]);
+        
     }
 }
 ?>

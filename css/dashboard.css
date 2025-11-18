@@ -1,0 +1,443 @@
+/*
+ * Arquivo: css/dashboard.css
+ * Tema: Corporativo Moderno (High Contrast)
+ * Cores Principais: Azul Profundo (Primário), Cinza Claro (Fundo), Cinza Escuro (Texto)
+ */
+
+/* --------------------------------------------------- */
+/* 0. Configurações Globais e Reset Simplificado       */
+/* --------------------------------------------------- */
+body {
+    font-family: 'Poppins', sans-serif; /* Fonte moderna e limpa */
+    margin: 0;
+    padding: 0;
+    background-color: #f7f9fc; /* Fundo muito claro, quase branco */
+    color: #333; /* Cor de texto principal escura */
+    line-height: 1.6;
+    scroll-behavior: smooth;
+}
+
+/* Adicionando a fonte Poppins (certifique-se de incluí-la no HTML) */
+/* Coloque esta linha no <head> do seu dashboard.php:
+   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+*/
+
+h1, h2, h3, h4 {
+    color: #1a1a2e; /* Títulos em cor de destaque escura */
+    font-weight: 600;
+}
+
+a {
+    text-decoration: none;
+    color: #007bff; /* Azul primário para links */
+    transition: color 0.3s ease;
+}
+
+a:hover {
+    color: #0056b3;
+}
+
+/* --------------------------------------------------- */
+/* 1. Header e Navegação (Estilo Fixo e Imponente)    */
+/* --------------------------------------------------- */
+.dashboard-header {
+    background-color: #1a1a2e; /* Azul/Preto Profundo para o cabeçalho */
+    color: #fff;
+    padding: 15px 0;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+.header-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.logo-title {
+    font-size: 1.8em;
+    font-weight: 700;
+    margin: 0;
+    color: #4CAF50; /* Verde de destaque para a marca */
+}
+
+/* Navegação Principal */
+.main-nav {
+    display: flex;
+    gap: 30px;
+}
+
+.nav-item {
+    color: #b0b0b0; /* Cinza claro para itens inativos */
+    font-weight: 400;
+    padding: 10px 15px;
+    border-radius: 5px;
+    transition: background-color 0.3s, color 0.3s;
+    display: flex;
+    align-items: center;
+}
+
+.nav-item i {
+    margin-right: 8px;
+    font-size: 1.1em;
+}
+
+.nav-item:hover {
+    color: #fff;
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.nav-active {
+    color: #fff !important;
+    background-color: #007bff; /* Azul primário para o item ativo */
+    font-weight: 600;
+    box-shadow: 0 2px 4px rgba(0, 123, 255, 0.3);
+}
+
+.nav-active:hover {
+    background-color: #0056b3;
+}
+
+/* Controle do Usuário */
+.user-control {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.user-display {
+    font-weight: 400;
+    font-size: 0.9em;
+    color: #f0f0f0;
+}
+
+.logout-btn {
+    background-color: #dc3545; /* Vermelho para 'Sair' */
+    color: #fff;
+    padding: 8px 15px;
+    border-radius: 5px;
+    font-weight: 600;
+    transition: background-color 0.3s;
+}
+
+.logout-btn:hover {
+    background-color: #c82333;
+}
+
+/* --------------------------------------------------- */
+/* 2. Conteúdo Principal e Seções                      */
+/* --------------------------------------------------- */
+.main-content-dashboard {
+    max-width: 1200px;
+    margin: 30px auto;
+    padding: 0 20px;
+}
+
+.section-title {
+    font-size: 2em;
+    margin-bottom: 25px;
+    border-left: 5px solid #007bff; /* Destaque visual no título da seção */
+    padding-left: 15px;
+    color: #1a1a2e;
+}
+
+.section-title i {
+    color: #007bff;
+    margin-right: 10px;
+}
+
+.content-section {
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    margin-bottom: 30px;
+}
+
+/* Cartões de Conteúdo (Widgets) */
+.widget-card {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    border: 1px solid #e9ecef;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+/* --------------------------------------------------- */
+/* 3. Estilo do Feed (Contratante)                     */
+/* --------------------------------------------------- */
+.search-module {
+    /* Estilo base já definido em .widget-card */
+}
+
+.search-tip {
+    font-style: italic;
+    color: #555;
+    margin-bottom: 20px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+}
+
+.terceirizadas-list {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.terceirizada-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    border-left: 5px solid #007bff; /* Destaque na lateral */
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.terceirizada-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 15px rgba(0, 123, 255, 0.1);
+}
+
+.profile-info {
+    display: flex;
+    align-items: center;
+    flex: 1;
+    gap: 15px;
+}
+
+.terceirizada-logo {
+    min-width: 60px; /* Garante que a imagem não encolha */
+    min-height: 60px;
+    border: 2px solid #007bff;
+    object-fit: cover;
+}
+
+.text-info h4 {
+    margin: 0 0 5px 0;
+    font-size: 1.2em;
+    color: #1a1a2e;
+}
+
+.service-area {
+    font-size: 0.9em;
+    color: #6c757d;
+    margin-bottom: 5px;
+}
+
+.description-short {
+    font-size: 0.9em;
+    color: #555;
+}
+
+.request-btn {
+    background-color: #4CAF50; /* Verde de Ação */
+    color: #fff;
+    padding: 10px 20px;
+    border-radius: 5px;
+    font-weight: 600;
+    transition: background-color 0.3s;
+    white-space: nowrap; /* Evita que o botão quebre a linha */
+}
+
+.request-btn:hover {
+    background-color: #45a049;
+}
+
+.request-btn i {
+    margin-right: 8px;
+}
+
+/* --------------------------------------------------- */
+/* 4. Estilo do Feed (Terceirizada - Solicitações)     */
+/* --------------------------------------------------- */
+.requests-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.solicitacao-card {
+    padding: 20px;
+    border-left: 5px solid #ffc107; /* Amarelo/Dourado para alerta/ação pendente */
+    transition: box-shadow 0.3s;
+}
+
+.solicitacao-card:hover {
+    box-shadow: 0 6px 15px rgba(255, 193, 7, 0.2);
+}
+
+.solicitacao-card h3 {
+    margin: 0 0 5px 0;
+    color: #1a1a2e;
+    font-size: 1.3em;
+}
+
+.solicitacao-card p {
+    margin: 3px 0;
+    font-size: 0.95em;
+}
+
+.solicitacao-card strong {
+    color: #1a1a2e;
+}
+
+.solicitacao-card .description-short {
+    margin-top: 10px;
+    border-top: 1px dashed #e9ecef;
+    padding-top: 10px;
+}
+
+.action-respond {
+    margin-top: 15px;
+    display: inline-block;
+    background-color: #007bff; /* Azul Primário para resposta */
+}
+
+.action-respond:hover {
+    background-color: #0056b3;
+}
+
+.status-message {
+    color: #6c757d;
+    font-size: 0.9em;
+}
+
+/* --------------------------------------------------- */
+/* 5. Estilo da Seção Meu Perfil (Formulário)          */
+/* --------------------------------------------------- */
+#formEdicaoPerfil {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 30px;
+}
+
+#formEdicaoPerfil h3 {
+    color: #007bff;
+    border-bottom: 2px solid #007bff;
+    padding-bottom: 5px;
+    margin-bottom: 20px;
+}
+
+/* Estilização Geral de Inputs e Textareas */
+#formEdicaoPerfil label {
+    display: block;
+    font-weight: 600;
+    margin: 15px 0 5px 0;
+    color: #1a1a2e;
+}
+
+#formEdicaoPerfil input[type="text"],
+#formEdicaoPerfil input[type="number"],
+#formEdicaoPerfil textarea {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ced4da;
+    border-radius: 5px;
+    box-sizing: border-box;
+    font-size: 1em;
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+#formEdicaoPerfil input:focus,
+#formEdicaoPerfil textarea:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+    outline: none;
+}
+
+#formEdicaoPerfil textarea {
+    resize: vertical;
+}
+
+.input-group {
+    margin-bottom: 20px;
+}
+
+.small-text {
+    font-size: 0.85em;
+    color: #6c757d;
+    margin-top: -10px;
+    margin-bottom: 20px;
+}
+
+/* Botão de Salvar */
+.btn-header {
+    background-color: #4CAF50;
+    color: #fff;
+    padding: 15px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1.1em;
+    font-weight: 700;
+    transition: background-color 0.3s, transform 0.1s;
+}
+
+.btn-header:hover {
+    background-color: #45a049;
+    transform: translateY(-1px);
+}
+
+.btn-header i {
+    margin-right: 10px;
+}
+
+/* --------------------------------------------------- */
+/* 6. Responsividade Básica                            */
+/* --------------------------------------------------- */
+@media (max-width: 992px) {
+    .header-container {
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .main-nav {
+        gap: 15px;
+    }
+    
+    .user-control {
+        width: 100%;
+        justify-content: space-around;
+        gap: 0;
+    }
+
+    .user-display {
+        display: none; /* Esconde em telas menores para economizar espaço */
+    }
+
+    .terceirizada-card {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+    }
+
+    .request-btn {
+        width: 100%;
+        text-align: center;
+    }
+}
+
+@media (max-width: 576px) {
+    .logo-title {
+        font-size: 1.5em;
+    }
+    
+    .main-nav {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .nav-item {
+        padding: 8px 10px;
+        font-size: 0.9em;
+    }
+
+    .section-title {
+        font-size: 1.5em;
+    }
+}

@@ -63,10 +63,9 @@ if (password_verify($senha, $usuario['senha'])) {
     $redirect_url = '';
     switch ($role) {
         case 'contratante':
-            $redirect_url = 'dashboard_contratante.php';
-            break;
         case 'terceirizada':
-            $redirect_url = 'dashboard_terceirizada.php';
+            // 🔑 UNIFICADO: Redireciona ambos para a página principal
+            $redirect_url = 'dashboard.php'; 
             break;
         case 'admin':
             $redirect_url = 'admin.php';
@@ -74,6 +73,7 @@ if (password_verify($senha, $usuario['senha'])) {
         default:
             $redirect_url = 'login.php';
     }
+// ...
 
     echo json_encode([
         'success' => true,
