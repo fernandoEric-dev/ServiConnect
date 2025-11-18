@@ -1,81 +1,212 @@
-/* CSS simples para o formulário de cadastro de Currículo */
+/* CSS para Formulário de Perfil Profissional (cadastro_empregado.css) */
 
-form {
-    max-width: 600px;
-    margin: 40px auto;
-    padding: 30px;
-    background-color: #ffffff; /* branco */
-    border-radius: 10px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-    font-family: 'Poppins', sans-serif;
+/* --- Importação da Fonte --- */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&family=Montserrat:wght@700&display=swap');
+
+/* --- Variáveis de Cor (Consistente com o site principal) --- */
+:root {
+    --primary-blue: #0A192F; /* Azul escuro principal */
+    --yellow-button: #ffcd03;
+    --light-grey: #F5F5F5; /* Fundo da página */
+    --white-color: #ffffff;
+    --text-color: #4A4A4A; /* Cor de texto padrão */
+    --border-color: #DDE2E7;
+    --shadow-subtle: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
-/* Título do formulário */
-form h2 {
-    text-align: center;
-    color: #0B1D51; /* azul escuro */
+/* --- Estilos Globais da Página --- */
+body {
+    font-family: 'Poppins', sans-serif;
+    background-color: var(--light-grey);
+    color: var(--text-color);
+    line-height: 1.6;
+    margin: 0;
+    padding: 40px 20px;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: 100vh;
+}
+
+/* --- Container Principal do Formulário --- */
+#formCadastroEmpregado {
+    max-width: 650px;
+    width: 100%;
+    padding: 35px 40px;
+    background-color: var(--white-color);
+    border-radius: 12px;
+    box-shadow: var(--shadow-subtle);
+    border-top: 6px solid var(--primary-blue); /* Detalhe visual da marca */
+    box-sizing: border-box;
+}
+
+/* --- Cabeçalhos --- */
+#formCadastroEmpregado h2 {
+    font-family: 'Montserrat', sans-serif;
+    color: var(--primary-blue);
     font-size: 2em;
     font-weight: 700;
-    margin-bottom: 10px;
+    text-align: center;
+    margin-top: 0;
+    margin-bottom: 30px;
 }
 
-/* Espaçamento entre os campos */
-form div {
-    margin-bottom: 20px;
+#formCadastroEmpregado h3 {
+    color: var(--primary-blue);
+    font-size: 1.35em;
+    font-weight: 600;
+    margin-top: 40px;
+    margin-bottom: 25px;
+    padding-bottom: 5px;
+    border-bottom: 2px solid var(--secondary-yellow);
+    display: inline-block;
 }
 
-/* Labels dos campos */
-form label {
+/* --- Estilo dos Campos e Rótulos --- */
+#formCadastroEmpregado > div {
+    margin-bottom: 22px;
+}
+
+label {
     display: block;
-    margin-bottom: 6px;
-    font-weight: 500;
-    color: #0B1D51; /* azul escuro */
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: var(--primary-blue);
+    font-size: 0.95em;
 }
 
-/* Campos de input, select e textarea */
-form input,
-form select,
-form textarea {
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="date"],
+input[type="tel"],
+textarea,
+input[type="file"] {
     width: 100%;
-    padding: 10px 12px;
-    border: 1px solid #ccc;
-    border-radius: 6px;
+    padding: 12px 16px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
     font-size: 1em;
     font-family: 'Poppins', sans-serif;
+    background-color: #fdfdfd;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    box-sizing: border-box;
 }
 
-/* Foco nos campos */
-form input:focus,
-form select:focus,
-form textarea:focus {
+/* Efeito de Foco */
+input:focus,
+textarea:focus {
     outline: none;
-    border-color: #0B1D51; /* azul escuro no foco */
-    box-shadow: 0 0 5px rgba(11,29,81,0.5);
+    border-color: var(--secondary-yellow);
+    box-shadow: 0 0 0 3px rgba(255, 196, 0, 0.3);
 }
 
-/* Botão de envio */
-form button[type="submit"] {
-    width: 100%;
-    padding: 12px 0;
-    background-color: #0B1D51; /* azul escuro */
-    color: #ffffff; /* texto branco */
-    font-weight: 600;
+textarea {
+    resize: vertical;
+}
+
+/* Estilo para a checkbox "sem experiência" */
+#semExperienciaCheckbox {
+    width: auto;
+    margin-right: 8px;
+    vertical-align: middle;
+}
+#formCadastroEmpregado div > label[for="semExperienciaCheckbox"] {
+    display: inline;
+    font-weight: normal;
+    color: var(--text-color);
     font-size: 1em;
+}
+
+/* --- Botões --- */
+/* Botão Principal: Finalizar Cadastro (classe .btn-header) */
+.btn-header {
+    width: 100%;
+    padding: 15px 20px;
+    background-color: var(--yellow-button); 
+    color: var(--primary-blue);
+    font-weight: 600;
+    font-size: 1.1em;
     border: none;
     border-radius: 50px;
     cursor: pointer;
     transition: all 0.3s ease;
 }
 
-form button[type="submit"]:hover {
-    background-color: #081540; /* azul ainda mais escuro ao passar o mouse */
+.btn-header:hover {
+    background-color: #e6b800; /* Azul um pouco mais escuro */
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    box-shadow: 0 6px 15px rgba(10, 25, 47, 0.2);
 }
 
-/* Responsividade simples */
-@media (max-width: 480px) {
-    form {
-        padding: 20px;
+/* Botão Secundário: Adicionar Formação/Experiência (classe .btn-secondary) */
+.btn-secondary {
+    background-color: var(--secondary-yellow);
+    color: var(--primary-blue);
+    padding: 10px 18px;
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    font-size: 0.95em;
+    font-weight: 600;
+    transition: background-color 0.3s ease;
+}
+
+.btn-secondary:hover {
+    background-color: #e6b800;
+}
+
+/* --- Blocos Repetíveis (Formação/Experiência) --- */
+.bloco-formacao,
+.bloco-experiencia {
+    border: 1px solid var(--border-color);
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    background-color: #fcfcfc;
+}
+
+.bloco-formacao hr,
+.bloco-experiencia hr {
+    border: 0;
+    height: 1px;
+    background-color: var(--secondary-yellow);
+    margin: 25px 0 0 0;
+}
+
+/* --- Estilos Flexbox para Campos na Mesma Linha (Endereço) --- */
+/* Sobrescreve o estilo inline para garantir o gap consistente e responsividade */
+#formCadastroEmpregado > div[style*="display: flex;"] {
+    display: flex !important;
+    gap: 15px;
+}
+
+#formCadastroEmpregado > div[style*="display: flex;"] > div {
+    /* Garante que os divs internos mantenham o margin-bottom padrão */
+    margin-bottom: 0 !important; 
+}
+
+/* --- Responsividade (Telas menores) --- */
+@media (max-width: 700px) {
+    #formCadastroEmpregado {
+        padding: 25px;
+        margin: 0 10px;
+    }
+
+    /* Altera o layout flexbox para empilhar em telas pequenas */
+    #formCadastroEmpregado > div[style*="display: flex;"] {
+        flex-direction: column;
+        gap: 0;
+    }
+
+    /* Garante que os divs internos (Número/Complemento, Cidade/Estado) fiquem com 100% de largura */
+    #formCadastroEmpregado > div[style*="display: flex;"] > div {
+        flex: none !important;
+        width: 100%;
+    }
+
+    /* Restaura a margem inferior para separar os campos empilhados */
+    #formCadastroEmpregado > div[style*="display: flex;"] > div:not(:last-child) {
+        margin-bottom: 22px !important;
     }
 }

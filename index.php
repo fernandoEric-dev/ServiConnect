@@ -36,7 +36,7 @@
                 <div class="user-actions">
                     <a href="login.php" class="login-link">Entrar</a>
                     <a href="cadastro_empregrado.php" class="btn btn-secondary">Sou Profissional/Buscar Vagas</a>
-                    <a href="cadastro_empresa.html" class="btn btn-header">Cadastrar Empresa</a>
+                    <a href="cadastro_empresa.php" class="btn btn-header">Cadastrar Empresa</a>
                 </div>
 
                 <!-- BOTÃO MENU MOBILE -->
