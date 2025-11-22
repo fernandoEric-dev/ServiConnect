@@ -1,0 +1,40 @@
+name: Deploy to InfinityFree
+
+on:
+    push:
+        branches:
+            - main
+
+jobs:
+    ftp-deploy:
+        runs-on: ubuntu-latest
+
+        steps:
+            # 1. Baixa o código
+            - name: Check out code
+              uses: actions/checkout@v4
+
+            # 1.1 Prepara o PHP
+            - name: Setup PHP
+              uses: shivammathur/setup-php@v2
+              with:
+                  php-version: '8.2'
+
+            # 2. Envia tudo para o InfinityFree
+            - name: FTP Deploy
+              uses: SamKirkland/FTP-Deploy-Action@v4.3.4
+              with:
+                  server: ${{ secrets.FTP_SERVER }}
+                  username: ${{ secrets.FTP_USERNAME }}
+                  password: ${{ secrets.FTP_PASSWORD }}
+
+                  # ---------------------
+                  server-dir: ./htdocs/
+                  # ---------------------
+                  protocol: ftp
+
+                  exclude: |
+                      */.git
+                      */.git/**
+                      */.github/*
+                      */node_modules/*
