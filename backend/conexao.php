@@ -2,10 +2,10 @@
 // backend/conexao.php
 
 // ⚠️ ATENÇÃO: Verifique se estes dados estão corretos no seu XAMPP.
-$host = 'localhost';
-$db   = 'serviconnect_final'; 
-$user = 'root'; 
-$pass = '';     
+$host = 'sql202.infinityfree.com';
+$db   = 'if0_40447154_serviconnect'; 
+$user = 'if0_40447154'; 
+$pass = 'legalizadO1';     
 
 $dsn = "mysql:host=$host;dbname=$db;charset=utf8mb4";
 $options = [
