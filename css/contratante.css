@@ -1,0 +1,33 @@
+/* css/contratante.css */
+
+.contratante-header {
+    border-bottom: 4px solid var(--secondary-yellow);
+}
+
+.badge-role {
+    font-size: 0.5em;
+    color: var(--secondary-yellow);
+    background: rgba(255, 196, 0, 0.1);
+    padding: 3px 8px;
+    border-radius: 4px;
+    vertical-align: middle;
+    margin-left: 10px;
+}
+
+.terceirizada-card {
+    border-left: 5px solid var(--secondary-yellow) !important;
+}
+
+.contratante-btn {
+    background-color: var(--secondary-yellow) !important;
+    color: var(--primary-blue) !important;
+    font-weight: bold;
+    border: none;
+    transition: all 0.3s ease;
+}
+
+.contratante-btn:hover {
+    background-color: #e6b800 !important;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(255, 196, 0, 0.3);
+}

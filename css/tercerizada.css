@@ -1,0 +1,40 @@
+/* css/terceirizada.css */
+
+.terceirizada-header {
+    background-color: var(--primary-blue);
+    border-bottom: 4px solid var(--white-color);
+}
+
+.badge-role {
+    font-size: 0.5em;
+    color: #fff;
+    background: rgba(255, 255, 255, 0.2);
+    padding: 3px 8px;
+    border-radius: 4px;
+    vertical-align: middle;
+    margin-left: 10px;
+}
+
+.solicitacao-card {
+    border-left: 5px solid var(--primary-blue) !important;
+    background-color: #fff;
+}
+
+.terceirizada-btn {
+    background-color: var(--primary-blue) !important;
+    color: var(--white-color) !important;
+    font-weight: bold;
+    border: none;
+    transition: all 0.3s ease;
+}
+
+.terceirizada-btn:hover {
+    background-color: #1a3a69 !important;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(10, 25, 47, 0.3);
+}
+
+.nav-active {
+    background-color: var(--secondary-yellow) !important;
+    color: var(--primary-blue) !important;
+}
