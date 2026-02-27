@@ -1,17 +1,11 @@
 <?php
 $is_local = ($_SERVER['HTTP_HOST'] == 'localhost' || $_SERVER['HTTP_HOST'] == '127.0.0.1');
 
-if ($is_local) {
-    $host = 'localhost';
-    $db   = 'serviconnect_banco';
-    $user = 'root';
-    $pass = '';
-} else {
     $host = 'sql105.infinityfree.com';
     $db   = 'if0_41205929_XXX'; 
     $user = 'if0_41205929'; 
     $pass = 'legalizadO1'; 
-}
+
 
 $dsn = "mysql:host=$host;dbname=$db;charset=utf8mb4";
 $options = [
