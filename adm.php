@@ -1,3 +1,68 @@
+<?php
+session_start();
+require_once 'backend/conexao.php';
+
+// Verifica se o usuário está logado e se é admin
+if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'admin') {
+    header('Location: login.php');
+    exit;
+}
+
+$mensagem = '';
+
+// --- LÓGICA PARA ARQUIVAR OU BLOQUEAR ---
+if (isset($_GET['acao']) && isset($_GET['id'])) {
+    $id_alvo = (int)$_GET['id'];
+    $acao = $_GET['acao'];
+
+    try {
+        if ($acao === 'arquivar') {
+            // 1. Busca os dados do usuário na tabela ativa
+            $stmtBusca = $pdo->prepare("SELECT * FROM usuarios WHERE id = ?");
+            $stmtBusca->execute([$id_alvo]);
+            $user = $stmtBusca->fetch(PDO::FETCH_ASSOC);
+
+            if ($user) {
+                // 2. Insere na tabela de arquivados
+                $stmtArq = $pdo->prepare("INSERT INTO usuarios_arquivados (id_original, cpf_cnpj, email, senha, tipo_conta) VALUES (?, ?, ?, ?, ?)");
+                $stmtArq->execute([$user['id'], $user['cpf_cnpj'], $user['email'], $user['senha'], $user['tipo_conta']]);
+
+                // 3. Deleta da tabela ativa (O login dele para de funcionar imediatamente)
+                $stmtDel = $pdo->prepare("DELETE FROM usuarios WHERE id = ?");
+                $stmtDel->execute([$id_alvo]);
+
+                $mensagem = "<div class='alert success'>Usuário movido para os Arquivados com sucesso (LGPD)!</div>";
+            } else {
+                $mensagem = "<div class='alert error'>Usuário não encontrado.</div>";
+            }
+
+        } elseif ($acao === 'bloquear') {
+            $stmt = $pdo->prepare("UPDATE usuarios SET status = 'bloqueado' WHERE id = ?");
+            $stmt->execute([$id_alvo]);
+            $mensagem = "<div class='alert warning'>Usuário bloqueado com sucesso!</div>";
+        } elseif ($acao === 'desbloquear') {
+            $stmt = $pdo->prepare("UPDATE usuarios SET status = 'ativo' WHERE id = ?");
+            $stmt->execute([$id_alvo]);
+            $mensagem = "<div class='alert success'>Usuário desbloqueado com sucesso!</div>";
+        }
+    } catch (\PDOException $e) {
+        // Se der erro de chave estrangeira (empresas vinculadas)
+        if ($e->getCode() == 23000) {
+             $mensagem = "<div class='alert error'>Erro: Este usuário tem perfis vinculados. Você precisa excluir a empresa/perfil dele antes de arquivar, ou configurar exclusão em cascata no banco.</div>";
+        } else {
+             $mensagem = "<div class='alert error'>Erro ao executar ação: " . $e->getMessage() . "</div>";
+        }
+    }
+}
+
+// --- BUSCAR TODOS OS USUÁRIOS PARA A TABELA ---
+try {
+    $stmtUsuarios = $pdo->query("SELECT id, cpf_cnpj, email, tipo_conta, status FROM usuarios ORDER BY id DESC");
+    $listaUsuarios = $stmtUsuarios->fetchAll(PDO::FETCH_ASSOC);
+} catch (\PDOException $e) {
+    die("Erro ao carregar usuários. Verifique a conexão com o banco.");
+}
+?>
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -8,71 +73,88 @@
     <link rel="stylesheet" href="css/style.css"> 
     <link rel="stylesheet" href="css/admin.css"> 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <style>
+        .admin-table { width: 100%; border-collapse: collapse; margin-top: 20px; background: #fff; text-align: left;}
+        .admin-table th, .admin-table td { padding: 12px; border-bottom: 1px solid #eee; }
+        .admin-table th { background-color: #f4f6f9; color: #333; font-weight: bold; }
+        .btn-acao { padding: 6px 12px; border: none; border-radius: 4px; cursor: pointer; text-decoration: none; color: white; font-size: 13px; margin-right: 5px; display: inline-block;}
+        .btn-danger { background-color: #6c757d; } /* Cor cinza para dar ideia de arquivo */
+        .btn-warning { background-color: #ffc107; color: #000; }
+        .btn-success { background-color: #28a745; }
+        .status-ativo { color: #28a745; font-weight: bold; }
+        .status-bloqueado { color: #dc3545; font-weight: bold; }
+        .alert { padding: 15px; margin-bottom: 20px; border-radius: 4px; }
+        .alert.success { background-color: #d4edda; color: #155724; }
+        .alert.warning { background-color: #fff3cd; color: #856404; }
+        .alert.error { background-color: #f8d7da; color: #721c24; }
+    </style>
 </head>
 <body>
 
     <div class="admin-container">
-        
         <aside class="sidebar">
             <div class="logo-area">
                 <img src="foto/logo.jpg" alt="Logo ServiConnect" class="logo-admin"> 
                 <h3>Painel de Gestão</h3>
             </div>
-            
             <nav class="admin-nav">
                 <ul id="adminNavigation">
-                    <li class="nav-item active"><a href="#dashboard"><i class="fa-solid fa-gauge"></i> Dashboard Geral</a></li>
-                    <li class="nav-item"><a href="#users"><i class="fa-solid fa-users"></i> Gestão de Usuários</a></li>
-                    <li class="nav-item"><a href="#companies"><i class="fa-solid fa-building"></i> Gestão de Empresas</a></li>
-                    <li class="nav-item"><a href="#services"><i class="fa-solid fa-list-check"></i> Pedidos de Serviço</a></li>
-                    <li class="nav-item"><a href="#api-status"><i class="fa-solid fa-code-branch"></i> Status de APIs</a></li>
-                    <li class="nav-item logout-link"><a href="login.html"><i class="fa-solid fa-right-from-bracket"></i> Sair</a></li>
+                    <li class="nav-item active"><a href="#users"><i class="fa-solid fa-users"></i> Gestão de Usuários</a></li>
+                    <li class="nav-item logout-link"><a href="logout.php"><i class="fa-solid fa-right-from-bracket"></i> Sair</a></li>
                 </ul>
             </nav>
         </aside>
 
         <main class="main-content">
             <header class="content-header">
-                <h1 id="pageTitle">Dashboard Geral</h1>
+                <h1 id="pageTitle">Gestão de Usuários</h1>
                 <div class="user-info">
-                    <span id="userName">Olá, Desenvolvedor!</span>
+                    <span id="userName">Olá, Administrador!</span>
                     <i class="fa-solid fa-user-circle user-icon"></i>
                 </div>
             </header>
 
-            <section class="dashboard-widgets">
-                <div class="widget total-users" id="widgetUsers">
-                    <i class="fa-solid fa-user-plus icon-widget"></i>
-                    <h4 class="widget-title">Novos Usuários (Hoje)</h4>
-                    <p class="widget-value">+12</p>
-                </div>
-                
-                <div class="widget total-companies" id="widgetCompanies">
-                    <i class="fa-solid fa-briefcase icon-widget"></i>
-                    <h4 class="widget-title">Empresas Ativas</h4>
-                    <p class="widget-value">874</p>
-                </div>
-                
-                <div class="widget pending-verifications" id="widgetPending">
-                    <i class="fa-solid fa-hourglass-half icon-widget"></i>
-                    <h4 class="widget-title">Verificações CNPJ Pendentes</h4>
-                    <p class="widget-value">42</p>
-                </div>
-                
-                <div class="widget service-requests" id="widgetRequests">
-                    <i class="fa-solid fa-bell icon-widget"></i>
-                    <h4 class="widget-title">Total de Pedidos</h4>
-                    <p class="widget-value">3,5k</p>
-                </div>
-            </section>
+            <section class="card-panel">
+                <?php echo $mensagem; ?>
 
-            <section class="recent-activity card-panel" id="recentActivityPanel">
-                <h2 class="section-title">Atividade Recente</h2>
-                <div class="activity-list">
-                    <p class="activity-item"><strong>[11:35]</strong> Novo cadastro de empresa: CNPJ 00.000.000/0001-01.</p>
-                    <p class="activity-item"><strong>[11:30]</strong> Perfil profissional atualizado: João Silva.</p>
-                    <p class="activity-item"><strong>[10:45]</strong> Falha na verificação de CNPJ: 99.999.999/9999-99.</p>
-                </div>
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>CNPJ/CPF</th>
+                            <th>E-mail</th>
+                            <th>Tipo</th>
+                            <th>Status</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php if(empty($listaUsuarios)): ?>
+                            <tr><td colspan="6" style="text-align:center;">Nenhum usuário encontrado.</td></tr>
+                        <?php else: ?>
+                            <?php foreach ($listaUsuarios as $user): ?>
+                                <tr>
+                                    <td><?php echo $user['id']; ?></td>
+                                    <td><?php echo htmlspecialchars($user['cpf_cnpj']); ?></td>
+                                    <td><?php echo htmlspecialchars($user['email']); ?></td>
+                                    <td><?php echo htmlspecialchars(ucfirst($user['tipo_conta'])); ?></td>
+                                    <td class="<?php echo $user['status'] === 'bloqueado' ? 'status-bloqueado' : 'status-ativo'; ?>">
+                                        <?php echo htmlspecialchars(ucfirst($user['status'] ?? 'ativo')); ?>
+                                    </td>
+                                    <td>
+                                        <?php if (!isset($user['status']) || $user['status'] !== 'bloqueado'): ?>
+                                            <a href="adm.php?acao=bloquear&id=<?php echo $user['id']; ?>" class="btn-acao btn-warning" onclick="return confirm('Bloquear este usuário?')">Bloquear</a>
+                                        <?php else: ?>
+                                            <a href="adm.php?acao=desbloquear&id=<?php echo $user['id']; ?>" class="btn-acao btn-success">Desbloquear</a>
+                                        <?php endif; ?>
+
+                                        <a href="adm.php?acao=arquivar&id=<?php echo $user['id']; ?>" class="btn-acao btn-danger" onclick="return confirm('Tem certeza que deseja ARQUIVAR este usuário? O login será desativado e os dados guardados (LGPD).')"><i class="fa-solid fa-box-archive"></i> Arquivar</a>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
+                    </tbody>
+                </table>
             </section>
         </main>
     </div>

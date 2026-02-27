@@ -34,6 +34,8 @@ if (empty($cnpj) || empty($email_acesso) || empty($senha) || empty($tipo_empresa
 // 3. Inicializa o Model
 $usuarioModel = new UsuarioModel($pdo);
 
+// ... (código anterior igual) ...
+
 // 4. Verifica se o CNPJ ou Email já existe (Prevenção de Duplicidade)
 if ($usuarioModel->existeUsuario($cnpj, $email_acesso)) {
     http_response_code(409); // Conflict
@@ -41,8 +43,20 @@ if ($usuarioModel->existeUsuario($cnpj, $email_acesso)) {
     exit;
 }
 
+// 4.1 VERIFICAÇÃO LGPD E BLOQUEIO: Checa se o usuário está arquivado/banido
+$stmtArquivado = $pdo->prepare("SELECT id FROM usuarios_arquivados WHERE cpf_cnpj = ?");
+$stmtArquivado->execute([$cnpj]); // Usamos a variável $cnpj que já foi limpa lá em cima
+
+if ($stmtArquivado->fetch()) {
+    http_response_code(403); // Proibido
+    echo json_encode(['success' => false, 'message' => 'Este documento está restrito ou arquivado em nosso sistema. Entre em contato com o suporte.']);
+    exit;
+}
+
 // 5. Hash da Senha e Preparação dos Dados
 $hashed_senha = password_hash($senha, PASSWORD_DEFAULT);
+
+// ... (resto do código igual) ...
 
 $dados_usuario = [
     'cpf_cnpj' => $cnpj,
