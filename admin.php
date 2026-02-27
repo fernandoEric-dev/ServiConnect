@@ -2,15 +2,44 @@
 session_start();
 require_once 'backend/conexao.php';
 
-// Verifica se o usuário está logado e se é admin
 if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'admin') {
     header('Location: login.php');
     exit;
 }
 
+try {
+    $pdo->exec("CREATE TABLE IF NOT EXISTS usuarios_arquivados (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        id_original INT NOT NULL,
+        cpf_cnpj VARCHAR(20) NOT NULL,
+        email VARCHAR(255) NOT NULL,
+        senha VARCHAR(255) NOT NULL,
+        tipo_conta VARCHAR(50) NOT NULL,
+        data_arquivamento TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )");
+
+    $checkStatus = $pdo->query("SHOW COLUMNS FROM usuarios LIKE 'status'")->rowCount();
+    if ($checkStatus == 0) {
+        $pdo->exec("ALTER TABLE usuarios ADD COLUMN status VARCHAR(20) DEFAULT 'ativo'");
+    }
+
+    $pdo->exec("CREATE TABLE IF NOT EXISTS solicitacoes (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        contratante_id INT,
+        terceirizada_id INT,
+        descricao_servico TEXT,
+        localizacao_servico VARCHAR(255),
+        numero_funcionarios INT,
+        area_servico_solicitada VARCHAR(255),
+        status VARCHAR(50) DEFAULT 'aberta'
+    )");
+
+} catch (\PDOException $e) {
+    die("Erro de configuracao automatica: " . $e->getMessage());
+}
+
 $mensagem = '';
 
-// --- 1. LÓGICA PARA ARQUIVAR OU BLOQUEAR ---
 if (isset($_GET['acao']) && isset($_GET['id'])) {
     $id_alvo = (int)$_GET['id'];
     $acao = $_GET['acao'];
@@ -23,15 +52,16 @@ if (isset($_GET['acao']) && isset($_GET['id'])) {
 
             if ($user) {
                 $pdo->beginTransaction();
-                // Insere nos arquivados
+                
                 $stmtArq = $pdo->prepare("INSERT INTO usuarios_arquivados (id_original, cpf_cnpj, email, senha, tipo_conta) VALUES (?, ?, ?, ?, ?)");
                 $stmtArq->execute([$user['id'], $user['cpf_cnpj'], $user['email'], $user['senha'], $user['tipo_conta']]);
-                // Remove vínculos de empresa
+                
                 $stmtDelEmpresa = $pdo->prepare("DELETE FROM empresas WHERE usuario_id = ?");
                 $stmtDelEmpresa->execute([$id_alvo]);
-                // Deleta da tabela ativa
+                
                 $stmtDelUser = $pdo->prepare("DELETE FROM usuarios WHERE id = ?");
                 $stmtDelUser->execute([$id_alvo]);
+                
                 $pdo->commit();
                 $mensagem = "<div class='alert alert-success'>Usuário arquivado com sucesso (LGPD)!</div>";
             }
@@ -50,18 +80,16 @@ if (isset($_GET['acao']) && isset($_GET['id'])) {
     }
 }
 
-// --- 2. BUSCAR DADOS PARA O DASHBOARD ---
 try {
     $totalUsuarios = $pdo->query("SELECT COUNT(*) FROM usuarios")->fetchColumn();
     $totalEmpresas = $pdo->query("SELECT COUNT(*) FROM empresas")->fetchColumn();
     $totalPedidos = $pdo->query("SELECT COUNT(*) FROM solicitacoes")->fetchColumn();
     $totalArquivados = $pdo->query("SELECT COUNT(*) FROM usuarios_arquivados")->fetchColumn();
     
-    // Lista de usuários para a tabela de gestão
     $stmtUsuarios = $pdo->query("SELECT id, cpf_cnpj, email, tipo_conta, status FROM usuarios ORDER BY id DESC");
     $listaUsuarios = $stmtUsuarios->fetchAll(PDO::FETCH_ASSOC);
 } catch (\PDOException $e) {
-    die("Erro ao carregar dados. Verifique a conexão com o banco.");
+    die("Erro ao carregar dados para a tabela: " . $e->getMessage());
 }
 ?>
 <!DOCTYPE html>
@@ -74,7 +102,6 @@ try {
     <link rel="stylesheet" href="css/admin.css"> 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
     <style>
-        /* Estilos adicionais para a tabela e alertas */
         .admin-table { width: 100%; border-collapse: collapse; margin-top: 20px; background: #fff; text-align: left; }
         .admin-table th, .admin-table td { padding: 12px; border-bottom: 1px solid #eee; }
         .admin-table th { background-color: #f4f6f9; color: #333; font-weight: bold; }
@@ -103,10 +130,15 @@ try {
             <nav class="admin-nav">
                 <ul id="adminNavigation">
                     <li class="nav-item active"><a href="#"><i class="fa-solid fa-gauge"></i> Dashboard & Gestão</a></li>
+                    <li> <a href="arquivados.php">Usuarios Arquivados</a></li>
                     <li class="nav-item logout-link"><a href="logout.php"><i class="fa-solid fa-right-from-bracket"></i> Sair</a></li>
                 </ul>
             </nav>
         </aside>
+
+        <nav>
+            
+        </nav>
 
         <main class="main-content">
             <header class="content-header">

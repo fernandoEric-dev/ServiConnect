@@ -25,14 +25,12 @@ public function buscarTerceirizadas() {
     $sql = "
         SELECT 
             u.id as usuario_id,
-            e.nome_empresa,
-            e.descricao_servicos,
-            e.area_atuacao,
-            e.regioes_atendidas,
-            e.foto_path
+            e.nome as nome_empresa,
+            e.descricao as descricao_servicos,
+            e.regiao as area_atuacao
         FROM usuarios u
         JOIN empresas e ON u.id = e.usuario_id
-        WHERE u.user_role = 'terceirizada'
+        WHERE u.tipo_conta = 'terceirizada'
     ";
     $stmt = $this->pdo->prepare($sql);
     $stmt->execute();
