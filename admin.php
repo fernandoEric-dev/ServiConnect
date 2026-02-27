@@ -1,33 +1,67 @@
 <?php
 session_start();
+require_once 'backend/conexao.php';
 
-// SEGURANÇA: Verifica se o usuário está logado e se é um administrador
+// Verifica se o usuário está logado e se é admin
 if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'admin') {
     header('Location: login.php');
     exit;
 }
 
-require_once 'backend/conexao.php';
+$mensagem = '';
 
+// --- 1. LÓGICA PARA ARQUIVAR OU BLOQUEAR ---
+if (isset($_GET['acao']) && isset($_GET['id'])) {
+    $id_alvo = (int)$_GET['id'];
+    $acao = $_GET['acao'];
+
+    try {
+        if ($acao === 'arquivar') {
+            $stmtBusca = $pdo->prepare("SELECT * FROM usuarios WHERE id = ?");
+            $stmtBusca->execute([$id_alvo]);
+            $user = $stmtBusca->fetch(PDO::FETCH_ASSOC);
+
+            if ($user) {
+                $pdo->beginTransaction();
+                // Insere nos arquivados
+                $stmtArq = $pdo->prepare("INSERT INTO usuarios_arquivados (id_original, cpf_cnpj, email, senha, tipo_conta) VALUES (?, ?, ?, ?, ?)");
+                $stmtArq->execute([$user['id'], $user['cpf_cnpj'], $user['email'], $user['senha'], $user['tipo_conta']]);
+                // Remove vínculos de empresa
+                $stmtDelEmpresa = $pdo->prepare("DELETE FROM empresas WHERE usuario_id = ?");
+                $stmtDelEmpresa->execute([$id_alvo]);
+                // Deleta da tabela ativa
+                $stmtDelUser = $pdo->prepare("DELETE FROM usuarios WHERE id = ?");
+                $stmtDelUser->execute([$id_alvo]);
+                $pdo->commit();
+                $mensagem = "<div class='alert alert-success'>Usuário arquivado com sucesso (LGPD)!</div>";
+            }
+        } elseif ($acao === 'bloquear') {
+            $stmt = $pdo->prepare("UPDATE usuarios SET status = 'bloqueado' WHERE id = ?");
+            $stmt->execute([$id_alvo]);
+            $mensagem = "<div class='alert alert-warning'>Usuário bloqueado com sucesso!</div>";
+        } elseif ($acao === 'desbloquear') {
+            $stmt = $pdo->prepare("UPDATE usuarios SET status = 'ativo' WHERE id = ?");
+            $stmt->execute([$id_alvo]);
+            $mensagem = "<div class='alert alert-success'>Usuário desbloqueado com sucesso!</div>";
+        }
+    } catch (\PDOException $e) {
+        if ($pdo->inTransaction()) { $pdo->rollBack(); }
+        $mensagem = "<div class='alert alert-error'>Erro ao executar ação: " . $e->getMessage() . "</div>";
+    }
+}
+
+// --- 2. BUSCAR DADOS PARA O DASHBOARD ---
 try {
-    // 1. Conta o total de usuários
-    $stmtUsuarios = $pdo->query("SELECT COUNT(*) FROM usuarios");
-    $totalUsuarios = $stmtUsuarios->fetchColumn();
-
-    // 2. Conta o total de empresas
-    $stmtEmpresas = $pdo->query("SELECT COUNT(*) FROM empresas");
-    $totalEmpresas = $stmtEmpresas->fetchColumn();
-
-    // 3. Conta o total de solicitações (pedidos)
-    $stmtPedidos = $pdo->query("SELECT COUNT(*) FROM solicitacoes");
-    $totalPedidos = $stmtPedidos->fetchColumn();
-
-    // 4. Busca os últimos 5 usuários cadastrados para a "Atividade Recente"
-    $stmtRecentes = $pdo->query("SELECT cpf_cnpj, email, tipo_conta FROM usuarios ORDER BY id DESC LIMIT 5");
-    $atividades = $stmtRecentes->fetchAll(PDO::FETCH_ASSOC);
-
+    $totalUsuarios = $pdo->query("SELECT COUNT(*) FROM usuarios")->fetchColumn();
+    $totalEmpresas = $pdo->query("SELECT COUNT(*) FROM empresas")->fetchColumn();
+    $totalPedidos = $pdo->query("SELECT COUNT(*) FROM solicitacoes")->fetchColumn();
+    $totalArquivados = $pdo->query("SELECT COUNT(*) FROM usuarios_arquivados")->fetchColumn();
+    
+    // Lista de usuários para a tabela de gestão
+    $stmtUsuarios = $pdo->query("SELECT id, cpf_cnpj, email, tipo_conta, status FROM usuarios ORDER BY id DESC");
+    $listaUsuarios = $stmtUsuarios->fetchAll(PDO::FETCH_ASSOC);
 } catch (\PDOException $e) {
-    die("Erro ao carregar dados do painel: " . $e->getMessage());
+    die("Erro ao carregar dados. Verifique a conexão com o banco.");
 }
 ?>
 <!DOCTYPE html>
@@ -39,6 +73,22 @@ try {
     <link rel="stylesheet" href="css/style.css"> 
     <link rel="stylesheet" href="css/admin.css"> 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <style>
+        /* Estilos adicionais para a tabela e alertas */
+        .admin-table { width: 100%; border-collapse: collapse; margin-top: 20px; background: #fff; text-align: left; }
+        .admin-table th, .admin-table td { padding: 12px; border-bottom: 1px solid #eee; }
+        .admin-table th { background-color: #f4f6f9; color: #333; font-weight: bold; }
+        .btn-acao { padding: 6px 12px; border: none; border-radius: 4px; cursor: pointer; text-decoration: none; color: white; font-size: 13px; margin-right: 5px; display: inline-block; }
+        .btn-danger { background-color: #6c757d; } 
+        .btn-warning { background-color: #ffc107; color: #000; }
+        .btn-success { background-color: #28a745; }
+        .status-ativo { color: #28a745; font-weight: bold; }
+        .status-bloqueado { color: #dc3545; font-weight: bold; }
+        .alert { padding: 15px; margin-bottom: 20px; border-radius: 4px; }
+        .alert-success { background-color: #d4edda; color: #155724; }
+        .alert-warning { background-color: #fff3cd; color: #856404; }
+        .alert-error { background-color: #f8d7da; color: #721c24; }
+    </style>
 </head>
 <body>
 
@@ -52,10 +102,7 @@ try {
             
             <nav class="admin-nav">
                 <ul id="adminNavigation">
-                    <li class="nav-item active"><a href="#dashboard"><i class="fa-solid fa-gauge"></i> Dashboard Geral</a></li>
-                    <li class="nav-item"><a href="#users"><i class="fa-solid fa-users"></i> Gestão de Usuários</a></li>
-                    <li class="nav-item"><a href="#companies"><i class="fa-solid fa-building"></i> Gestão de Empresas</a></li>
-                    <li class="nav-item"><a href="#services"><i class="fa-solid fa-list-check"></i> Pedidos de Serviço</a></li>
+                    <li class="nav-item active"><a href="#"><i class="fa-solid fa-gauge"></i> Dashboard & Gestão</a></li>
                     <li class="nav-item logout-link"><a href="logout.php"><i class="fa-solid fa-right-from-bracket"></i> Sair</a></li>
                 </ul>
             </nav>
@@ -70,6 +117,8 @@ try {
                 </div>
             </header>
 
+            <?php echo $mensagem; ?>
+
             <section class="dashboard-widgets">
                 <div class="widget total-users">
                     <i class="fa-solid fa-user-plus icon-widget"></i>
@@ -78,7 +127,7 @@ try {
                 </div>
                 
                 <div class="widget total-companies">
-                    <i class="fa-solid fa-briefcase icon-widget"></i>
+                    <i class="fa-solid fa-building icon-widget"></i>
                     <h4 class="widget-title">Empresas Cadastradas</h4>
                     <p class="widget-value"><?php echo $totalEmpresas; ?></p>
                 </div>
@@ -88,23 +137,55 @@ try {
                     <h4 class="widget-title">Total de Pedidos</h4>
                     <p class="widget-value"><?php echo $totalPedidos; ?></p>
                 </div>
+
+                <div class="widget">
+                    <i class="fa-solid fa-box-archive icon-widget" style="color: #6c757d;"></i>
+                    <h4 class="widget-title">Contas Arquivadas</h4>
+                    <p class="widget-value"><?php echo $totalArquivados; ?></p>
+                </div>
             </section>
 
             <section class="recent-activity card-panel">
-                <h2 class="section-title">Últimos Cadastros</h2>
-                <div class="activity-list">
-                    <?php if (empty($atividades)): ?>
-                        <p class="activity-item">Nenhuma atividade recente.</p>
-                    <?php else: ?>
-                        <?php foreach ($atividades as $ativ): ?>
-                            <p class="activity-item">
-                                <strong>Novo <?php echo htmlspecialchars($ativ['tipo_conta']); ?>:</strong> 
-                                CNPJ/CPF: <?php echo htmlspecialchars($ativ['cpf_cnpj']); ?> - 
-                                Email: <?php echo htmlspecialchars($ativ['email']); ?>
-                            </p>
-                        <?php endforeach; ?>
-                    <?php endif; ?>
-                </div>
+                <h2 class="section-title">Gestão de Usuários</h2>
+                
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>CNPJ/CPF</th>
+                            <th>E-mail</th>
+                            <th>Tipo</th>
+                            <th>Status</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php if(empty($listaUsuarios)): ?>
+                            <tr><td colspan="6" style="text-align:center;">Nenhum usuário encontrado.</td></tr>
+                        <?php else: ?>
+                            <?php foreach ($listaUsuarios as $user): ?>
+                                <tr>
+                                    <td><?php echo $user['id']; ?></td>
+                                    <td><?php echo htmlspecialchars($user['cpf_cnpj']); ?></td>
+                                    <td><?php echo htmlspecialchars($user['email']); ?></td>
+                                    <td><?php echo htmlspecialchars(ucfirst($user['tipo_conta'])); ?></td>
+                                    <td class="<?php echo $user['status'] === 'bloqueado' ? 'status-bloqueado' : 'status-ativo'; ?>">
+                                        <?php echo htmlspecialchars(ucfirst($user['status'] ?? 'ativo')); ?>
+                                    </td>
+                                    <td>
+                                        <?php if (!isset($user['status']) || $user['status'] !== 'bloqueado'): ?>
+                                            <a href="admin.php?acao=bloquear&id=<?php echo $user['id']; ?>" class="btn-acao btn-warning" onclick="return confirm('Bloquear este usuário?')">Bloquear</a>
+                                        <?php else: ?>
+                                            <a href="admin.php?acao=desbloquear&id=<?php echo $user['id']; ?>" class="btn-acao btn-success">Desbloquear</a>
+                                        <?php endif; ?>
+
+                                        <a href="admin.php?acao=arquivar&id=<?php echo $user['id']; ?>" class="btn-acao btn-danger" onclick="return confirm('Tem certeza que deseja ARQUIVAR este usuário? O login será desativado e os dados guardados (LGPD).')"><i class="fa-solid fa-box-archive"></i> Arquivar</a>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
+                    </tbody>
+                </table>
             </section>
         </main>
     </div>

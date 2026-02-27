@@ -17,20 +17,29 @@ if (isset($_GET['acao']) && isset($_GET['id'])) {
 
     try {
         if ($acao === 'arquivar') {
-            // 1. Busca os dados do usuário na tabela ativa
+            // Busca o usuário
             $stmtBusca = $pdo->prepare("SELECT * FROM usuarios WHERE id = ?");
             $stmtBusca->execute([$id_alvo]);
             $user = $stmtBusca->fetch(PDO::FETCH_ASSOC);
 
             if ($user) {
-                // 2. Insere na tabela de arquivados
+                // Inicia uma transação para garantir que tudo seja feito com segurança
+                $pdo->beginTransaction();
+
+                // 1. Insere na tabela de arquivados
                 $stmtArq = $pdo->prepare("INSERT INTO usuarios_arquivados (id_original, cpf_cnpj, email, senha, tipo_conta) VALUES (?, ?, ?, ?, ?)");
                 $stmtArq->execute([$user['id'], $user['cpf_cnpj'], $user['email'], $user['senha'], $user['tipo_conta']]);
 
-                // 3. Deleta da tabela ativa (O login dele para de funcionar imediatamente)
-                $stmtDel = $pdo->prepare("DELETE FROM usuarios WHERE id = ?");
-                $stmtDel->execute([$id_alvo]);
+                // 2. Remove o vínculo da empresa (para não dar erro de Chave Estrangeira)
+                $stmtDelEmpresa = $pdo->prepare("DELETE FROM empresas WHERE usuario_id = ?");
+                $stmtDelEmpresa->execute([$id_alvo]);
 
+                // 3. Deleta o usuário da tabela ativa
+                $stmtDelUser = $pdo->prepare("DELETE FROM usuarios WHERE id = ?");
+                $stmtDelUser->execute([$id_alvo]);
+
+                // Confirma as exclusões
+                $pdo->commit();
                 $mensagem = "<div class='alert success'>Usuário movido para os Arquivados com sucesso (LGPD)!</div>";
             } else {
                 $mensagem = "<div class='alert error'>Usuário não encontrado.</div>";
@@ -46,21 +55,27 @@ if (isset($_GET['acao']) && isset($_GET['id'])) {
             $mensagem = "<div class='alert success'>Usuário desbloqueado com sucesso!</div>";
         }
     } catch (\PDOException $e) {
-        // Se der erro de chave estrangeira (empresas vinculadas)
-        if ($e->getCode() == 23000) {
-             $mensagem = "<div class='alert error'>Erro: Este usuário tem perfis vinculados. Você precisa excluir a empresa/perfil dele antes de arquivar, ou configurar exclusão em cascata no banco.</div>";
-        } else {
-             $mensagem = "<div class='alert error'>Erro ao executar ação: " . $e->getMessage() . "</div>";
+        if ($pdo->inTransaction()) {
+            $pdo->rollBack(); // Desfaz se algo der errado
         }
+        $mensagem = "<div class='alert error'>Erro ao executar ação: " . $e->getMessage() . "</div>";
     }
 }
 
-// --- BUSCAR TODOS OS USUÁRIOS PARA A TABELA ---
+// --- BUSCAR DADOS PARA O DASHBOARD ---
 try {
+    // Conta usuários ativos
+    $totalUsuarios = $pdo->query("SELECT COUNT(*) FROM usuarios")->fetchColumn();
+    // Conta empresas
+    $totalEmpresas = $pdo->query("SELECT COUNT(*) FROM empresas")->fetchColumn();
+    // Conta arquivados/banidos
+    $totalArquivados = $pdo->query("SELECT COUNT(*) FROM usuarios_arquivados")->fetchColumn();
+
+    // Busca a lista para a tabela
     $stmtUsuarios = $pdo->query("SELECT id, cpf_cnpj, email, tipo_conta, status FROM usuarios ORDER BY id DESC");
     $listaUsuarios = $stmtUsuarios->fetchAll(PDO::FETCH_ASSOC);
 } catch (\PDOException $e) {
-    die("Erro ao carregar usuários. Verifique a conexão com o banco.");
+    die("Erro ao carregar dados. Verifique a conexão com o banco.");
 }
 ?>
 <!DOCTYPE html>
@@ -78,7 +93,7 @@ try {
         .admin-table th, .admin-table td { padding: 12px; border-bottom: 1px solid #eee; }
         .admin-table th { background-color: #f4f6f9; color: #333; font-weight: bold; }
         .btn-acao { padding: 6px 12px; border: none; border-radius: 4px; cursor: pointer; text-decoration: none; color: white; font-size: 13px; margin-right: 5px; display: inline-block;}
-        .btn-danger { background-color: #6c757d; } /* Cor cinza para dar ideia de arquivo */
+        .btn-danger { background-color: #6c757d; } 
         .btn-warning { background-color: #ffc107; color: #000; }
         .btn-success { background-color: #28a745; }
         .status-ativo { color: #28a745; font-weight: bold; }
@@ -87,6 +102,13 @@ try {
         .alert.success { background-color: #d4edda; color: #155724; }
         .alert.warning { background-color: #fff3cd; color: #856404; }
         .alert.error { background-color: #f8d7da; color: #721c24; }
+        
+        /* Estilos para os cards do dashboard */
+        .dashboard-widgets { display: flex; gap: 20px; margin-bottom: 30px; }
+        .widget { flex: 1; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); text-align: center; }
+        .widget h4 { margin: 10px 0 5px; color: #666; font-size: 14px; }
+        .widget p { margin: 0; font-size: 24px; font-weight: bold; color: #004b87; }
+        .icon-widget { font-size: 30px; color: #004b87; }
     </style>
 </head>
 <body>
@@ -99,7 +121,7 @@ try {
             </div>
             <nav class="admin-nav">
                 <ul id="adminNavigation">
-                    <li class="nav-item active"><a href="#users"><i class="fa-solid fa-users"></i> Gestão de Usuários</a></li>
+                    <li class="nav-item active"><a href="#"><i class="fa-solid fa-users"></i> Gestão de Usuários</a></li>
                     <li class="nav-item logout-link"><a href="logout.php"><i class="fa-solid fa-right-from-bracket"></i> Sair</a></li>
                 </ul>
             </nav>
@@ -113,6 +135,24 @@ try {
                     <i class="fa-solid fa-user-circle user-icon"></i>
                 </div>
             </header>
+
+            <section class="dashboard-widgets">
+                <div class="widget">
+                    <i class="fa-solid fa-users icon-widget"></i>
+                    <h4>Total de Usuários Ativos</h4>
+                    <p><?php echo $totalUsuarios; ?></p>
+                </div>
+                <div class="widget">
+                    <i class="fa-solid fa-building icon-widget"></i>
+                    <h4>Empresas Registradas</h4>
+                    <p><?php echo $totalEmpresas; ?></p>
+                </div>
+                <div class="widget">
+                    <i class="fa-solid fa-box-archive icon-widget" style="color: #6c757d;"></i>
+                    <h4>Contas Arquivadas/Banidas</h4>
+                    <p><?php echo $totalArquivados; ?></p>
+                </div>
+            </section>
 
             <section class="card-panel">
                 <?php echo $mensagem; ?>
