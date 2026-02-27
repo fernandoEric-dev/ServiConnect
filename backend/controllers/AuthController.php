@@ -19,6 +19,30 @@ $data = json_decode($json_data, true);
 $identificacao = isset($data['identificacao']) ? preg_replace('/\D/', '', $data['identificacao']) : ''; 
 $senha = isset($data['senha']) ? $data['senha'] : '';
 
+// 1. VERIFICA PRIMEIRO SE É UM ADMINISTRADOR (NOVA TABELA)
+$stmtAdmin = $pdo->prepare("SELECT id, senha, login_cnpj FROM administradores WHERE login_cnpj = ?");
+$stmtAdmin->execute([$identificacao]);
+$admin = $stmtAdmin->fetch(PDO::FETCH_ASSOC);
+
+if ($admin) {
+    // É um admin! Vamos verificar a senha
+    if (password_verify($senha, $admin['senha'])) {
+        $_SESSION['user_id'] = $admin['id'];
+        $_SESSION['user_cnpj'] = $admin['login_cnpj'];
+        $_SESSION['user_role'] = 'admin'; 
+        
+        echo json_encode([
+            'success' => true,
+            'message' => 'Login de Administrador bem-sucedido!',
+            'redirect' => 'admin.php'
+        ]);
+    } else {
+        echo json_encode(['success' => false, 'message' => 'Senha incorreta.']);
+    }
+    exit; // Para a execução do script aqui para não buscar nos usuários comuns
+}
+
+// 2. SE NÃO FOR ADMIN, FAZ A BUSCA NORMAL NA TABELA DE USUÁRIOS
 $stmt = $pdo->prepare("
     SELECT 
         u.id, u.senha, u.cpf_cnpj, u.tipo_conta,
@@ -31,7 +55,7 @@ $stmt->execute([$identificacao]);
 $usuario = $stmt->fetch(PDO::FETCH_ASSOC);
 
 if (!$usuario) {
-    echo json_encode(['success' => false, 'message' => 'CNPJ não encontrado.']);
+    echo json_encode(['success' => false, 'message' => 'CNPJ/CPF não encontrado.']);
     exit;
 }
 
@@ -55,9 +79,6 @@ if (password_verify($senha, $usuario['senha'])) {
             break;
         case 'terceirizada':
             $redirect_url = 'dashboard_terceirizada.php'; 
-            break;
-        case 'admin':
-            $redirect_url = 'admin.php';
             break;
         default:
             $redirect_url = 'login.php';
