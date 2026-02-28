@@ -262,7 +262,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
 
             } catch (error) {
-                alert('Erro de comunicação com o servidor. Verifique o XAMPP e a URL do Controller.');
+                alert('Ocorreu um erro ao conectar ao servidor. Tente novamente mais tarde.');
             } finally {
                 submitButtonLogin.disabled = false;
                 submitButtonLogin.textContent = 'Entrar';
