@@ -8,7 +8,7 @@ if ($is_local) {
     $pass = '';
 } else {
     $host = 'sql105.infinityfree.com';
-    $db   = 'if0_41205929_XXX'; 
+    $db   = 'if0_41205929_serviconnecct_banco '; 
     $user = 'if0_41205929'; 
     $pass = 'legalizadO1'; 
 }
