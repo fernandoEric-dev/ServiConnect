@@ -15,9 +15,14 @@
             <label for="identificacao">CNPJ</label>
             <input type="text" id="identificacao" name="cnpj" placeholder="99.999.999/9999-99" required maxlength="18">
         </div>
+        
         <div>
             <label for="senhaLogin">Senha</label>
             <input type="password" id="senhaLogin" name="senha" placeholder="Digite sua senha" required>
+        </div>
+        
+        <div style="text-align: right; margin-top: -10px; margin-bottom: 20px;">
+            <a href="esqueci_senha.php" style="font-size: 14px; color: #004b87; text-decoration: none;">Esqueci minha senha</a>
         </div>
         
         <button type="submit" id="submitButtonLogin" style="margin-top: 20px;">Entrar</button>
