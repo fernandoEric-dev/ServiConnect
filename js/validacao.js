@@ -187,7 +187,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
 
             } catch (error) {
-                alert('Erro na comunicação com o servidor. Verifique o XAMPP e a URL do Controller.');
+                alert('Ocorreu um erro ao conectar ao servidor. Tente novamente mais tarde.');;
             } finally {
                  submitButton.disabled = false;
                  submitButton.textContent = 'Cadastrar Empresa';
