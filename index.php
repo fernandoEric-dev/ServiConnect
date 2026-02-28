@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="ServiConnect: Conectando empresas a prestadores de serviços terceirizados de forma prática e segura.">
-    <title>ServiConnect - Conectando Empresas e Serviços</title>
+    <title>ServiConnect - Conectando Empresas e Serviços </title>
     
     <!-- CSS principal -->
     <link rel="stylesheet" href="css/style.css">
