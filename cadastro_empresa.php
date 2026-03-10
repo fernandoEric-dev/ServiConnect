@@ -3,20 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cadastro de Empresas Contratantes ou Terceirizada</title>
+    <title>Cadastro Rápido de Empresa</title>
     <link rel="stylesheet" href="css/cadastro_empresa.css">
 </head>
 <body>
     
     <form action="#" method="post" id="formCadastroEmpresa">
 
-        <h2>Cadastro de Empresa</h2>
-        <p>Informe os requisitos para cadastro</p>
-        
-        <div>
-            <label for="nome">Nome da empresa</label>
-            <input type="text" id="nome" name="nome" placeholder="Digite o nome da empresa" required>
-        </div>
+        <h2>Crie sua Conta</h2>
+        <p>Cadastro rápido. Você poderá preencher o perfil da sua empresa depois.</p>
 
         <div>
             <label for="cnpj">CNPJ</label>
@@ -24,93 +19,31 @@
         </div>
 
         <div>
-            <label for="tipo">Tipo de empresa</label>
+            <label for="tipo">Tipo de Conta</label>
             <select id="tipo" name="tipo" required>
-                <option value="" disabled selected>Selecione</option>
-                <option value="terceirizada">Empresa Terceirizada</option>
-                <option value="contratante">Empresa Contratante</option>
+                <option value="" disabled selected>Selecione seu objetivo</option>
+                <option value="terceirizada">Quero Prestar Serviços (Terceirizada)</option>
+                <option value="contratante">Quero Contratar Serviços (Contratante)</option>
             </select>
         </div>
 
-        <h3 style="margin-top: 40px;">Dados de Acesso (Login)</h3>
+        <h3 style="margin-top: 30px;">Dados de Acesso</h3>
         <div>
             <label for="email_acesso">Email para Login</label>
             <input type="email" id="emailAcesso" name="email_acesso" placeholder="email@empresa.com" required>
         </div>
         <div>
             <label for="senha">Senha</label>
-            <input type="password" id="senha" name="senha" placeholder="Digite sua senha (mín. 6 caracteres)" required>
+            <input type="password" id="senha" name="senha" placeholder="Crie uma senha (mín. 6 caracteres)" required>
         </div>
         <div>
             <label for="confirmar_senha">Confirmar Senha</label>
-            <input type="password" id="confirmarSenha" name="confirmar_senha" placeholder="Confirme sua senha" required>
-        </div>
-        <h3 style="margin-top: 40px;">Endereço da Empresa</h3>
-        <div>
-            <label for="cep_empresa">CEP</label>
-            <input type="text" name="cep_empresa" id="cepEmpresa" placeholder="00000-000" required maxlength="9"> 
-        </div>
-        <div>
-            <label for="logradouro_empresa">Rua/Avenida</label>
-            <input type="text" name="logradouro_empresa" id="logradouroEmpresa" placeholder="Será preenchido automaticamente" required>
-        </div>
-        <div style="display: flex; gap: 10px;">
-            <div style="flex: 1;">
-                <label for="numero_empresa">Número</label>
-                <input type="text" name="numero_empresa" id="numeroEmpresa" placeholder="Nº" required>
-            </div>
-            <div style="flex: 2;">
-                <label for="complemento_empresa">Complemento (opcional)</label>
-                <input type="text" name="complemento_empresa" id="complementoEmpresa" placeholder="Sala, Andar, etc.">
-            </div>
-        </div>
-        <div>
-            <label for="bairro_empresa">Bairro</label>
-            <input type="text" name="bairro_empresa" id="bairroEmpresa" placeholder="Será preenchido automaticamente" required>
-        </div>
-        <div style="display: flex; gap: 10px;">
-            <div style="flex: 3;">
-                <label for="cidade_empresa">Cidade</label>
-                <input type="text" name="cidade_empresa" id="cidadeEmpresa" placeholder="Será preenchido automaticamente" required>
-            </div>
-            <div style="flex: 1;">
-                <label for="estado_empresa">Estado (UF)</label>
-                <input type="text" name="estado_empresa" id="estadoEmpresa" placeholder="UF" required maxlength="2">
-            </div>
+            <input type="password" id="confirmarSenha" name="confirmar_senha" placeholder="Confirme a senha" required>
         </div>
 
-        <h3 style="margin-top: 40px;">Contatos</h3>
-        <div>
-            <label for="telefone">Telefone da empresa</label>
-            <input type="tel" id="telefoneEmpresa" name="telefone" placeholder="(11) 99999-9999" required maxlength="15">
-        </div>
-
-        <div>
-            <label for="responsavel">Nome do responsável</label>
-            <input type="text" id="responsavel" name="responsavel" placeholder="Nome do responsável pelo cadastro" required>
-        </div>
-
-        <h3 style="margin-top: 40px;">Informações Adicionais</h3>
-        <div>
-            <label for="descricao">Descrição dos serviços</label>
-            <textarea id="descricao" name="descricao" placeholder="Descreva os serviços oferecidos pela empresa Ex: Limpeza, Segurança..." rows="4"></textarea>
-        </div>
-
-        <div>
-            <label for="regiao">Regiões atendidas</label>
-            <input type="text" id="regiao" name="regiao" placeholder="Ex.: São Paulo, Ferraz de Vasconcelos, etc...">
-        </div>
-
-        <div>
-            <label for="horario">Horário de funcionamento</label>
-            <input type="text" id="horario" name="horario" placeholder="Ex.: Seg a Sex 08:00 - 18:00">
-        </div>
-
-        <button type="submit" style="margin-top: 20px;">Cadastrar Empresa</button>
+        <button type="submit" style="margin-top: 20px;">Criar Conta e Continuar</button>
     </form>
 
     <script src="js/validacao.js"></script> 
-    <script src="js/cep_api.js"></script>
-
 </body>
 </html>
