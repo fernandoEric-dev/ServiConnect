@@ -1,56 +1,69 @@
-# ServiConnect
+<p align="center">
+  <img src="foto/logo.jpg" alt="Logo ServiConnect" width="250">
+</p>
 
-## Nome do Projeto
-ServiConnect - Conectando Empresas e Serviços
+<h1 align="center">🤝 ServiConnect</h1>
 
-## Alunos Integrantes
-* Paulo Vinicius
-* Fernando Eric
-* Paulo Quintino
+<p align="center">
+  <strong>A plataforma ideal para conectar empresas contratantes a prestadoras de serviços terceirizados de forma prática, segura e transparente.</strong>
+</p>
 
-## Descrição do Sistema Simulado
+<p align="center">
+  <img src="https://img.shields.io/badge/PHP-8.2-777BB4?style=for-the-badge&logo=php&logoColor=white" alt="PHP">
+  <img src="https://img.shields.io/badge/MySQL-005C84?style=for-the-badge&logo=mysql&logoColor=white" alt="MySQL">
+  <img src="https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black" alt="JavaScript">
+  <img src="https://img.shields.io/badge/HTML5-E34F26?style=for-the-badge&logo=html5&logoColor=white" alt="HTML5">
+  <img src="https://img.shields.io/badge/CSS3-1572B6?style=for-the-badge&logo=css3&logoColor=white" alt="CSS3">
+</p>
 
-O **ServiConnect** é uma plataforma digital que visa **conectar empresas contratantes a prestadoras de serviços terceirizados** (como limpeza, segurança, manutenção, etc.) de forma prática, segura e transparente.
+---
 
-### Principais Funcionalidades:
+## 📖 Sobre o Projeto
 
-1.  **Página Principal (`index.html`):**
-    * **Interface Amigável:** Layout com `header`, barra de pesquisa de serviços e botões de ação (Entrar, Sou Profissional/Buscar Vagas, Cadastrar Empresa).
-    * **Visão Geral:** Seções de "Sobre Nós", "Funcionalidades" e "Como Funciona" que detalham o propósito da plataforma.
-    * **Busca:** Permite buscar serviços (ex: limpeza, segurança).
-    * **Navegação:** Menu com links para seções principais e informações de contato.
+O **ServiConnect** é um sistema web desenvolvido para otimizar e centralizar o processo de contratação de serviços B2B (Business-to-Business). Seja para serviços de limpeza, segurança, manutenção ou TI, a plataforma oferece um ambiente dedicado onde as necessidades encontram as soluções certas.
 
-2.  **Cadastro de Empresas (`cadastro_empresa.html`):**
-    * Formulário dedicado ao registro de empresas.
-    * Permite diferenciar a empresa entre **"Empresa Terceirizada"** (prestadora de serviço) e **"Empresa Contratante"**.
-    * Campos de dados essenciais: Nome da Empresa, CNPJ, Telefone, Nome do Responsável, E-mail, Descrição dos Serviços, Regiões Atendidas e Horário de Funcionamento.
+O sistema conta com três frentes principais de utilizadores, garantindo fluxos de trabalho específicos para **Empresas Contratantes**, **Empresas Terceirizadas** e uma área de **Gestão Administrativa**.
 
-3.  **Cadastro de Profissionais / Empregados (`cadastro_empregado.html`):**
-    * Formulário para indivíduos que buscam vagas/oportunidades (sugerido pelo botão "Sou Profissional/Buscar Vagas" na `index.html`).
-    * Focado no registro de currículos e informações pessoais: E-mail, Senha, CPF, RG, Data de Nascimento, CEP.
-    * Recurso de **Envio de Currículo (PDF)**, indicando um sistema de gestão de currículos ou candidaturas.
+## ✨ Principais Funcionalidades
 
- 4. Tela de Login (`login.html`)
+### 🏢 Para Empresas Contratantes
+* **Busca e Filtros:** Encontre facilmente empresas terceirizadas por região e área de atuação.
+* **Solicitação de Orçamentos:** Envie pedidos detalhados (número de funcionários, local, descrição) diretamente para os prestadores.
+* **Dashboard Exclusivo:** Acompanhe as empresas disponíveis e faça a gestão das suas contratações.
 
-| Elemento | Tipo de Campo / Ação | Propósito |
-| :--- | :--- | :--- |
-| **Login Unificado** | `input type="text"` | Recebe o identificador unificado: **CPF (Profissional) ou CNPJ (Empresa)**. |
-| **Segurança** | `input type="password"` | Recebe a **Senha** de acesso, ocultando os caracteres. |
-| **Ação** | Botão "Entrar" | Envia as credenciais para o sistema de autenticação. |
-| **Recuperação** | Link "Esqueci minha senha" | Permite ao usuário iniciar o processo de recuperação de acesso. |
+### 💼 Para Empresas Terceirizadas (Prestadoras)
+* **Perfil Público (Estilo LinkedIn):** Destaque os seus serviços, adicione uma foto/logótipo, descreva a sua área de atuação e regiões atendidas.
+* **Gestão de Pedidos:** Receba notificações de pedidos de orçamento de contratantes interessados.
+* **Resposta Rápida:** Envie a sua proposta de valor diretamente pela plataforma ou recuse o pedido se não tiver disponibilidade.
 
-## Descrição do Sistema Simulado
-### Fluxo Principal Simulado (Atores e Ações):
+### 🛡️ Para a Administração (Gestão)
+* **Painel de Controlo:** Dashboard com métricas totais de utilizadores, empresas e pedidos realizados no sistema.
+* **Gestão de Utilizadores:** Bloqueio e desbloqueio de contas por mau uso da plataforma.
+* **Conformidade LGPD:** Funcionalidade de "Arquivar" contas (soft delete), guardando os dados de forma segura e inativando o acesso sem perda de histórico.
 
-O sistema atende três tipos de atores principais, controlando o acesso e a interação através de telas simuladas de Cadastro e Login:
+## 🛠️ Tecnologias Utilizadas
 
-| Ator | Telas de Entrada | Fluxo de Negócio Simulado (Atual) |
-| :--- | :--- | :--- |
-| **1. Empresas Contratantes** | `cadastro_empresa.html` e `login.html` | Cadastram-se, publicam demandas de serviço (vagas/projetos), recebem e analisam propostas de fornecedores qualificados. |
-| **2. Prestadores de Serviço (Empresas Terceirizadas)** | `cadastro_empresa.html` e `login.html` | Cadastram-se, detalham seus serviços, encontram oportunidades publicadas, enviam propostas e estabelecem o acordo de serviço. |
-| **3. Profissionais Individuais / Empregados** | `cadastro_empregado.html` e `login.html` | Cadastram seus dados e **currículo**, buscando oportunidades de emprego nas empresas terceirizadas ou contratantes. |
+**Frontend:**
+* HTML5 & CSS3 (Design Responsivo, CSS Variables, Flexbox/Grid)
+* JavaScript (Vanilla)
+* Integração com APIs externas (ViaCEP para endereços e OpenCNPJ para validação de empresas)
+* Leaflet.js (Para mapas interativos)
 
-**Acesso:** O acesso de todos os atores é consolidado na tela de **Login** (`login.html`), que aceita tanto **CPF** (para Profissionais) quanto **CNPJ** (para Empresas).
+**Backend:**
+* PHP 8.x (Arquitetura MVC simplificada)
+* PDO (PHP Data Objects) para consultas seguras à base de dados
+* Sistema de Autenticação seguro com `password_hash`
 
-**Visão de Futuro:** O sistema é projetado para, em futuras implementações, gerenciar contratos e **interligar o processo de pagamento** para garantir a segurança e a transparência financeira de todas as transações, complementando o ciclo de conexão e avaliação.
+**Base de Dados:**
+* MySQL (Tabelas relacionais: `usuarios`, `empresas`, `solicitacoes`, `usuarios_arquivados`, `administradores`)
 
+**DevOps & CI/CD:**
+* GitHub Actions para Deploy Automático via FTP (InfinityFree) e Verificação de Sintaxe PHP (Lint).
+
+## 🚀 Como Executar o Projeto Localmente
+
+Siga os passos abaixo para rodar o projeto na sua máquina local utilizando o XAMPP ou servidor equivalente:
+
+1. **Clone o repositório:**
+   ```bash
+   git clone [https://github.com/fernandoeric-dev/serviconnect.git](https://github.com/fernandoeric-dev/serviconnect.git)
