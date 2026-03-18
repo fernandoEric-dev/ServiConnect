@@ -31,3 +31,9 @@
     transform: translateY(-2px);
     box-shadow: 0 4px 10px rgba(255, 196, 0, 0.3);
 }
+
+.nav-active {
+    background-color: var(--secondary-yellow) !important;
+    color: var(--primary-blue) !important;
+    border-radius: 5px;
+}
