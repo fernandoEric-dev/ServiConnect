@@ -1,8 +1,8 @@
 <p align="center">
-  <img src="foto/logo.jpg" alt="Logo ServiConnect" width="30">
+  <img src="foto/logo.jpg" alt="Logo ServiConnect" width="150">
 </p>
 
-<h1 align="center">🤝 ServiConnect</h1>
+<h1 align="center">ServiConnect</h1>
 
 <p align="center">
   <strong>A plataforma ideal para conectar empresas contratantes a prestadoras de serviços terceirizados de forma prática, segura e transparente.</strong>
@@ -26,21 +26,19 @@ O **ServiConnect** é um sistema web desenvolvido para otimizar e centralizar o 
 
 ## 🖼️ Visão Geral e Arquitetura
 
-Abaixo estão a tela principal de acesso à plataforma e o diagrama estrutural do sistema.
+Abaixo apresentamos uma visão do painel do sistema e o diagrama que ilustra as interações dos utilizadores com a plataforma.
 
-### Tela Inicial
-![Tela Inicial do ServiConnect](caminho/para/sua/tela_inicial.png)
-> *Página de entrada do sistema, onde os usuários podem fazer login ou iniciar seu cadastro como Contratante ou Empresa Terceirizada.*
+### Painel de Gestão
+![Painel de Gestão do ServiConnect](img/Painel_gestão_ServiConnect.png)
+> *Visão do painel administrativo do sistema, permitindo o acompanhamento de métricas e a gestão da plataforma.*
 
-### Diagrama do Projeto
-![Diagrama do ServiConnect](caminho/para/seu/diagrama.png)
-> *Representação da arquitetura, fluxo de dados e relacionamento entre as entidades do sistema.*
-
-*(**Nota:** Substitua `caminho/para/sua/tela_inicial.png` e `caminho/para/seu/diagrama.png` pelo caminho real das imagens no seu repositório, como por exemplo `foto/tela_inicial.jpg`)*
+### Diagrama de Casos de Uso
+![Diagrama de Casos de Uso](img/Diagrama_Caso_deUSo.jpeg)
+> *Representação estrutural demonstrando as ações e permissões de cada tipo de utilizador (Contratante, Terceirizada e Administrador) dentro do sistema.*
 
 ---
 
-## 👥 Equipe
+## 👥 Equipa
 
 **Desenvolvedores:**
 * Fernando Eric Freitas da Silva
@@ -53,7 +51,7 @@ Abaixo estão a tela principal de acesso à plataforma e o diagrama estrutural d
 
 ## ✨ Principais Funcionalidades
 
-O sistema conta com três frentes principais de usuários, garantindo fluxos de trabalho específicos:
+O sistema conta com três frentes principais de utilizadores, garantindo fluxos de trabalho específicos:
 
 ### 🏢 Para Empresas Contratantes
 * **Busca e Filtros:** Encontre facilmente empresas terceirizadas por região e área de atuação.
@@ -61,14 +59,13 @@ O sistema conta com três frentes principais de usuários, garantindo fluxos de 
 * **Gestão de Contratações:** Acompanhe as empresas disponíveis e as propostas recebidas.
 
 ### 💼 Para Empresas Terceirizadas (Prestadoras)
-* **Perfil Público (Estilo LinkedIn):** Destaque os seus serviços, adicione uma foto/logotipo, descreva a sua área de atuação e regiões atendidas.
+* **Perfil Público:** Destaque os seus serviços, adicione uma foto/logótipo, descreva a sua área de atuação e regiões atendidas.
 * **Gestão de Pedidos:** Receba notificações de pedidos de orçamento de contratantes interessados.
 * **Resposta Rápida:** Envie a sua proposta de valor diretamente pela plataforma ou recuse o pedido se não tiver disponibilidade.
 
 ### 🛡️ Para a Administração (Gestão)
-* **Painel de Controle:** Dashboard com métricas totais de usuários, empresas e pedidos realizados no sistema.
-* **Gestão de Usuários:** Pesquisa avançada e capacidade de bloquear e desbloquear contas por mau uso da plataforma.
-* **Gestão de Administradores:** Sistema de permissões para criar e gerenciar novos administradores com segurança.
+* **Painel de Controlo:** Dashboard com métricas totais de utilizadores, empresas e pedidos realizados no sistema.
+* **Gestão de Utilizadores:** Pesquisa avançada e capacidade de bloquear e desbloquear contas por mau uso da plataforma.
 * **Conformidade LGPD:** Funcionalidade de "Arquivar" contas (soft delete), guardando os dados de forma segura e inativando o acesso sem perda de histórico.
 
 ---
@@ -76,27 +73,26 @@ O sistema conta com três frentes principais de usuários, garantindo fluxos de 
 ## 🛠️ Tecnologias Utilizadas
 
 **Frontend:**
-* HTML5 & CSS3 (Design Responsivo, CSS Variables, Flexbox/Grid)
-* JavaScript (Vanilla)
-* Integração com APIs externas (ViaCEP para endereços e OpenCNPJ para validação de empresas)
-* Leaflet.js (Para mapas interativos)
+* HTML5 & CSS3 (Design Responsivo, Flexbox/Grid)
+* JavaScript Vanilla
+* Integração com APIs externas (ViaCEP e OpenCNPJ)
+* Leaflet.js (Mapas interativos)
 
 **Backend:**
 * PHP 8.x (Arquitetura MVC simplificada)
-* PDO (PHP Data Objects) para consultas seguras ao banco de dados
-* Sistema de Autenticação seguro com `password_hash`
+* PDO (Consultas seguras à base de dados)
 
-**Banco de Dados:**
-* MySQL (Tabelas relacionais: `usuarios`, `empresas`, `solicitacoes`, `usuarios_arquivados`, `administradores`)
+**Base de Dados:**
+* MySQL (Tabelas relacionais)
 
 **DevOps & CI/CD:**
-* GitHub Actions para Deploy Automático via FTP (InfinityFree) e Verificação de Sintaxe PHP (Lint).
+* GitHub Actions para Deploy Automático (FTP) e Verificação de Sintaxe PHP (Lint).
 
 ---
 
 ## 🚀 Como Executar o Projeto Localmente
 
-Siga os passos abaixo para rodar o projeto na sua máquina local utilizando o XAMPP ou servidor equivalente:
+Siga os passos abaixo para rodar o projeto na sua máquina utilizando o XAMPP ou servidor equivalente:
 
 1. **Clone o repositório:**
    ```bash
