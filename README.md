@@ -45,6 +45,9 @@ Abaixo apresentamos uma visão do painel do sistema e o diagrama que ilustra as 
 
 **Orientadores:**
 * Prof. Jeferson Roberto de Lima
+* Marcia Aparecida Silva Bissaco
+* Francisco Douglas lima Abreu
+* Rógerio Bezzerra
   
 ---
 
