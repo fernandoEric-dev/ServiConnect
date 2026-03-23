@@ -92,10 +92,3 @@ O sistema conta com três frentes principais de utilizadores, garantindo fluxos 
 
 ---
 
-## 🚀 Como Executar o Projeto Localmente
-
-Siga os passos abaixo para rodar o projeto na sua máquina utilizando o XAMPP ou servidor equivalente:
-
-1. **Clone o repositório:**
-   ```bash
-   git clone [https://github.com/fernandoeric-dev/serviconnect.git](https://github.com/fernandoeric-dev/serviconnect.git)
