@@ -20,6 +20,8 @@
 
 ## 📖 Sobre o Projeto
 
+<p Desenvolvedores</p>
+
 O **ServiConnect** é um sistema web desenvolvido para otimizar e centralizar o processo de contratação de serviços B2B (Business-to-Business). Seja para serviços de limpeza, segurança, manutenção ou TI, a plataforma oferece um ambiente dedicado onde as necessidades encontram as soluções certas.
 
 O sistema conta com três frentes principais de utilizadores, garantindo fluxos de trabalho específicos para **Empresas Contratantes**, **Empresas Terceirizadas** e uma área de **Gestão Administrativa**.
