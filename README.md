@@ -1,9 +1,7 @@
-<div align="center">
-  <img src="foto/logo.jpg" alt="Logo ServiConnect" width="70" align="absmiddle" style="margin-right: 10px;">
-  <h1 style="display: inline; align: center;">
-    <font color="darkblue">Servi</font><font color="#FFC107">Connect</font>
-  </h1>
-</div>
+<h1 align="center">
+  <img src="foto/logo.jpg" alt="Logo ServiConnect" width="60" align="absmiddle" style="margin-right: 10px;">
+  <font color="darkblue">Servi</font><font color="#FFC107">Connect</font>
+</h1>
 
 <p align="center">
   <strong>A plataforma ideal para conectar empresas contratantes a prestadoras de serviços terceirizados de forma prática, segura e transparente.</strong>
