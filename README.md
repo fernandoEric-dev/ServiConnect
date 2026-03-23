@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="foto/logo.jpg" alt="Logo ServiConnect" width="250">
+  <img src="foto/logo.jpg" alt="Logo ServiConnect" width="30">
 </p>
 
 <h1 align="center">🤝 ServiConnect</h1>
