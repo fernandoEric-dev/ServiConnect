@@ -38,14 +38,15 @@ Abaixo apresentamos uma visão do painel do sistema e o diagrama que ilustra as 
 
 ---
 
-## 👥 Equipa
+## 👥 Equipe
 
 **Desenvolvedores:**
 * Fernando Eric Freitas da Silva
 * Leonardo Quintino Santos
 
-**Orientador:**
+**Orientadores:**
 * Prof. Jeferson Roberto de Lima
+  
 
 ---
 
