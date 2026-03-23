@@ -1,8 +1,9 @@
-<p align="center">
-  <img src="foto/logo.jpg" alt="Logo ServiConnect" width="150">
-</p>
-
-<h1 align="center">ServiConnect</h1>
+<div align="center">
+  <img src="foto/logo.jpg" alt="Logo ServiConnect" width="70" align="absmiddle" style="margin-right: 10px;">
+  <h1 style="display: inline; align: center;">
+    <font color="darkblue">Servi</font><font color="#FFC107">Connect</font>
+  </h1>
+</div>
 
 <p align="center">
   <strong>A plataforma ideal para conectar empresas contratantes a prestadoras de serviços terceirizados de forma prática, segura e transparente.</strong>
@@ -41,13 +42,12 @@ Abaixo apresentamos uma visão do painel do sistema e o diagrama que ilustra as 
 ## 👥 Equipe
 
 **Desenvolvedores:**
-* Fernando Eric Freitas da Silva
-* Leonardo Quintino Santos
+* **Fernando Eric Freitas da Silva** - [🔗 LinkedIn](https://www.linkedin.com/in/fernando-eric-403636248/)
+* **Leonardo Quintino Santos**
 
 **Orientadores:**
 * Prof. Jeferson Roberto de Lima
   
-
 ---
 
 ## ✨ Principais Funcionalidades
@@ -74,20 +74,20 @@ O sistema conta com três frentes principais de utilizadores, garantindo fluxos 
 ## 🛠️ Tecnologias Utilizadas
 
 **Frontend:**
-* HTML5 & CSS3 (Design Responsivo, Flexbox/Grid)
-* JavaScript Vanilla
-* Integração com APIs externas (ViaCEP e OpenCNPJ)
-* Leaflet.js (Mapas interativos)
+* 🌐 **HTML5 & CSS3** (Design Responsivo, Flexbox/Grid)
+* 🟨 **JavaScript Vanilla**
+* 🔌 **Integração com APIs externas** (ViaCEP e OpenCNPJ)
+* 🗺️ **Leaflet.js** (Mapas interativos)
 
 **Backend:**
-* PHP 8.x (Arquitetura MVC simplificada)
-* PDO (Consultas seguras à base de dados)
+* 🐘 **PHP 8.x** (Arquitetura MVC simplificada)
+* 🗃️ **PDO** (Consultas seguras à base de dados)
 
 **Base de Dados:**
-* MySQL (Tabelas relacionais)
+* 🐬 **MySQL** (Tabelas relacionais)
 
 **DevOps & CI/CD:**
-* GitHub Actions para Deploy Automático (FTP) e Verificação de Sintaxe PHP (Lint).
+* ⚙️ **GitHub Actions** para Deploy Automático (FTP) e Verificação de Sintaxe PHP (Lint).
 
 ---
 
