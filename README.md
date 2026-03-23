@@ -24,29 +24,19 @@ O **ServiConnect** é um sistema web desenvolvido para otimizar e centralizar o 
 
 ---
 
-## 🖼️ Visão Geral do Projeto
+## 🖼️ Visão Geral e Arquitetura
 
-Abaixo, apresentamos algumas capturas de ecrã para ilustrar a interface e o fluxo do ServiConnect.
+Abaixo estão a tela principal de acesso à plataforma e o diagrama estrutural do sistema.
 
-### ✨ Principais Telas
+### Tela Inicial
+![Tela Inicial do ServiConnect](caminho/para/sua/tela_inicial.png)
+> *Página de entrada do sistema, onde os usuários podem fazer login ou iniciar seu cadastro como Contratante ou Empresa Terceirizada.*
 
-Aqui estão alguns exemplos das principais páginas do sistema:
+### Diagrama do Projeto
+![Diagrama do ServiConnect](caminho/para/seu/diagrama.png)
+> *Representação da arquitetura, fluxo de dados e relacionamento entre as entidades do sistema.*
 
-| **Página Inicial (Landing Page)** | **Dashboard da Empresa Terceirizada** |
-| :---: | :---: |
-| ![Página Inicial](https://img.shields.io/badge/Adicione_aqui_sua_captura-blue.svg) | ![Dashboard Terceirizada](https://img.shields.io/badge/Adicione_aqui_sua_captura-blue.svg) |
-| *Visão geral para novos usuários.* | *Perfil público e gestão de pedidos.* |
-
-| **Dashboard da Empresa Contratante** | **Painel Administrativo** |
-| :---: | :---: |
-| ![Dashboard Contratante](https://img.shields.io/badge/Adicione_aqui_sua_captura-blue.svg) | ![Painel Administrativo](https://img.shields.io/badge/Adicione_aqui_sua_captura-blue.svg) |
-| *Gestão de orçamentos e busca de empresas.* | *Métricas totais, usuários e gestão.* |
-
-<p align="center">
-  <img src="https://img.shields.io/badge/📸_Substitua_estes_links_pelos_caminhos_das_suas_imagens_-orange.svg" alt="Aviso">
-</p>
-
-> **Nota:** Para adicionar as suas próprias fotos, tire capturas de ecrã da sua aplicação em funcionamento, adicione-as a uma pasta (ex: `/assets/images`) no seu projeto e substitua o link `![Página Inicial](https://img.shields.io/badge/Adicione_aqui_sua_captura-blue.svg)` pelo caminho real (ex: `![Página Inicial](assets/images/pagina_inicial.png)`).
+*(**Nota:** Substitua `caminho/para/sua/tela_inicial.png` e `caminho/para/seu/diagrama.png` pelo caminho real das imagens no seu repositório, como por exemplo `foto/tela_inicial.jpg`)*
 
 ---
 
@@ -63,7 +53,7 @@ Aqui estão alguns exemplos das principais páginas do sistema:
 
 ## ✨ Principais Funcionalidades
 
-O sistema conta com três frentes principais de utilizadores, garantindo fluxos de trabalho específicos:
+O sistema conta com três frentes principais de usuários, garantindo fluxos de trabalho específicos:
 
 ### 🏢 Para Empresas Contratantes
 * **Busca e Filtros:** Encontre facilmente empresas terceirizadas por região e área de atuação.
@@ -71,14 +61,14 @@ O sistema conta com três frentes principais de utilizadores, garantindo fluxos 
 * **Gestão de Contratações:** Acompanhe as empresas disponíveis e as propostas recebidas.
 
 ### 💼 Para Empresas Terceirizadas (Prestadoras)
-* **Perfil Público (Estilo LinkedIn):** Destaque os seus serviços, adicione uma foto/logótipo, descreva a sua área de atuação e regiões atendidas.
+* **Perfil Público (Estilo LinkedIn):** Destaque os seus serviços, adicione uma foto/logotipo, descreva a sua área de atuação e regiões atendidas.
 * **Gestão de Pedidos:** Receba notificações de pedidos de orçamento de contratantes interessados.
 * **Resposta Rápida:** Envie a sua proposta de valor diretamente pela plataforma ou recuse o pedido se não tiver disponibilidade.
 
 ### 🛡️ Para a Administração (Gestão)
-* **Painel de Controlo:** Dashboard com métricas totais de utilizadores, empresas e pedidos realizados no sistema.
-* **Gestão de Utilizadores:** Pesquisa avançada e capacidade de bloquear e desbloquear contas por mau uso da plataforma.
-* **Gestão de Administradores:** Sistema de permissões para criar e gerir novos administradores com segurança (apenas o administrador principal pode aceder a esta funcionalidade).
+* **Painel de Controle:** Dashboard com métricas totais de usuários, empresas e pedidos realizados no sistema.
+* **Gestão de Usuários:** Pesquisa avançada e capacidade de bloquear e desbloquear contas por mau uso da plataforma.
+* **Gestão de Administradores:** Sistema de permissões para criar e gerenciar novos administradores com segurança.
 * **Conformidade LGPD:** Funcionalidade de "Arquivar" contas (soft delete), guardando os dados de forma segura e inativando o acesso sem perda de histórico.
 
 ---
@@ -93,10 +83,10 @@ O sistema conta com três frentes principais de utilizadores, garantindo fluxos 
 
 **Backend:**
 * PHP 8.x (Arquitetura MVC simplificada)
-* PDO (PHP Data Objects) para consultas seguras à base de dados
+* PDO (PHP Data Objects) para consultas seguras ao banco de dados
 * Sistema de Autenticação seguro com `password_hash`
 
-**Base de Dados:**
+**Banco de Dados:**
 * MySQL (Tabelas relacionais: `usuarios`, `empresas`, `solicitacoes`, `usuarios_arquivados`, `administradores`)
 
 **DevOps & CI/CD:**
