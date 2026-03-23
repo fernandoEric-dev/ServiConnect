@@ -40,8 +40,8 @@ Abaixo apresentamos uma visão do painel do sistema e o diagrama que ilustra as 
 ## 👥 Equipe
 
 **Desenvolvedores:**
-* **Fernando Eric Freitas da Silva** - [🔗 LinkedIn](https://www.linkedin.com/in/fernando-eric-403636248/) - ([🔗 GitHub]https://github.com/fernandoEric-dev)
-* **Leonardo Quintino Santos** ([🔗 GitHub]https://github.com/LeonardoQuintino)
+* **Fernando Eric Freitas da Silva** - [🔗 LinkedIn](https://www.linkedin.com/in/fernando-eric-403636248/) - [🔗 GitHub](https://github.com/fernandoEric-dev)
+* **Leonardo Quintino Santos** [🔗 GitHub](https://github.com/LeonardoQuintino)
 
 **Orientadores:**
 * Prof. Jeferson Roberto de Lima
