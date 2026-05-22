@@ -78,7 +78,7 @@ if (password_verify($senha, $usuario['senha'])) {
             $redirect_url = 'dashboard_contratante.php'; 
             break;
         case 'terceirizada':
-            $redirect_url = 'dashboard_terceirizada.php'; 
+            $redirect_url = 'dashboard_tercerizada.php'; 
             break;
         default:
             $redirect_url = 'login.php';
