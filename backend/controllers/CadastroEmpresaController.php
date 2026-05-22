@@ -21,7 +21,7 @@ $cnpj = isset($data['cnpj']) ? preg_replace('/\D/', '', $data['cnpj']) : '';
 $email_acesso = $data['email_acesso'] ?? null;
 $senha = $data['senha'] ?? null;
 $tipo_empresa = $data['tipo'] ?? null;
-$nome_empresa = $data['nome'] ?? 'Empresa em Configuração'; // Nome vindo da API via JS
+$nome_empresa = $data['nome'] ?? 'Empresa em Configuração'; 
 
 if (empty($cnpj) || empty($email_acesso) || empty($senha) || empty($tipo_empresa)) {
     http_response_code(400);
@@ -46,7 +46,7 @@ $dados_usuario = [
     'tipo_conta' => 'empresa'
 ];
 
-
+// DADOS CORRIGIDOS COM ASPAS SIMPLES
 $dados_empresa = [
     'nome' => $nome_empresa,
     'tipo_empresa' => $tipo_empresa,
@@ -63,3 +63,32 @@ $dados_empresa = [
     'cidade' => '',
     'estado' => '',
 ];
+
+try {
+    $pdo->beginTransaction();
+
+    $usuario_id = $usuarioModel->cadastrarUsuario($dados_usuario);
+
+    if ($usuario_id) {
+        $dados_empresa['usuario_id'] = $usuario_id; 
+        $usuarioModel->cadastrarEmpresa($dados_empresa);
+        
+        $pdo->commit(); 
+
+        echo json_encode([
+            'success' => true, 
+            'message' => 'Conta criada com sucesso!'
+        ]);
+        
+    } else {
+        $pdo->rollBack();
+        echo json_encode(['success' => false, 'message' => 'Falha ao cadastrar.']);
+    }
+
+} catch (PDOException $e) {
+    $pdo->rollBack();
+    error_log("Erro de PDO no cadastro: " . $e->getMessage()); 
+    http_response_code(500);
+    echo json_encode(['success' => false, 'message' => 'Erro interno do servidor.']);
+}
+?>

@@ -78,10 +78,17 @@ try {
     $stmt = $pdo->prepare($sql_update);
     $stmt->execute($dados_form);
 
-  // 4. RETORNO DE SUCESSO OU ERRO PARA O AJAX (Se você usar AJAX)
-if ($success) {
-    echo json_encode(['success' => true, 'message' => $mensagem]);
-} else {
-    echo json_encode(['success' => false, 'message' => $mensagem]);
+ // ... código acima ...
+    $stmt = $pdo->prepare($sql_update);
+    $stmt->execute($dados_form);
+
+    // 4. REDIRECIONA DE VOLTA PARA O PERFIL (Isso substitui o JSON antigo!)
+    header('Location: ../../dashboard_tercerizada.php#perfil');
+    exit;
+
+} catch (Exception $e) {
+    error_log("Erro ao salvar o perfil: " . $e->getMessage());
+    echo "<script>alert('Ocorreu um erro ao guardar os dados.'); window.history.back();</script>";
+    exit;
 }
 ?>
