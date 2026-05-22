@@ -1,5 +1,5 @@
 <?php
-// dashboard_terceirizada.php
+// dashboard_tercerizada.php
 session_start();
 
 if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'terceirizada') {
@@ -98,7 +98,7 @@ $solicitacoes_recebidas = $stmtSolicitacoes->fetchAll(PDO::FETCH_ASSOC);
 
         <section id="perfil" class="content-section" style="display: none;">
             <h2 class="section-title"><i class="fa-solid fa-id-card-clip"></i> Gerenciar Perfil Público</h2>
-            <form action="backend/controllers/PerfilTerceirizadaController.php" method="post" id="formEdicaoPerfil" enctype="multipart/form-data" class="widget-card">
+            <form action="backend/controllers/PerfilTercerizadaController.php" method="post" id="formEdicaoPerfil" enctype="multipart/form-data" class="widget-card">
                 <input type="hidden" name="acao" value="atualizar_perfil">
                 <input type="hidden" name="foto_atual" value="<?php echo $dados_perfil['foto_path']; ?>">
 
@@ -163,8 +163,14 @@ $solicitacoes_recebidas = $stmtSolicitacoes->fetchAll(PDO::FETCH_ASSOC);
                     feedLink.classList.remove('nav-active');
                 }
             }
+            
             feedLink.addEventListener('click', (e) => { e.preventDefault(); switchView('feed'); });
             perfilLink.addEventListener('click', (e) => { e.preventDefault(); switchView('perfil'); });
+
+            // Se a URL tiver #perfil (ex: após salvar), abre a aba perfil direto
+            if(window.location.hash === '#perfil') {
+                switchView('perfil');
+            }
         });
     </script>
 </body>
