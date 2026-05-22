@@ -73,7 +73,7 @@ $terceirizadas = $stmtTerceirizadas->fetchAll(PDO::FETCH_ASSOC);
         <section id="busca" class="content-section active-section">
             <h2 class="section-title"><i class="fa-solid fa-handshake"></i> Encontre o Serviço Perfeito</h2>
             <div class="search-module widget-card">
-                <p class="search-tip">Empresas terceirizadas disponíveis para contratação:</p>
+                <p class="search-tip">Empresas terceirizadas disponíveis para contratação (clique na foto ou nome para ver o perfil completo):</p>
                 <div class="terceirizadas-list">
                     <?php if (empty($terceirizadas)): ?>
                         <p>Nenhuma empresa terceirizada encontrada no momento.</p>
@@ -82,11 +82,13 @@ $terceirizadas = $stmtTerceirizadas->fetchAll(PDO::FETCH_ASSOC);
                             <div class="terceirizada-card widget-card">
                                 <div class="profile-info">
                                     <?php $foto_terc = !empty($t['foto_path']) ? $t['foto_path'] : 'img/default_avatar.png'; ?>
-                                    <img src="<?php echo htmlspecialchars($foto_terc); ?>" alt="Logo" class="terceirizada-logo" style="width: 60px; height: 60px; border-radius: 8px; object-fit: cover;">
+                                    <a href="perfil_empresa.php?id=<?php echo $t['usuario_id']; ?>">
+                                        <img src="<?php echo htmlspecialchars($foto_terc); ?>" alt="Logo" class="terceirizada-logo" style="width: 60px; height: 60px; border-radius: 8px; object-fit: cover; border: 1px solid #ddd;">
+                                    </a>
                                     <div class="text-info">
-                                        <h4><?php echo htmlspecialchars($t['nome_empresa']); ?></h4>
+                                        <h4><a href="perfil_empresa.php?id=<?php echo $t['usuario_id']; ?>" style="text-decoration: none; color: inherit;"><?php echo htmlspecialchars($t['nome_empresa']); ?></a></h4>
                                         <p class="service-area"><i class="fa-solid fa-location-dot"></i> Região: <?php echo htmlspecialchars($t['regioes_atendidas']); ?></p>
-                                        <p class="description-short"><?php echo substr(htmlspecialchars($t['descricao_servicos']), 0, 100); ?>...</p>
+                                        <p class="description-short"><?php echo substr(htmlspecialchars($t['descricao_servicos'] ?? ''), 0, 100); ?>...</p>
                                     </div>
                                 </div>
                                 <a href="solicitacao_orcamento.php?terceirizada_id=<?php echo $t['usuario_id']; ?>" class="btn-primary request-btn contratante-btn">
@@ -176,7 +178,6 @@ $terceirizadas = $stmtTerceirizadas->fetchAll(PDO::FETCH_ASSOC);
             buscaLink.addEventListener('click', (e) => { e.preventDefault(); switchView('busca'); });
             perfilLink.addEventListener('click', (e) => { e.preventDefault(); switchView('perfil'); });
 
-            // Se a URL tiver #perfil (ex: após salvar), abre a aba perfil direto
             if(window.location.hash === '#perfil') {
                 switchView('perfil');
             }
