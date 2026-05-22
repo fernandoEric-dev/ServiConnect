@@ -46,49 +46,20 @@ $dados_usuario = [
     'tipo_conta' => 'empresa'
 ];
 
-// Preenche os dados da empresa com Nulos, pois serão completados no Perfil depois
+
 $dados_empresa = [
     'nome' => $nome_empresa,
     'tipo_empresa' => $tipo_empresa,
-    'telefone' => null,
-    'responsavel' => null,
-    'descricao' => null,
-    'regiao' => null,
-    'horario' => null,
-    'cep' => null,
-    'logradouro' => null,
-    'numero' => null,
-    'complemento' => null,
-    'bairro' => null,
-    'cidade' => null,
-    'estado' => null,
+    'telefone' => '',
+    'responsavel' => '',
+    'descricao' => '',
+    'regiao' => '',
+    'horario' => '',
+    'cep' => '',
+    'logradouro' => '',
+    'numero' => '',
+    'complemento' => '',
+    'bairro' => '',
+    'cidade' => '',
+    'estado' => '',
 ];
-
-try {
-    $pdo->beginTransaction();
-
-    $usuario_id = $usuarioModel->cadastrarUsuario($dados_usuario);
-
-    if ($usuario_id) {
-        $dados_empresa['usuario_id'] = $usuario_id; 
-        $usuarioModel->cadastrarEmpresa($dados_empresa);
-        
-        $pdo->commit(); 
-
-        echo json_encode([
-            'success' => true, 
-            'message' => 'Conta criada com sucesso!'
-        ]);
-        
-    } else {
-        $pdo->rollBack();
-        echo json_encode(['success' => false, 'message' => 'Falha ao cadastrar.']);
-    }
-
-} catch (PDOException $e) {
-    $pdo->rollBack();
-    error_log("Erro de PDO no cadastro: " . $e->getMessage()); 
-    http_response_code(500);
-    echo json_encode(['success' => false, 'message' => 'Erro interno do servidor.']);
-}
-?>
