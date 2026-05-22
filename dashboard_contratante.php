@@ -30,9 +30,10 @@ $dados_perfil = [
     'estado' => htmlspecialchars($dados_bd['estado'] ?? ''),
 ];
 
-// 2. Busca lista de Terceirizadas para o FEED
+// 2. Busca lista de Terceirizadas para o MAPA e FEED
 $stmtTerceirizadas = $pdo->prepare("
-    SELECT u.id as usuario_id, e.nome AS nome_empresa, e.descricao AS descricao_servicos, e.regiao AS regioes_atendidas, e.foto_path
+    SELECT u.id as usuario_id, e.nome AS nome_empresa, e.descricao AS descricao_servicos, 
+           e.regiao AS regioes_atendidas, e.foto_path, e.latitude, e.longitude, e.logradouro, e.bairro
     FROM usuarios u JOIN empresas e ON u.id = e.usuario_id
     WHERE u.tipo_conta = 'empresa' AND e.tipo_empresa = 'terceirizada'
 ");
@@ -49,6 +50,48 @@ $terceirizadas = $stmtTerceirizadas->fetchAll(PDO::FETCH_ASSOC);
     <link rel="stylesheet" href="css/dashboard.css">
     <link rel="stylesheet" href="css/contratante.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <style>
+        /* Estilos específicos para a vista de Mapa */
+        .map-view-container {
+            display: flex;
+            gap: 20px;
+            height: 70vh; /* Ocupa 70% da altura do ecrã */
+            margin-top: 15px;
+        }
+        .map-wrapper {
+            flex: 1; /* O mapa ocupa o restante do espaço */
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid #ccc;
+            z-index: 1; /* Mantém atrás dos menus */
+        }
+        #mapaServicos {
+            width: 100%;
+            height: 100%;
+        }
+        .sidebar-list {
+            flex: 0 0 380px; /* Largura fixa para a barra lateral */
+            overflow-y: auto; /* Adiciona scroll se houver muitas empresas */
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            padding-right: 10px;
+        }
+        
+        /* Personalização do Scrollbar da Sidebar */
+        .sidebar-list::-webkit-scrollbar { width: 8px; }
+        .sidebar-list::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 4px; }
+        .sidebar-list::-webkit-scrollbar-thumb { background: #888; border-radius: 4px; }
+        .sidebar-list::-webkit-scrollbar-thumb:hover { background: #555; }
+
+        /* Ajuste fino no cartão da terceirizada para caber na sidebar */
+        .terceirizada-card { margin-bottom: 0; cursor: pointer; transition: transform 0.2s; }
+        .terceirizada-card:hover { transform: scale(1.02); border-color: var(--secondary-yellow); }
+    </style>
 </head>
 <body>
     <div class="dashboard-header contratante-header">
@@ -56,7 +99,7 @@ $terceirizadas = $stmtTerceirizadas->fetchAll(PDO::FETCH_ASSOC);
             <h1 class="logo-title">ServiConnect <span class="badge-role">Contratante</span></h1>
             
             <nav class="main-nav">
-                <a href="#busca" id="buscaLink" class="nav-item nav-active"><i class="fa-solid fa-magnifying-glass"></i> Buscar Serviços</a>
+                <a href="#busca" id="buscaLink" class="nav-item nav-active"><i class="fa-solid fa-map-location-dot"></i> Mapa de Serviços</a>
                 <a href="#perfil" id="perfilLink" class="nav-item"><i class="fa-solid fa-building-user"></i> Meu Perfil</a>
             </nav>
 
@@ -72,31 +115,35 @@ $terceirizadas = $stmtTerceirizadas->fetchAll(PDO::FETCH_ASSOC);
         
         <section id="busca" class="content-section active-section">
             <h2 class="section-title"><i class="fa-solid fa-handshake"></i> Encontre o Serviço Perfeito</h2>
-            <div class="search-module widget-card">
-                <p class="search-tip">Empresas terceirizadas disponíveis para contratação (clique na foto ou nome para ver o perfil completo):</p>
-                <div class="terceirizadas-list">
+            
+            <div class="map-view-container">
+                <div class="sidebar-list">
                     <?php if (empty($terceirizadas)): ?>
-                        <p>Nenhuma empresa terceirizada encontrada no momento.</p>
+                        <div class="widget-card"><p>Nenhuma empresa terceirizada encontrada na sua região.</p></div>
                     <?php else: ?>
-                        <?php foreach ($terceirizadas as $t): ?>
-                            <div class="terceirizada-card widget-card">
+                        <?php foreach ($terceirizadas as $index => $t): ?>
+                            <div class="terceirizada-card widget-card" onclick="focarNoMapa(<?php echo $index; ?>)">
                                 <div class="profile-info">
                                     <?php $foto_terc = !empty($t['foto_path']) ? $t['foto_path'] : 'img/default_avatar.png'; ?>
-                                    <a href="perfil_empresa.php?id=<?php echo $t['usuario_id']; ?>">
-                                        <img src="<?php echo htmlspecialchars($foto_terc); ?>" alt="Logo" class="terceirizada-logo" style="width: 60px; height: 60px; border-radius: 8px; object-fit: cover; border: 1px solid #ddd;">
-                                    </a>
+                                    <img src="<?php echo htmlspecialchars($foto_terc); ?>" alt="Logo" class="terceirizada-logo" style="width: 50px; height: 50px; border-radius: 8px; object-fit: cover; border: 1px solid #ddd;">
                                     <div class="text-info">
-                                        <h4><a href="perfil_empresa.php?id=<?php echo $t['usuario_id']; ?>" style="text-decoration: none; color: inherit;"><?php echo htmlspecialchars($t['nome_empresa']); ?></a></h4>
-                                        <p class="service-area"><i class="fa-solid fa-location-dot"></i> Região: <?php echo htmlspecialchars($t['regioes_atendidas']); ?></p>
-                                        <p class="description-short"><?php echo substr(htmlspecialchars($t['descricao_servicos'] ?? ''), 0, 100); ?>...</p>
+                                        <h4 style="margin:0 0 5px 0; font-size:1.1em;"><?php echo htmlspecialchars($t['nome_empresa']); ?></h4>
+                                        <p class="service-area" style="margin:0; font-size:0.85em; color:#555;">
+                                            <i class="fa-solid fa-location-dot"></i> <?php echo htmlspecialchars($t['bairro'] ?? 'Região'); ?>
+                                        </p>
                                     </div>
                                 </div>
-                                <a href="solicitacao_orcamento.php?terceirizada_id=<?php echo $t['usuario_id']; ?>" class="btn-primary request-btn contratante-btn">
-                                    <i class="fa-solid fa-comments-dollar"></i> Solicitar Orçamento
-                                </a>
+                                <div style="display:flex; gap:5px; margin-top:12px;">
+                                    <a href="perfil_empresa.php?id=<?php echo $t['usuario_id']; ?>" class="btn-primary" style="flex:1; text-align:center; background:#333; font-size:0.8em; padding:8px;"><i class="fa-solid fa-eye"></i> Perfil</a>
+                                    <a href="solicitacao_orcamento.php?terceirizada_id=<?php echo $t['usuario_id']; ?>" class="btn-primary request-btn contratante-btn" style="flex:2; text-align:center; font-size:0.8em; padding:8px;"><i class="fa-solid fa-comments-dollar"></i> Orçamento</a>
+                                </div>
                             </div>
                         <?php endforeach; ?>
                     <?php endif; ?>
+                </div>
+
+                <div class="map-wrapper">
+                    <div id="mapaServicos"></div>
                 </div>
             </div>
         </section>
@@ -107,7 +154,6 @@ $terceirizadas = $stmtTerceirizadas->fetchAll(PDO::FETCH_ASSOC);
             <form action="backend/controllers/PerfilContratanteController.php" method="post" enctype="multipart/form-data" class="widget-card">
                 <div style="background-color: rgba(255, 196, 0, 0.1); padding: 15px; border-radius: 5px; margin-bottom: 20px; border-left: 4px solid var(--secondary-yellow);">
                     <p><strong>Empresa:</strong> <?php echo $dados_perfil['nome']; ?> | <strong>CNPJ:</strong> <?php echo $cnpj_logado; ?></p>
-                    <p style="font-size: 0.9em; color: #555; margin-top: 5px;">Mantenha os seus dados atualizados para que as prestadoras de serviço saibam onde realizar o trabalho.</p>
                 </div>
 
                 <div class="input-group" style="margin-bottom: 20px;">
@@ -119,14 +165,8 @@ $terceirizadas = $stmtTerceirizadas->fetchAll(PDO::FETCH_ASSOC);
                 </div>
 
                 <div style="display: flex; gap: 15px; margin-bottom: 15px;">
-                    <div style="flex: 1;">
-                        <label>Pessoa Responsável (Contato)</label>
-                        <input type="text" name="responsavel" value="<?php echo $dados_perfil['responsavel']; ?>" style="width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #ccc;">
-                    </div>
-                    <div style="flex: 1;">
-                        <label>Telefone / WhatsApp</label>
-                        <input type="text" name="telefone" value="<?php echo $dados_perfil['telefone']; ?>" style="width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #ccc;">
-                    </div>
+                    <div style="flex: 1;"><label>Responsável (Contato)</label><input type="text" name="responsavel" value="<?php echo $dados_perfil['responsavel']; ?>" style="width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #ccc;"></div>
+                    <div style="flex: 1;"><label>Telefone / WhatsApp</label><input type="text" name="telefone" value="<?php echo $dados_perfil['telefone']; ?>" style="width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #ccc;"></div>
                 </div>
                 
                 <h3 style="margin-top: 30px; margin-bottom: 15px; border-bottom: 1px solid #eee; padding-bottom: 5px;">Endereço Principal</h3>
@@ -155,7 +195,13 @@ $terceirizadas = $stmtTerceirizadas->fetchAll(PDO::FETCH_ASSOC);
     </main>
 
     <script>
+        // Dados das empresas vindos do PHP
+        const empresas = <?php echo json_encode($terceirizadas); ?>;
+        let map;
+        let marcadores = [];
+
         document.addEventListener('DOMContentLoaded', () => {
+            // Lógica de troca de abas
             const buscaLink = document.getElementById('buscaLink');
             const perfilLink = document.getElementById('perfilLink');
             const buscaSection = document.getElementById('busca');
@@ -167,6 +213,7 @@ $terceirizadas = $stmtTerceirizadas->fetchAll(PDO::FETCH_ASSOC);
                     perfilSection.style.display = 'none';
                     buscaLink.classList.add('nav-active');
                     perfilLink.classList.remove('nav-active');
+                    if (map) { map.invalidateSize(); } // Recalcula o tamanho do mapa ao mostrar
                 } else {
                     buscaSection.style.display = 'none';
                     perfilSection.style.display = 'block';
@@ -181,7 +228,46 @@ $terceirizadas = $stmtTerceirizadas->fetchAll(PDO::FETCH_ASSOC);
             if(window.location.hash === '#perfil') {
                 switchView('perfil');
             }
+
+            // INICIALIZANDO O MAPA LEAFLET
+            // Posição inicial: Centro de Ferraz de Vasconcelos
+            map = L.map('mapaServicos').setView([-23.5398, -46.3686], 13);
+
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                maxZoom: 19,
+                attribution: '© OpenStreetMap contributors'
+            }).addTo(map);
+
+            // Adicionando os marcadores das empresas
+            empresas.forEach((empresa, index) => {
+                // Truque visual: Se não tiver latitude no banco, gera uma coordenada aleatória perto de Ferraz
+                let lat = empresa.latitude ? parseFloat(empresa.latitude) : -23.5398 + (Math.random() - 0.5) * 0.04;
+                let lng = empresa.longitude ? parseFloat(empresa.longitude) : -46.3686 + (Math.random() - 0.5) * 0.04;
+
+                // Cria o ícone e a janela flutuante (popup)
+                let marker = L.marker([lat, lng]).addTo(map);
+                
+                let foto = empresa.foto_path ? empresa.foto_path : 'img/default_avatar.png';
+                let popupContent = `
+                    <div style="text-align: center; width: 150px;">
+                        <img src="${foto}" style="width: 50px; height: 50px; border-radius: 5px; object-fit: cover;">
+                        <h4 style="margin: 5px 0;">${empresa.nome_empresa}</h4>
+                        <a href="perfil_empresa.php?id=${empresa.usuario_id}" style="color: #0056b3; font-size: 12px; font-weight: bold; text-decoration: none;">Ver Perfil</a>
+                    </div>
+                `;
+                marker.bindPopup(popupContent);
+                marcadores.push(marker);
+            });
         });
+
+        // Função chamada quando se clica num cartão da barra lateral
+        function focarNoMapa(index) {
+            let marker = marcadores[index];
+            if(marker) {
+                map.flyTo(marker.getLatLng(), 16); // Faz o zoom até à empresa
+                marker.openPopup(); // Abre o balão de informação
+            }
+        }
     </script>
 </body>
 </html>
