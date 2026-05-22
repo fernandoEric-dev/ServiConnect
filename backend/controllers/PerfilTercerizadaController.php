@@ -78,11 +78,7 @@ try {
     $stmt = $pdo->prepare($sql_update);
     $stmt->execute($dados_form);
 
- // ... código acima ...
-    $stmt = $pdo->prepare($sql_update);
-    $stmt->execute($dados_form);
-
-    // 4. REDIRECIONA DE VOLTA PARA O PERFIL (Isso substitui o JSON antigo!)
+    // 4. REDIRECIONA DE VOLTA PARA O PERFIL
     header('Location: ../../dashboard_tercerizada.php#perfil');
     exit;
 
