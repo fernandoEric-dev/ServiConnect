@@ -6,25 +6,34 @@
     <meta name="description" content="ServiConnect: Conectando empresas a prestadores de serviços terceirizados de forma prática e segura.">
     <title>ServiConnect - Conectando Empresas e Serviços </title>
     
-    <!-- CSS principal -->
     <link rel="stylesheet" href="css/style.css">
 
-    <!-- Fonte Poppins -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet">
 
-    <!-- Ícones -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+    <style>
+        .top-bar .container {
+            justify-content: center !important;
+            gap: 50px !important; /* Espaçamento entre o logo, pesquisa e botões */
+        }
+        
+        /* Ajuste para telas menores não quebrarem o layout centralizado */
+        @media (max-width: 768px) {
+            .top-bar .container {
+                flex-direction: column;
+                gap: 20px !important;
+            }
+        }
+    </style>
 </head>
 <body>
 
-    <!-- HEADER -->
     <header>
         <div class="top-bar">
             <div class="container">
-                <!-- LOGO -->
                 <img src="foto/logo.jpg" alt="Logo da ServiConnect" class="logo">
                 
-                <!-- BARRA DE PESQUISA -->
                 <div class="search-area">
                     <input type="text" placeholder="Buscar por serviços (ex: limpeza, segurança)...">
                     <button type="submit" aria-label="Buscar">
@@ -32,21 +41,14 @@
                     </button>
                 </div>
 
-                <!-- BOTÕES DE AÇÃO -->
                 <div class="user-actions">
                     <a href="login.php" class="login-link">Entrar</a>
                     <a href="cadastro_empresa.php" class="btn btn-header">Cadastrar Empresa</a>
                 </div>
-
-                <!-- BOTÃO MENU MOBILE -->
-                <button class="mobile-nav-toggle" aria-controls="primary-navigation" aria-expanded="false">
-                    <span class="sr-only">Abrir Menu</span>
-                    <i class="fa-solid fa-bars"></i>
-                </button>
-            </div>
+                
+                </div>
         </div>
 
-        <!-- MENU -->
         <div class="bottom-bar" id="primary-navigation">
             <div class="container">
                  <nav>
@@ -61,7 +63,6 @@
         </div>
     </header>
 
-    <!-- HERO -->
     <section class="hero">
         <div class="container">
             <h1>A Conexão Certa para Sua Empresa</h1>
@@ -69,7 +70,6 @@
         </div>
     </section>
 
-    <!-- SOBRE -->
     <section id="sobre">
         <div class="container">
           <h2>Sobre a Servi<span class="highlight">Connect</span></h2>
@@ -85,7 +85,6 @@
         </div>
     </section>
 
-    <!-- FUNCIONALIDADES -->
     <section id="funcionalidades">
         <div class="container">
             <h2>Nossas Funcionalidades</h2>
@@ -118,7 +117,6 @@
         </div>
     </section>
 
-    <!-- COMO FUNCIONA -->
     <section id="como-funciona">
         <div class="container">
             <h2>Como Funciona</h2>
@@ -143,7 +141,6 @@
         </div>
     </section>
 
-    <!-- FOOTER -->
     <footer id="contato">
         <div class="container">
             <div class="social-icons">
@@ -156,7 +153,6 @@
         </div>
     </footer>
 
-    <!-- SCRIPT -->
     <script src="js/script.js"></script>
 
 </body>
