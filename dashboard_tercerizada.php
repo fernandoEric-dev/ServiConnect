@@ -105,7 +105,8 @@ $solicitacoes_recebidas = $stmtSolicitacoes->fetchAll(PDO::FETCH_ASSOC);
 
         <section id="perfil" class="content-section" style="display: none;">
             <h2 class="section-title"><i class="fa-solid fa-id-card-clip"></i> Gerenciar Perfil Público</h2>
-            <form action="backend/controllers/PerfilTercerizadaController.php" method="post" id="formEdicaoPerfil" enctype="multipart/form-data" class="widget-card">
+            
+            <form id="formCadastroEmpresa" action="backend/controllers/PerfilTercerizadaController.php" method="post" enctype="multipart/form-data" class="widget-card">
                 <input type="hidden" name="acao" value="atualizar_perfil">
                 <input type="hidden" name="foto_atual" value="<?php echo $dados_perfil['foto_path']; ?>">
 
@@ -136,17 +137,18 @@ $solicitacoes_recebidas = $stmtSolicitacoes->fetchAll(PDO::FETCH_ASSOC);
                 </div>
                 
                 <h3 style="margin-top: 30px; border-bottom: 1px solid #eee; padding-bottom: 5px;">Endereço Base</h3>
+                
                 <div style="display: flex; gap: 10px; margin-top:10px;">
-                    <div style="flex: 1;"><label>CEP</label><input type="text" name="cep_empresa" value="<?php echo $dados_perfil['cep']; ?>" style="width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #ccc;"></div>
-                    <div style="flex: 2;"><label>Rua/Avenida</label><input type="text" name="logradouro_empresa" value="<?php echo $dados_perfil['logradouro']; ?>" style="width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #ccc;"></div>
+                    <div style="flex: 1;"><label>CEP</label><input type="text" id="cepEmpresa" name="cep_empresa" value="<?php echo $dados_perfil['cep']; ?>" style="width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #ccc;"></div>
+                    <div style="flex: 2;"><label>Rua/Avenida</label><input type="text" id="logradouroEmpresa" name="logradouro_empresa" value="<?php echo $dados_perfil['logradouro']; ?>" style="width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #ccc;"></div>
                 </div>
                 <div style="display: flex; gap: 10px; margin-top:10px;">
-                    <div style="flex: 1;"><label>Número</label><input type="text" name="numero_empresa" value="<?php echo $dados_perfil['numero']; ?>" style="width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #ccc;"></div>
-                    <div style="flex: 2;"><label>Bairro</label><input type="text" name="bairro_empresa" value="<?php echo $dados_perfil['bairro']; ?>" style="width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #ccc;"></div>
+                    <div style="flex: 1;"><label>Número</label><input type="text" id="numeroEmpresa" name="numero_empresa" value="<?php echo $dados_perfil['numero']; ?>" style="width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #ccc;"></div>
+                    <div style="flex: 2;"><label>Bairro</label><input type="text" id="bairroEmpresa" name="bairro_empresa" value="<?php echo $dados_perfil['bairro']; ?>" style="width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #ccc;"></div>
                 </div>
                 <div style="display: flex; gap: 10px; margin-top:10px;">
-                    <div style="flex: 3;"><label>Cidade</label><input type="text" name="cidade_empresa" value="<?php echo $dados_perfil['cidade']; ?>" style="width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #ccc;"></div>
-                    <div style="flex: 1;"><label>UF</label><input type="text" name="estado_empresa" value="<?php echo $dados_perfil['estado']; ?>" style="width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #ccc;"></div>
+                    <div style="flex: 3;"><label>Cidade</label><input type="text" id="cidadeEmpresa" name="cidade_empresa" value="<?php echo $dados_perfil['cidade']; ?>" style="width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #ccc;"></div>
+                    <div style="flex: 1;"><label>UF</label><input type="text" id="estadoEmpresa" name="estado_empresa" value="<?php echo $dados_perfil['estado']; ?>" style="width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #ccc;"></div>
                 </div>
 
                 <button type="submit" class="btn btn-header terceirizada-btn" style="width: 100%; margin-top: 30px; padding: 15px; font-size: 1.1em;">
@@ -155,6 +157,60 @@ $solicitacoes_recebidas = $stmtSolicitacoes->fetchAll(PDO::FETCH_ASSOC);
             </form>
         </section>
     </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Verifica qual campo de CEP existe na página (se é o da Terceirizada ou do Contratante)
+            const inputCep = document.getElementById('cepEmpresa') || document.getElementById('cep');
+            
+            if (inputCep) {
+                // O evento 'input' dispara automaticamente a cada número que você digita
+                inputCep.addEventListener('input', function() {
+                    // Remove o traço e deixa só os números
+                    let cepLimpo = this.value.replace(/\D/g, ''); 
+                    
+                    // Só busca na API quando tiver exatamente 8 números
+                    if (cepLimpo.length === 8) {
+                        
+                        // Define quais são os IDs dos campos dependendo de qual painel estamos
+                        let isEmpresa = this.id === 'cepEmpresa';
+                        let fLogradouro = document.getElementById(isEmpresa ? 'logradouroEmpresa' : 'logradouro');
+                        let fBairro = document.getElementById(isEmpresa ? 'bairroEmpresa' : 'bairro');
+                        let fCidade = document.getElementById(isEmpresa ? 'cidadeEmpresa' : 'cidade');
+                        let fEstado = document.getElementById(isEmpresa ? 'estadoEmpresa' : 'estado');
+                        let fNumero = document.getElementById(isEmpresa ? 'numeroEmpresa' : 'numero');
+
+                        // Mostra "Buscando..." enquanto a internet processa
+                        fLogradouro.value = 'Buscando...';
+                        fBairro.value = 'Buscando...';
+                        fCidade.value = 'Buscando...';
+                        fEstado.value = 'Buscando...';
+
+                        // Faz a busca na ViaCEP
+                        fetch(`https://viacep.com.br/ws/${cepLimpo}/json/`)
+                        .then(resposta => resposta.json())
+                        .then(dados => {
+                            if (!dados.erro) {
+                                fLogradouro.value = dados.logradouro || '';
+                                fBairro.value = dados.bairro || '';
+                                fCidade.value = dados.localidade || '';
+                                fEstado.value = dados.uf || '';
+                                fNumero.focus(); // Pula o cursor direto para você digitar o número
+                            } else {
+                                alert('CEP não encontrado. Verifique se digitou corretamente.');
+                                fLogradouro.value = ''; fBairro.value = ''; fCidade.value = ''; fEstado.value = '';
+                            }
+                        })
+                        .catch(() => {
+                            alert('Erro de conexão ao buscar o CEP.');
+                            fLogradouro.value = ''; fBairro.value = ''; fCidade.value = ''; fEstado.value = '';
+                        });
+                    }
+                });
+            }
+        });
+    </script>
+
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const feedLink = document.getElementById('feedLink');

@@ -45,58 +45,124 @@ $status_respondida = ($solicitacao['status'] !== 'aberta');
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <title>Responder Orçamento #<?php echo htmlspecialchars($solicitacao_id); ?></title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Responder Orçamento #<?php echo htmlspecialchars($solicitacao_id); ?> - ServiConnect</title>
+    
     <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="css/dashboard.css"> 
-</head>
-<body>
-    <div class="dashboard-box" style="margin-top: 50px;">
-        <h2 class="section-title">Responder Solicitação de Orçamento #<?php echo htmlspecialchars($solicitacao_id); ?></h2>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    
+    <style>
+        body {
+            background-color: var(--light-grey);
+            font-family: 'Poppins', sans-serif;
+        }
         
-        <div class="widget-card" style="margin-bottom: 20px;">
-            <h3>Detalhes do Pedido</h3>
-            <p><strong>Contratante:</strong> <?php echo htmlspecialchars($solicitacao['nome_contratante']); ?> (<?php echo htmlspecialchars($solicitacao['email_contratante']); ?>)</p>
-            <p><strong>Área Solicitada:</strong> <?php echo htmlspecialchars($solicitacao['area_servico_solicitada']); ?></p>
-            <p><strong>Funcionários Desejados:</strong> <?php echo htmlspecialchars($solicitacao['numero_funcionarios']); ?></p>
-            <p><strong>Localização:</strong> <?php echo htmlspecialchars($solicitacao['localizacao_servico']); ?></p>
-            <p><strong>Descrição:</strong> <br><?php echo nl2br(htmlspecialchars($solicitacao['descricao_servico'])); ?></p>
-            <p><strong>Status Atual:</strong> <span style="font-weight: bold; color: <?php echo $status_respondida ? 'blue' : 'red'; ?>"><?php echo htmlspecialchars(ucfirst($solicitacao['status'])); ?></span></p>
+        .orcamento-container {
+            max-width: 800px;
+            margin: 50px auto;
+            background: var(--white-color);
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+        }
 
-            <?php if ($solicitacao['status'] === 'orçada'): ?>
-                <p><strong>Valor Orçado:</strong> R$ <?php echo number_format($solicitacao['valor_orcamento'], 2, ',', '.'); ?></p>
-            <?php endif; ?>
-        </div>
+        .orcamento-header {
+            background: var(--primary-blue);
+            color: var(--white-color);
+            padding: 25px 30px;
+            text-align: center;
+            border-bottom: 4px solid var(--secondary-yellow);
+        }
+        
+        .orcamento-header h2 {
+            color: var(--white-color);
+            margin: 0;
+            font-size: 1.8em;
+            padding-bottom: 0;
+        }
+        
+        .orcamento-header h2::after {
+            display: none; 
+        }
 
-        <?php if ($solicitacao['status'] === 'aberta'): ?>
-            <h3 class="section-title">Ação da Terceirizada</h3>
-            
-            <form action="backend/controllers/RespostaOrcamentoController.php" method="POST" class="widget-card">
-                <input type="hidden" name="solicitacao_id" value="<?php echo $solicitacao_id; ?>">
-                
-                <p>O que você deseja fazer com esta solicitação?</p>
+        .orcamento-body {
+            padding: 35px;
+        }
 
-                <div>
-                    <label for="valor_orcamento">Valor do Orçamento (R$):</label>
-                    <input type="number" id="valor_orcamento" name="valor_orcamento" min="0" step="0.01" placeholder="Informe o valor total. Ex: 5500.00">
-                    <small>Deixe em branco se for recusar.</small>
-                </div>
+        /* Seção de Detalhes do Pedido */
+        .detalhes-pedido {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 25px;
+            margin-bottom: 30px;
+        }
 
-                <div style="margin-top: 20px; display: flex; gap: 10px;">
-                    <button type="submit" name="action" value="orcamento" class="btn-primary search-btn" style="flex: 1;">
-                        <i class="fa-solid fa-money-bill-wave"></i> Enviar Orçamento
-                    </button>
-                    <button type="submit" name="action" value="recusa" class="btn-secondary" style="flex: 1;" onclick="return confirm('Tem certeza que deseja recusar este orçamento? Essa ação não pode ser desfeita.');">
-                        <i class="fa-solid fa-times-circle"></i> Recusar Solicitação
-                    </button>
-                </div>
-            </form>
-        <?php else: ?>
-            <div class="alert alert-warning">Esta solicitação já foi respondida e está com status: **<?php echo htmlspecialchars(ucfirst($solicitacao['status'])); ?>**.</div>
-        <?php endif; ?>
+        .detalhes-pedido h3 {
+            margin-top: 0;
+            color: var(--primary-blue);
+            font-size: 1.2em;
+            border-bottom: 1px solid #e2e8f0;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
 
-        <div style="margin-top: 15px; text-align: center;">
-            <a href="dashboard.php" class="btn-link">Voltar para a Lista de Solicitações</a>
-        </div>
-    </div>
-</body>
-</html>
+        .detalhe-item {
+            display: flex;
+            margin-bottom: 15px;
+            align-items: flex-start;
+        }
+
+        .detalhe-item i {
+            color: var(--secondary-yellow);
+            width: 25px;
+            font-size: 1.1em;
+            margin-top: 4px;
+        }
+
+        .detalhe-conteudo {
+            flex: 1;
+        }
+
+        .detalhe-conteudo strong {
+            color: var(--primary-blue);
+            display: block;
+            font-size: 0.9em;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 3px;
+        }
+
+        .detalhe-conteudo span {
+            color: var(--text-color);
+            font-size: 1.05em;
+        }
+
+        /* Status Badge */
+        .status-badge {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 50px;
+            font-size: 0.85em;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        .status-aberta { background: #e0f2fe; color: #0284c7; }
+        .status-orcamento { background: #dcfce7; color: #166534; }
+        .status-recusada { background: #fee2e2; color: #991b1b; }
+
+        /* Formulário de Ação */
+        .acao-form {
+            background: var(--white-color);
+            padding: 20px 0 0 0;
+            border-top: 1px dashed #cbd5e1;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-group label {
+            font-weight: 600;
+            color: var(--primary-blue);
+            display: block;
