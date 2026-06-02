@@ -203,4 +203,50 @@ $status_respondida = ($solicitacao['status'] !== 'aberta');
                     </div>
                 </div>
                 <div class="detalhe-item">
-                    <i class="fa-
+                    <i class="fa-solid fa-location-dot"></i>
+                    <div class="detalhe-conteudo">
+                        <strong>Localização</strong>
+                        <span><?php echo htmlspecialchars($solicitacao['localizacao_servico']); ?></span>
+                    </div>
+                </div>
+                <div class="detalhe-item">
+                    <i class="fa-solid fa-align-left"></i>
+                    <div class="detalhe-conteudo">
+                        <strong>Descrição Completa</strong>
+                        <span><?php echo nl2br(htmlspecialchars($solicitacao['descricao_servico'])); ?></span>
+                    </div>
+                </div>
+            </div>
+
+            <?php if (!$status_respondida): ?>
+                <div class="acao-form">
+                    <form action="backend/controllers/RespostaOrcamentoController.php" method="POST">
+                        <input type="hidden" name="solicitacao_id" value="<?php echo $solicitacao['id']; ?>">
+                        
+                        <div class="form-group">
+                            <label for="valor_orcamento">Valor Estimado (R$):</label>
+                            <input type="number" step="0.01" name="valor_orcamento" id="valor_orcamento" class="form-control" placeholder="0.00">
+                        </div>
+
+                        <button type="submit" name="action" value="orcamento" class="btn btn-success">
+                            <i class="fa-solid fa-check"></i> Enviar Orçamento
+                        </button>
+                        
+                        <button type="submit" name="action" value="recusa" class="btn btn-danger" onclick="return confirm('Tem certeza que deseja recusar este pedido?');">
+                            <i class="fa-solid fa-xmark"></i> Recusar Solicitação
+                        </button>
+                    </form>
+                </div>
+            <?php else: ?>
+                <div style="text-align: center; color: #555;">
+                    <h3>Esta solicitação já foi respondida (Status: <?php echo htmlspecialchars($solicitacao['status']); ?>)</h3>
+                </div>
+            <?php endif; ?>
+
+            <div style="text-align: center;">
+                <a href="dashboard_tercerizada.php" class="btn-back"><i class="fa-solid fa-arrow-left"></i> Voltar ao Dashboard</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

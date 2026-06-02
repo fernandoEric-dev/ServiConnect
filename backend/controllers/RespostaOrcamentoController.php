@@ -54,11 +54,11 @@ try {
     $stmt->execute($params);
 
     // 4. Redireciona com sucesso
-    header('Location: ../../dashboard.php?status=' . $msg);
+    header('Location: ../../dashboard_tercerizada.php?status=' . $msg);
     exit;
 
 } catch (\PDOException $e) {
     error_log("Erro ao responder solicitação: " . $e->getMessage());
-    header('Location: ../../dashboard.php?status=erro_banco');
+    header('Location: ../../dashboard_tercerizada.php?status=erro_banco');
     exit;
 }

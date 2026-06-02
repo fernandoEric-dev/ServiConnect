@@ -11,7 +11,7 @@ $contratante_id = $_SESSION['user_id'];
 $terceirizada_id = $_GET['terceirizada_id'] ?? null;
 
 if (!$terceirizada_id || !is_numeric($terceirizada_id)) {
-    header('Location: dashboard.php');
+    header('Location: dashboard_contratante.php');
     exit;
 }
 
