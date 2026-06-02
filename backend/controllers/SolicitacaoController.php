@@ -43,13 +43,13 @@ try {
     // 3. Execução
     $stmt->execute([$contratante_id, $terceirizada_id, $descricao, $localizacao, $num_func, $area_servico]);
 
-    // Redireciona o Contratante de volta para o dashboard com uma mensagem de sucesso
-    header('Location: ../../dashboard.php?status=solicitacao_enviada');
+    // REDIRECIONA PARA O NOVO (Troque isso)
+    header('Location: ../../dashboard_contratante.php?status=solicitacao_enviada');
     exit;
 
 } catch (\PDOException $e) {
     error_log("Erro ao salvar solicitação: " . $e->getMessage());
-    // Em caso de erro, redireciona para o dashboard com uma mensagem de falha
-    header('Location: ../../dashboard.php?status=solicitacao_erro');
+    // REDIRECIONA PARA O NOVO (Troque isso)
+    header('Location: ../../dashboard_contratante.php?status=solicitacao_erro');
     exit;
 }

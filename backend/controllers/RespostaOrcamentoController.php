@@ -16,7 +16,7 @@ $action = $_POST['action'] ?? null; // 'orcamento' ou 'recusa'
 $valor_orcamento = $_POST['valor_orcamento'] ?? null;
 
 if (!$solicitacao_id || !is_numeric($solicitacao_id) || empty($action)) {
-    header('Location: ../../dashboard.php?status=dados_invalidos');
+    header('Location: ../../dashboard_tercerizada.php?status=dados_invalidos');
     exit;
 }
 
@@ -43,9 +43,9 @@ try {
         $params = [$status, null, $solicitacao_id, $terceirizada_id];
         $msg = 'solicitacao_recusada';
         
-    } else {
+   } else {
         // Ação inválida
-        header('Location: ../../dashboard.php?status=acao_invalida');
+        header('Location: ../../dashboard_tercerizada.php?status=acao_invalida');
         exit;
     }
 

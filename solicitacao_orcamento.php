@@ -241,7 +241,7 @@ $terceirizada_nome = $terceirizada_info['nome_empresa'] ?? "Empresa Não Encontr
                         <i class="fa-solid fa-paper-plane"></i> Enviar Pedido de Orçamento
                     </button>
                     
-                    <a href="dashboard.php" class="btn-back"><i class="fa-solid fa-arrow-left"></i> Voltar ao Feed</a>
+                    <a href="dashboard_contratante.php" class="btn-back"><i class="fa-solid fa-arrow-left"></i> Voltar ao Feed</a>
                 </form>
             </div>
         </div>
