@@ -36,6 +36,8 @@ $stmtTerceirizadas = $pdo->prepare("
     FROM usuarios u JOIN empresas e ON u.id = e.usuario_id
     WHERE u.tipo_conta = 'empresa' AND e.tipo_empresa = 'terceirizada'
 ");
+$stmtTerceirizadas->execute();
+$terceirizadas = $stmtTerceirizadas->fetchAll(PDO::FETCH_ASSOC);
 
 // 3. Busca lista de Pedidos de Orçamento feitos pelo Contratante
 $stmtPedidos = $pdo->prepare("
@@ -47,9 +49,6 @@ $stmtPedidos = $pdo->prepare("
 ");
 $stmtPedidos->execute([$user_id]);
 $meus_pedidos = $stmtPedidos->fetchAll(PDO::FETCH_ASSOC);
-
-$stmtTerceirizadas->execute();
-$terceirizadas = $stmtTerceirizadas->fetchAll(PDO::FETCH_ASSOC);
 ?>
 <!DOCTYPE html>
 <html lang="pt-BR">
@@ -80,13 +79,6 @@ $terceirizadas = $stmtTerceirizadas->fetchAll(PDO::FETCH_ASSOC);
             border: 1px solid #ccc;
             z-index: 1; /* Mantém atrás dos menus */
         }
-
-        <nav class="main-nav">
-                <a href="#busca" id="buscaLink" class="nav-item nav-active"><i class="fa-solid fa-map-location-dot"></i> Mapa de Serviços</a>
-                <a href="#pedidos" id="pedidosLink" class="nav-item"><i class="fa-solid fa-file-invoice-dollar"></i> Meus Pedidos</a>
-                <a href="#perfil" id="perfilLink" class="nav-item"><i class="fa-solid fa-building-user"></i> Meu Perfil</a>
-            </nav>
-
         #mapaServicos {
             width: 100%;
             height: 100%;
@@ -118,6 +110,7 @@ $terceirizadas = $stmtTerceirizadas->fetchAll(PDO::FETCH_ASSOC);
             
             <nav class="main-nav">
                 <a href="#busca" id="buscaLink" class="nav-item nav-active"><i class="fa-solid fa-map-location-dot"></i> Mapa de Serviços</a>
+                <a href="#pedidos" id="pedidosLink" class="nav-item"><i class="fa-solid fa-file-invoice-dollar"></i> Meus Pedidos</a>
                 <a href="#perfil" id="perfilLink" class="nav-item"><i class="fa-solid fa-building-user"></i> Meu Perfil</a>
             </nav>
 
@@ -166,7 +159,6 @@ $terceirizadas = $stmtTerceirizadas->fetchAll(PDO::FETCH_ASSOC);
             </div>
         </section>
 
-        <!-- NOVA ABA: MEUS PEDIDOS -->
         <section id="pedidos" class="content-section" style="display: none;">
             <h2 class="section-title"><i class="fa-solid fa-file-invoice-dollar"></i> Orçamentos Solicitados</h2>
             
@@ -179,7 +171,7 @@ $terceirizadas = $stmtTerceirizadas->fetchAll(PDO::FETCH_ASSOC);
                     <?php foreach ($meus_pedidos as $pedido): ?>
                         <div class="widget-card" style="border-left: 5px solid <?php 
                             if ($pedido['status'] === 'aberta') echo '#ffc107'; // Amarelo
-                            elseif ($pedido['status'] === 'respondida') echo '#28a745'; // Verde
+                            elseif ($pedido['status'] === 'orçada' || $pedido['status'] === 'respondida') echo '#28a745'; // Verde
                             else echo '#dc3545'; // Vermelho (recusada)
                         ?>;">
                             <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 15px;">
@@ -194,7 +186,7 @@ $terceirizadas = $stmtTerceirizadas->fetchAll(PDO::FETCH_ASSOC);
                                 <div style="text-align: right; min-width: 150px;">
                                     <?php if ($pedido['status'] === 'aberta'): ?>
                                         <span style="display: inline-block; background: #fff3cd; color: #856404; padding: 5px 12px; border-radius: 50px; font-size: 0.9em; font-weight: bold;"><i class="fa-solid fa-clock"></i> Aguardando Resposta</span>
-                                    <?php elseif ($pedido['status'] === 'respondida'): ?>
+                                    <?php elseif ($pedido['status'] === 'orçada' || $pedido['status'] === 'respondida'): ?>
                                         <span style="display: inline-block; background: #d4edda; color: #155724; padding: 5px 12px; border-radius: 50px; font-size: 0.9em; font-weight: bold;"><i class="fa-solid fa-check-circle"></i> Respondido</span>
                                         <p style="margin: 5px 0 0 0; font-weight: bold; color: var(--primary-blue); font-size: 1.1em;">Valor: R$ <?php echo number_format($pedido['valor_orcamento'], 2, ',', '.'); ?></p>
                                     <?php elseif ($pedido['status'] === 'recusada'): ?>
@@ -259,19 +251,13 @@ $terceirizadas = $stmtTerceirizadas->fetchAll(PDO::FETCH_ASSOC);
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            // Verifica qual campo de CEP existe na página (se é o da Terceirizada ou do Contratante)
             const inputCep = document.getElementById('cepEmpresa') || document.getElementById('cep');
             
             if (inputCep) {
-                // O evento 'input' dispara automaticamente a cada número que você digita
                 inputCep.addEventListener('input', function() {
-                    // Remove o traço e deixa só os números
                     let cepLimpo = this.value.replace(/\D/g, ''); 
                     
-                    // Só busca na API quando tiver exatamente 8 números
                     if (cepLimpo.length === 8) {
-                        
-                        // Define quais são os IDs dos campos dependendo de qual painel estamos
                         let isEmpresa = this.id === 'cepEmpresa';
                         let fLogradouro = document.getElementById(isEmpresa ? 'logradouroEmpresa' : 'logradouro');
                         let fBairro = document.getElementById(isEmpresa ? 'bairroEmpresa' : 'bairro');
@@ -279,13 +265,11 @@ $terceirizadas = $stmtTerceirizadas->fetchAll(PDO::FETCH_ASSOC);
                         let fEstado = document.getElementById(isEmpresa ? 'estadoEmpresa' : 'estado');
                         let fNumero = document.getElementById(isEmpresa ? 'numeroEmpresa' : 'numero');
 
-                        // Mostra "Buscando..." enquanto a internet processa
                         fLogradouro.value = 'Buscando...';
                         fBairro.value = 'Buscando...';
                         fCidade.value = 'Buscando...';
                         fEstado.value = 'Buscando...';
 
-                        // Faz a busca na ViaCEP
                         fetch(`https://viacep.com.br/ws/${cepLimpo}/json/`)
                         .then(resposta => resposta.json())
                         .then(dados => {
@@ -294,7 +278,7 @@ $terceirizadas = $stmtTerceirizadas->fetchAll(PDO::FETCH_ASSOC);
                                 fBairro.value = dados.bairro || '';
                                 fCidade.value = dados.localidade || '';
                                 fEstado.value = dados.uf || '';
-                                fNumero.focus(); // Pula o cursor direto para você digitar o número
+                                fNumero.focus(); 
                             } else {
                                 alert('CEP não encontrado. Verifique se digitou corretamente.');
                                 fLogradouro.value = ''; fBairro.value = ''; fCidade.value = ''; fEstado.value = '';
@@ -311,38 +295,54 @@ $terceirizadas = $stmtTerceirizadas->fetchAll(PDO::FETCH_ASSOC);
     </script>
     
     <script>
-        // Dados das empresas vindos do PHP
         const empresas = <?php echo json_encode($terceirizadas); ?>;
         let map;
         let marcadores = [];
 
         document.addEventListener('DOMContentLoaded', () => {
-            // Lógica de troca de abas
+            // Lógica de troca de abas com a nova aba MEUS PEDIDOS
             const buscaLink = document.getElementById('buscaLink');
+            const pedidosLink = document.getElementById('pedidosLink');
             const perfilLink = document.getElementById('perfilLink');
+            
             const buscaSection = document.getElementById('busca');
+            const pedidosSection = document.getElementById('pedidos');
             const perfilSection = document.getElementById('perfil');
 
             function switchView(view) {
+                buscaSection.style.display = 'none';
+                pedidosSection.style.display = 'none';
+                perfilSection.style.display = 'none';
+                
+                buscaLink.classList.remove('nav-active');
+                pedidosLink.classList.remove('nav-active');
+                perfilLink.classList.remove('nav-active');
+
                 if (view === 'busca') {
                     buscaSection.style.display = 'block';
-                    perfilSection.style.display = 'none';
                     buscaLink.classList.add('nav-active');
-                    perfilLink.classList.remove('nav-active');
-                    if (map) { map.invalidateSize(); } 
+                    if (map) { setTimeout(() => { map.invalidateSize(); }, 100); } 
+                } else if (view === 'pedidos') {
+                    pedidosSection.style.display = 'block';
+                    pedidosLink.classList.add('nav-active');
                 } else {
-                    buscaSection.style.display = 'none';
                     perfilSection.style.display = 'block';
                     perfilLink.classList.add('nav-active');
-                    buscaLink.classList.remove('nav-active');
                 }
             }
             
             buscaLink.addEventListener('click', (e) => { e.preventDefault(); switchView('busca'); });
+            pedidosLink.addEventListener('click', (e) => { e.preventDefault(); switchView('pedidos'); });
             perfilLink.addEventListener('click', (e) => { e.preventDefault(); switchView('perfil'); });
 
+            // Verifica qual aba abrir dependendo da URL
             if(window.location.hash === '#perfil') {
                 switchView('perfil');
+            } else if (window.location.hash === '#pedidos' || window.location.search.includes('solicitacao_enviada')) {
+                // Se a URL tiver ?status=solicitacao_enviada, já abre a tela de pedidos direto!
+                switchView('pedidos');
+            } else {
+                switchView('busca'); // Default
             }
 
             // INICIALIZANDO O MAPA LEAFLET
