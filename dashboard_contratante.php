@@ -36,6 +36,18 @@ $stmtTerceirizadas = $pdo->prepare("
     FROM usuarios u JOIN empresas e ON u.id = e.usuario_id
     WHERE u.tipo_conta = 'empresa' AND e.tipo_empresa = 'terceirizada'
 ");
+
+// 3. Busca lista de Pedidos de Orçamento feitos pelo Contratante
+$stmtPedidos = $pdo->prepare("
+    SELECT s.*, e.nome AS nome_terceirizada, e.foto_path
+    FROM solicitacoes s
+    JOIN empresas e ON s.terceirizada_id = e.usuario_id
+    WHERE s.contratante_id = ?
+    ORDER BY s.data_solicitacao DESC
+");
+$stmtPedidos->execute([$user_id]);
+$meus_pedidos = $stmtPedidos->fetchAll(PDO::FETCH_ASSOC);
+
 $stmtTerceirizadas->execute();
 $terceirizadas = $stmtTerceirizadas->fetchAll(PDO::FETCH_ASSOC);
 ?>
@@ -68,6 +80,13 @@ $terceirizadas = $stmtTerceirizadas->fetchAll(PDO::FETCH_ASSOC);
             border: 1px solid #ccc;
             z-index: 1; /* Mantém atrás dos menus */
         }
+
+        <nav class="main-nav">
+                <a href="#busca" id="buscaLink" class="nav-item nav-active"><i class="fa-solid fa-map-location-dot"></i> Mapa de Serviços</a>
+                <a href="#pedidos" id="pedidosLink" class="nav-item"><i class="fa-solid fa-file-invoice-dollar"></i> Meus Pedidos</a>
+                <a href="#perfil" id="perfilLink" class="nav-item"><i class="fa-solid fa-building-user"></i> Meu Perfil</a>
+            </nav>
+
         #mapaServicos {
             width: 100%;
             height: 100%;
@@ -145,6 +164,51 @@ $terceirizadas = $stmtTerceirizadas->fetchAll(PDO::FETCH_ASSOC);
                     <div id="mapaServicos"></div>
                 </div>
             </div>
+        </section>
+
+        <!-- NOVA ABA: MEUS PEDIDOS -->
+        <section id="pedidos" class="content-section" style="display: none;">
+            <h2 class="section-title"><i class="fa-solid fa-file-invoice-dollar"></i> Orçamentos Solicitados</h2>
+            
+            <?php if (empty($meus_pedidos)): ?>
+                <div class="widget-card">
+                    <p style="text-align: center; color: #666; padding: 20px;">Você ainda não solicitou nenhum orçamento. Navegue pelo Mapa de Serviços para começar!</p>
+                </div>
+            <?php else: ?>
+                <div style="display: grid; gap: 20px;">
+                    <?php foreach ($meus_pedidos as $pedido): ?>
+                        <div class="widget-card" style="border-left: 5px solid <?php 
+                            if ($pedido['status'] === 'aberta') echo '#ffc107'; // Amarelo
+                            elseif ($pedido['status'] === 'respondida') echo '#28a745'; // Verde
+                            else echo '#dc3545'; // Vermelho (recusada)
+                        ?>;">
+                            <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 15px;">
+                                <div style="display: flex; gap: 15px; align-items: center;">
+                                    <img src="<?php echo htmlspecialchars($pedido['foto_path'] ?? 'img/default_avatar.png'); ?>" alt="Logo" style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover;">
+                                    <div>
+                                        <h3 style="margin: 0; font-size: 1.2em;">Pedido para: <a href="perfil_empresa.php?id=<?php echo $pedido['terceirizada_id']; ?>" style="color: var(--primary-blue); text-decoration: none;"><?php echo htmlspecialchars($pedido['nome_terceirizada']); ?></a></h3>
+                                        <p style="margin: 5px 0 0 0; font-size: 0.85em; color: #666;"><i class="fa-solid fa-calendar-day"></i> Solicitado em: <?php echo date('d/m/Y', strtotime($pedido['data_solicitacao'])); ?></p>
+                                    </div>
+                                </div>
+
+                                <div style="text-align: right; min-width: 150px;">
+                                    <?php if ($pedido['status'] === 'aberta'): ?>
+                                        <span style="display: inline-block; background: #fff3cd; color: #856404; padding: 5px 12px; border-radius: 50px; font-size: 0.9em; font-weight: bold;"><i class="fa-solid fa-clock"></i> Aguardando Resposta</span>
+                                    <?php elseif ($pedido['status'] === 'respondida'): ?>
+                                        <span style="display: inline-block; background: #d4edda; color: #155724; padding: 5px 12px; border-radius: 50px; font-size: 0.9em; font-weight: bold;"><i class="fa-solid fa-check-circle"></i> Respondido</span>
+                                        <p style="margin: 5px 0 0 0; font-weight: bold; color: var(--primary-blue); font-size: 1.1em;">Valor: R$ <?php echo number_format($pedido['valor_orcamento'], 2, ',', '.'); ?></p>
+                                    <?php elseif ($pedido['status'] === 'recusada'): ?>
+                                        <span style="display: inline-block; background: #f8d7da; color: #721c24; padding: 5px 12px; border-radius: 50px; font-size: 0.9em; font-weight: bold;"><i class="fa-solid fa-xmark-circle"></i> Recusado</span>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
+                            <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed #eee;">
+                                <p style="margin: 0; font-size: 0.9em;"><strong>Serviço:</strong> <?php echo htmlspecialchars($pedido['area_servico_solicitada']); ?> | <strong>Local:</strong> <?php echo htmlspecialchars($pedido['localizacao_servico']); ?></p>
+                            </div>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+            <?php endif; ?>
         </section>
 
         <section id="perfil" class="content-section" style="display: none;">

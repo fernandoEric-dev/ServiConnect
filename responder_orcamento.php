@@ -156,6 +156,12 @@ $status_respondida = ($solicitacao['status'] !== 'aberta');
             border: 1px solid #ccc;
             border-radius: 6px;
             font-size: 1em;
+            box-sizing: border-box;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--secondary-yellow);
         }
 
         .btn {
@@ -166,16 +172,23 @@ $status_respondida = ($solicitacao['status'] !== 'aberta');
             cursor: pointer;
             width: 100%;
             margin-bottom: 10px;
+            font-size: 1em;
+            transition: 0.3s;
         }
 
         .btn-success { background: #28a745; color: #fff; }
+        .btn-success:hover { background: #218838; }
         .btn-danger { background: #dc3545; color: #fff; }
+        .btn-danger:hover { background: #c82333; }
         
         .btn-back {
             display: inline-block;
             margin-top: 15px;
             color: var(--primary-blue);
             text-decoration: none;
+        }
+        .btn-back:hover {
+            color: var(--secondary-yellow);
         }
     </style>
 </head>
@@ -224,8 +237,10 @@ $status_respondida = ($solicitacao['status'] !== 'aberta');
                         <input type="hidden" name="solicitacao_id" value="<?php echo $solicitacao['id']; ?>">
                         
                         <div class="form-group">
-                            <label for="valor_orcamento">Valor Estimado (R$):</label>
-                            <input type="number" step="0.01" name="valor_orcamento" id="valor_orcamento" class="form-control" placeholder="0.00">
+                            <label for="valor_orcamento_mask">Valor Estimado:</label>
+                            <input type="text" id="valor_orcamento_mask" class="form-control" placeholder="R$ 0,00" required>
+                            
+                            <input type="hidden" name="valor_orcamento" id="valor_orcamento">
                         </div>
 
                         <button type="submit" name="action" value="orcamento" class="btn btn-success">
@@ -248,5 +263,36 @@ $status_respondida = ($solicitacao['status'] !== 'aberta');
             </div>
         </div>
     </div>
+
+    <script>
+        const inputMask = document.getElementById('valor_orcamento_mask');
+        const inputReal = document.getElementById('valor_orcamento');
+
+        if (inputMask && inputReal) {
+            inputMask.addEventListener('input', function(e) {
+                // Remove tudo o que não for número digitado pelo utilizador
+                let valor = e.target.value.replace(/\D/g, '');
+                
+                // Se apagar tudo, limpa ambos os campos
+                if (valor === '') {
+                    e.target.value = '';
+                    inputReal.value = '';
+                    return;
+                }
+
+                // Divide por 100 para criar os cêntimos matematicamente (ex: 10000 vira 100.00)
+                let valorNumerico = (parseInt(valor, 10) / 100);
+
+                // 1. Guarda o valor real no input hidden para o PHP/MySQL (formato: 10000.00)
+                inputReal.value = valorNumerico.toFixed(2);
+
+                // 2. Formata a tela para o utilizador em Reais (formato: R$ 10.000,00)
+                e.target.value = valorNumerico.toLocaleString('pt-BR', { 
+                    style: 'currency', 
+                    currency: 'BRL' 
+                });
+            });
+        }
+    </script>
 </body>
 </html>
