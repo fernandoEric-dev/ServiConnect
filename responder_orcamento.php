@@ -11,7 +11,7 @@ $terceirizada_id = $_SESSION['user_id'];
 $solicitacao_id = $_GET['id'] ?? null;
 
 if (!$solicitacao_id || !is_numeric($solicitacao_id)) {
-    header('Location: dashboard.php?status=solicitacao_invalida');
+    header('Location: dashboard_tercerizada.php?status=solicitacao_invalida');
     exit;
 }
 
@@ -33,7 +33,7 @@ $stmt->execute([$solicitacao_id, $terceirizada_id]);
 $solicitacao = $stmt->fetch(PDO::FETCH_ASSOC);
 
 if (!$solicitacao) {
-    header('Location: dashboard.php?status=nao_autorizado');
+    header('Location: dashboard_tercerizada.php?status=nao_autorizado');
     exit;
 }
 
@@ -80,16 +80,11 @@ $status_respondida = ($solicitacao['status'] !== 'aberta');
             font-size: 1.8em;
             padding-bottom: 0;
         }
-        
-        .orcamento-header h2::after {
-            display: none; 
-        }
 
         .orcamento-body {
             padding: 35px;
         }
 
-        /* Seção de Detalhes do Pedido */
         .detalhes-pedido {
             background: #f8fafc;
             border: 1px solid #e2e8f0;
@@ -138,20 +133,6 @@ $status_respondida = ($solicitacao['status'] !== 'aberta');
             font-size: 1.05em;
         }
 
-        /* Status Badge */
-        .status-badge {
-            display: inline-block;
-            padding: 6px 12px;
-            border-radius: 50px;
-            font-size: 0.85em;
-            font-weight: 600;
-            text-transform: uppercase;
-        }
-        .status-aberta { background: #e0f2fe; color: #0284c7; }
-        .status-orcamento { background: #dcfce7; color: #166534; }
-        .status-recusada { background: #fee2e2; color: #991b1b; }
-
-        /* Formulário de Ação */
         .acao-form {
             background: var(--white-color);
             padding: 20px 0 0 0;
@@ -166,3 +147,60 @@ $status_respondida = ($solicitacao['status'] !== 'aberta');
             font-weight: 600;
             color: var(--primary-blue);
             display: block;
+            margin-bottom: 8px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 1em;
+        }
+
+        .btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            margin-bottom: 10px;
+        }
+
+        .btn-success { background: #28a745; color: #fff; }
+        .btn-danger { background: #dc3545; color: #fff; }
+        
+        .btn-back {
+            display: inline-block;
+            margin-top: 15px;
+            color: var(--primary-blue);
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="orcamento-container">
+        <div class="orcamento-header">
+            <h2>Detalhes da Solicitação #<?php echo $solicitacao['id']; ?></h2>
+        </div>
+        
+        <div class="orcamento-body">
+            <div class="detalhes-pedido">
+                <h3>Informações do Pedido</h3>
+                <div class="detalhe-item">
+                    <i class="fa-solid fa-building"></i>
+                    <div class="detalhe-conteudo">
+                        <strong>Contratante</strong>
+                        <span><?php echo htmlspecialchars($solicitacao['nome_contratante']); ?></span>
+                    </div>
+                </div>
+                <div class="detalhe-item">
+                    <i class="fa-solid fa-briefcase"></i>
+                    <div class="detalhe-conteudo">
+                        <strong>Serviço</strong>
+                        <span><?php echo htmlspecialchars($solicitacao['area_servico_solicitada']); ?> (<?php echo htmlspecialchars($solicitacao['numero_funcionarios']); ?> Funcionários)</span>
+                    </div>
+                </div>
+                <div class="detalhe-item">
+                    <i class="fa-

@@ -36,7 +36,7 @@ $dados_perfil = [
 
 // Busca Solicitações Recebidas trazendo também o ID do contratante para ver o perfil
 $stmtSolicitacoes = $pdo->prepare("
-    SELECT s.id AS solicitacao_id, s.contratante_id, s.data_solicitacao, s.descricao_servico, s.localizacao_servico, s.area_servico_solicitada, s.numero_funcionarios, e.nome AS nome_contratante
+    SELECT s.id AS solicitacao_id, s.contratante_id, s.data_solicitacao, s.descricao_servico, s.localizacao_servico, s.area_servico_solicitada, s.numero_funcionarios, e.nome AS nome_contratante, e.foto_path
     FROM solicitacoes s
     JOIN empresas e ON s.contratante_id = e.usuario_id
     WHERE s.terceirizada_id = :terceirizada_id AND s.status = 'aberta'
@@ -83,7 +83,10 @@ $solicitacoes_recebidas = $stmtSolicitacoes->fetchAll(PDO::FETCH_ASSOC);
                 <div class="requests-list">
                     <?php foreach ($solicitacoes_recebidas as $s): ?>
                         <div class="solicitacao-card widget-card">
-                            <h3>Pedido de <a href="perfil_empresa.php?id=<?php echo $s['contratante_id']; ?>" style="color: #0056b3; text-decoration: none; font-weight: bold;"><?php echo htmlspecialchars($s['nome_contratante']); ?></a></h3>
+                           <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 10px;">
+                                <img src="<?php echo htmlspecialchars($s['foto_path'] ?? 'img/default_avatar.png'); ?>" style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover;">
+                                <h3>Pedido de <a href="perfil_empresa.php?id=<?php echo $s['contratante_id']; ?>" style="color: #0056b3; text-decoration: none; font-weight: bold;"><?php echo htmlspecialchars($s['nome_contratante']); ?></a></h3>
+                            </div>
                             <p><strong>Data:</strong> <?php echo date('d/m/Y H:i', strtotime($s['data_solicitacao'])); ?></p>
                             <p><strong>Serviço:</strong> <?php echo htmlspecialchars($s['area_servico_solicitada']); ?> (<?php echo htmlspecialchars($s['numero_funcionarios']); ?> Funcionários)</p>
                             <p><strong>Local:</strong> <?php echo htmlspecialchars($s['localizacao_servico']); ?></p>
