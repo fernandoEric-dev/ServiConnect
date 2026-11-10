@@ -37,4 +37,7 @@ $_SESSION['account_type'] = $user['tipo_empresa'] ?? 'admin';
 $_SESSION['person_type'] = $user['tipo_pessoa'] ?? 'juridica';
 csrf_token();
 $routes = ['admin'=>'admin.php','contratante'=>'dashboard_contratante.php','prestador'=>'dashboard_tercerizada.php'];
-echo json_encode(['success'=>true,'message'=>'Acesso autorizado.','redirect'=>$routes[$role]]);
+$requestedProvider = isset($data['prestador']) && is_scalar($data['prestador'])
+    ? (filter_var($data['prestador'], FILTER_VALIDATE_INT, ['options'=>['min_range'=>1]]) ?: 0) : 0;
+$destination = $requestedProvider ? 'perfil_empresa.php?id=' . $requestedProvider : $routes[$role];
+echo json_encode(['success'=>true,'message'=>'Acesso autorizado.','redirect'=>$destination]);

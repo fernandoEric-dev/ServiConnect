@@ -192,7 +192,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 const result = await sendJson('backend/controllers/AuthController.php', {
                     identificacao: documentValue,
                     senha: passwordField.value,
-                    csrf_token: login.querySelector('[name="csrf_token"]').value
+                    csrf_token: login.querySelector('[name="csrf_token"]').value,
+                    prestador: login.querySelector('[name="prestador"]')?.value || ''
                 });
                 const destination = new URL(result.redirect, window.location.href);
                 if (destination.origin !== window.location.origin) throw new Error('Destino de acesso inválido. Atualize a página e tente novamente.');

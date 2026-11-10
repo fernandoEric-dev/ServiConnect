@@ -34,12 +34,12 @@
             <div class="container">
                 <img src="foto/logo.jpg" alt="Logo da ServiConnect" class="logo">
                 
-                <div class="search-area">
-                    <input type="text" placeholder="Buscar por serviços (ex: limpeza, segurança)...">
+                <form class="search-area" action="busca.php" method="get" role="search" aria-label="Buscar serviços">
+                    <input type="search" name="q" maxlength="100" aria-label="Serviço ou nome do prestador" placeholder="Buscar serviços (ex.: jardinagem, limpeza)...">
                     <button type="submit" aria-label="Buscar">
                         <i class="fa-solid fa-magnifying-glass"></i>
                     </button>
-                </div>
+                </form>
 
                 <div class="user-actions">
                     <a href="login.php" class="login-link">Entrar</a>
@@ -67,6 +67,7 @@
         <div class="container">
             <h1>Serviços para sua casa ou empresa</h1>
             <p class="frase">Encontre MEIs e empresas terceirizadas para serviços como jardinagem, limpeza e manutenção.</p>
+            <a href="busca.php" class="btn btn-header">Buscar prestadores</a>
         </div>
     </section>
 

@@ -1,0 +1,17 @@
+<?php // Recebe $search, $searchPath e $searchAnchor das páginas de busca.
+$filters = $search['filters'];
+?>
+<form action="<?php echo search_escape($searchPath . $searchAnchor); ?>" method="get" class="search-filters" role="search" aria-label="Buscar prestadores">
+    <div class="search-field search-query"><label for="buscaTermo">Serviço ou nome do prestador</label><input type="search" id="buscaTermo" name="q" maxlength="100" placeholder="Ex.: jardinagem, limpeza, pintura" value="<?php echo search_escape($filters['q']); ?>"></div>
+    <div class="search-field"><label for="buscaLocal">Cidade ou região atendida</label><input type="search" id="buscaLocal" name="local" maxlength="100" placeholder="Ex.: Suzano" value="<?php echo search_escape($filters['local']); ?>"></div>
+    <div class="search-field"><label for="buscaUf">Estado da sede</label><select id="buscaUf" name="uf"><option value="">Todos os estados</option><?php foreach (search_states() as $uf): ?><option value="<?php echo $uf; ?>" <?php if ($filters['uf'] === $uf) echo 'selected'; ?>><?php echo $uf; ?></option><?php endforeach; ?></select></div>
+    <div class="search-field"><label for="buscaTipo">Tipo de prestador</label><select id="buscaTipo" name="tipo"><option value="">MEIs e terceirizadas</option><option value="mei" <?php if ($filters['tipo'] === 'mei') echo 'selected'; ?>>MEI</option><option value="terceirizada" <?php if ($filters['tipo'] === 'terceirizada') echo 'selected'; ?>>Empresa terceirizada</option></select></div>
+    <div class="search-field"><label for="buscaOrdem">Ordenar por</label><select id="buscaOrdem" name="ordem"><option value="relevancia" <?php if ($filters['ordem'] === 'relevancia') echo 'selected'; ?>>Relevância</option><option value="nome" <?php if ($filters['ordem'] === 'nome') echo 'selected'; ?>>Nome: A a Z</option><option value="nome_desc" <?php if ($filters['ordem'] === 'nome_desc') echo 'selected'; ?>>Nome: Z a A</option></select></div>
+    <div class="search-filter-actions"><button type="submit" class="search-button">Buscar serviços</button><a class="search-clear" href="<?php echo search_escape($searchPath . $searchAnchor); ?>">Limpar filtros</a></div>
+</form>
+<?php if ($filters['errors']): ?>
+    <div class="search-error" role="alert"><strong>Revise os filtros para pesquisar.</strong><ul><?php foreach ($filters['errors'] as $error): ?><li><?php echo search_escape($error); ?></li><?php endforeach; ?></ul></div>
+<?php else: ?>
+    <div class="search-summary" role="status"><p id="resumoBusca"><?php if ($search['total']): ?><strong><?php echo $search['total']; ?> <?php echo $search['total'] === 1 ? 'prestador encontrado' : 'prestadores encontrados'; ?></strong><span>Mostrando <?php echo $search['from']; ?>–<?php echo $search['to']; ?>.</span><?php else: ?><strong>Nenhum prestador encontrado.</strong><?php endif; ?></p>
+    <?php if ($filters['q'] !== '' || $filters['local'] !== '' || $filters['uf'] !== '' || $filters['tipo'] !== ''): ?><div class="search-chips" aria-label="Filtros aplicados"><?php foreach (['q'=>'Busca', 'local'=>'Atendimento em', 'uf'=>'Sede em', 'tipo'=>'Tipo'] as $key=>$label): ?><?php if ($filters[$key] !== ''): ?><span><?php echo $label; ?>: <?php echo search_escape($key === 'tipo' ? account_type_label($filters[$key]) : $filters[$key]); ?></span><?php endif; ?><?php endforeach; ?></div><?php endif; ?></div>
+<?php endif; ?>

@@ -46,6 +46,8 @@ Todos os dados abaixo são exclusivos dos testes locais. Senha inicial: **`Servi
 
 Os cadastros CPF/CNPJ e os perfis MEI/terceirizada estão implementados. Consulte [Etapa 2](ETAPA_2.md) para os novos fluxos e a atualização incremental do InfinityFree.
 
+A [Etapa 3](ETAPA_3.md) acrescenta busca pública e no painel, filtros e paginação com os dados existentes, sem nova importação de banco. A suíte específica é `tests/search.php`.
+
 ## Estrutura e configurações
 
 - `database/migrations/001_base.sql`: estrutura do banco atual, sem INSERTs de produção, sem nome do banco de produção e sem contadores de IDs reais.

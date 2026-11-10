@@ -32,20 +32,16 @@ $dados_perfil = [
     'estado' => htmlspecialchars($dados_bd['estado'] ?? ''),
 ];
 
-// 2. Busca lista de Terceirizadas para o MAPA e FEED
-$stmtTerceirizadas = $pdo->prepare("
-    SELECT u.id AS usuario_id,e.nome AS nome_empresa,e.descricao AS descricao_servicos,
-           e.regiao AS regioes_atendidas,e.foto_path,e.tipo_empresa,e.area_atuacao,e.cidade,e.estado,
-           CASE WHEN e.tipo_empresa='terceirizada' THEN e.latitude ELSE NULL END AS latitude,
-           CASE WHEN e.tipo_empresa='terceirizada' THEN e.longitude ELSE NULL END AS longitude
-    FROM usuarios u JOIN empresas e ON u.id=e.usuario_id
-    WHERE u.tipo_conta='empresa' AND e.tipo_empresa IN ('terceirizada','mei') AND u.status='ativo'
-    ORDER BY e.nome,u.id
-");
-$stmtTerceirizadas->execute();
-$terceirizadas = $stmtTerceirizadas->fetchAll(PDO::FETCH_ASSOC);
-foreach ($terceirizadas as &$prestador) $prestador['foto_path'] = safe_photo($prestador['foto_path']);
-unset($prestador);
+// A lista e o mapa usam a mesma página de resultados da busca pública.
+require_once __DIR__ . '/backend/search.php';
+$search = search_providers($pdo, search_filters($_GET), true);
+if ($search['filters']['errors']) http_response_code(400);
+$terceirizadas = $search['items'];
+$searchPath = 'dashboard_contratante.php';
+$searchAnchor = '';
+$searchMap = true;
+$searchSignedIn = true;
+$searchContractor = true;
 
 // 3. Busca lista de Pedidos de Orçamento feitos pelo Contratante
 $stmtPedidos = $pdo->prepare("
@@ -111,6 +107,7 @@ $meus_pedidos = $stmtPedidos->fetchAll(PDO::FETCH_ASSOC);
         .terceirizada-card:hover { transform: scale(1.02); border-color: var(--secondary-yellow); }
     </style>
     <link rel="stylesheet" href="css/perfis.css">
+    <link rel="stylesheet" href="css/busca.css">
 </head>
 <body>
     <div class="dashboard-header contratante-header">
@@ -118,7 +115,7 @@ $meus_pedidos = $stmtPedidos->fetchAll(PDO::FETCH_ASSOC);
             <h1 class="logo-title">ServiConnect <span class="badge-role">Contratante</span></h1>
 
             <nav class="main-nav">
-                <a href="#busca" id="buscaLink" class="nav-item nav-active"><i class="fa-solid fa-map-location-dot"></i> Mapa de Serviços</a>
+                <a href="#busca" id="buscaLink" class="nav-item nav-active"><i class="fa-solid fa-map-location-dot"></i> Buscar serviços</a>
                 <a href="#pedidos" id="pedidosLink" class="nav-item"><i class="fa-solid fa-file-invoice-dollar"></i> Meus Pedidos</a>
                 <a href="#perfil" id="perfilLink" class="nav-item"><i class="fa-solid fa-building-user"></i> Meu Perfil</a>
             </nav>
@@ -135,38 +132,19 @@ $meus_pedidos = $stmtPedidos->fetchAll(PDO::FETCH_ASSOC);
 
         <section id="busca" class="content-section active-section">
             <h2 class="section-title"><i class="fa-solid fa-handshake"></i> Encontre o Serviço Perfeito</h2>
+            <?php require __DIR__ . '/backend/views/busca-filtros.php'; ?>
 
             <div class="map-view-container">
                 <div class="sidebar-list account-provider-list">
-                    <?php if (empty($terceirizadas)): ?>
-                        <div class="widget-card"><p>Nenhum prestador disponível no momento.</p></div>
-                    <?php else: ?>
-                        <?php foreach ($terceirizadas as $index => $t): ?>
-                            <article class="terceirizada-card widget-card">
-                                <div class="profile-info">
-                                    <img src="<?php echo htmlspecialchars($t['foto_path']); ?>" alt="Foto de <?php echo htmlspecialchars($t['nome_empresa']); ?>" class="terceirizada-logo" width="50" height="50">
-                                    <div class="text-info">
-                                        <h3 style="margin:0 0 6px;font-size:1.1rem"><?php echo htmlspecialchars($t['nome_empresa']); ?></h3>
-                                        <span class="profile-type"><?php echo htmlspecialchars(account_type_label($t['tipo_empresa'],'juridica')); ?></span>
-                                        <p class="provider-service"><?php echo htmlspecialchars($t['area_atuacao'] ?: 'Serviços a consultar'); ?></p>
-                                        <p class="service-area"><?php echo htmlspecialchars(trim(($t['cidade'] ?? '').(!empty($t['estado']) ? ' / '.$t['estado'] : '')) ?: 'Localização não informada'); ?></p>
-                                    </div>
-                                </div>
-                                <div class="provider-actions">
-                                    <a href="perfil_empresa.php?id=<?php echo (int)$t['usuario_id']; ?>" class="profile-action">Ver perfil</a>
-                                    <a href="solicitacao_orcamento.php?terceirizada_id=<?php echo (int)$t['usuario_id']; ?>" class="profile-action profile-action-primary">Orçamento</a>
-                                    <?php if ($t['latitude'] !== null && $t['longitude'] !== null): ?><button type="button" class="map-focus profile-action" onclick="focarNoMapa(<?php echo (int)$index; ?>)">Ver no mapa</button><?php endif; ?>
-                                </div>
-                            </article>
-                        <?php endforeach; ?>
-                    <?php endif; ?>
+                    <?php require __DIR__ . '/backend/views/busca-resultados.php'; ?>
                 </div>
 
                 <div class="map-wrapper">
-                    <p style="margin:8px">O mapa exibe empresas com localização informada. MEIs aparecem na lista, com sua região de atendimento.</p>
+                    <p class="search-map-note">O mapa mostra somente as empresas desta página com localização informada. MEIs aparecem na lista, sem divulgar seu endereço residencial.</p>
                     <div id="mapaServicos"></div>
                 </div>
             </div>
+            <?php require __DIR__ . '/backend/views/busca-paginacao.php'; ?>
         </section>
 
         <section id="pedidos" class="content-section" style="display: none;">
@@ -359,6 +337,8 @@ $meus_pedidos = $stmtPedidos->fetchAll(PDO::FETCH_ASSOC);
                 marker.bindPopup(popup);
                 marcadores[index] = marker;
             });
+            const visibles = marcadores.filter(Boolean);
+            if (visibles.length) map.fitBounds(L.featureGroup(visibles).getBounds(), {padding: [30, 30], maxZoom: 14});
         });
 
         function focarNoMapa(index) {
