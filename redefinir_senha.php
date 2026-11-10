@@ -1,48 +1,24 @@
 <?php
-require_once 'backend/conexao.php';
-
-$mensagem = '';
-$tipo_msg = '';
+require_once __DIR__ . '/backend/conexao.php';
+$mensagem = ''; $tipo_msg = ''; $token_valido = false;
 $token = $_GET['token'] ?? '';
-$token_valido = false;
-
-if ($token) {
-    // Verifica se o token existe e ainda não expirou (valido por 1 hora)
-    $stmt = $pdo->prepare("SELECT id FROM usuarios WHERE reset_token = ? AND reset_expires > NOW()");
-    $stmt->execute([$token]);
-    $user = $stmt->fetch(PDO::FETCH_ASSOC);
-
-    if ($user) {
-        $token_valido = true;
+if (!is_string($token) || !preg_match('/^[a-f0-9]{64}$/D',$token)) abort_request(400,'Link de recuperação inválido.');
+$stmt = $pdo->prepare("SELECT id FROM usuarios WHERE reset_token=? AND reset_expires>NOW() AND status='ativo'");
+$stmt->execute([hash('sha256',$token)]);
+$id = $stmt->fetchColumn();
+$token_valido = (bool)$id;
+if (!$token_valido) { $mensagem='Este link é inválido ou expirou. Solicite outro.'; $tipo_msg='error'; }
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    require_csrf();
+    $senha = $_POST['senha'] ?? '';
+    if (!$token_valido) abort_request(400,'Este link é inválido ou expirou.');
+    if (!is_string($senha) || strlen($senha)<6 || strlen($senha)>72 || $senha !== ($_POST['confirmar_senha'] ?? null)) {
+        $mensagem='As senhas devem coincidir e ter entre 6 e 72 bytes.'; $tipo_msg='error';
     } else {
-        $mensagem = "Este link de recuperação é inválido ou já expirou. Solicite um novo.";
-        $tipo_msg = 'error';
-    }
-} else {
-    header("Location: login.php");
-    exit;
-}
-
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && $token_valido) {
-    $senha = $_POST['senha'];
-    $confirmar_senha = $_POST['confirmar_senha'];
-
-    if (strlen($senha) < 6) {
-        $mensagem = "A senha deve ter pelo menos 6 caracteres.";
-        $tipo_msg = 'error';
-    } elseif ($senha !== $confirmar_senha) {
-        $mensagem = "As senhas não coincidem.";
-        $tipo_msg = 'error';
-    } else {
-        $hash = password_hash($senha, PASSWORD_DEFAULT);
-
-        // Atualiza a senha e apaga o token para que o link pare de funcionar por segurança
-        $stmt = $pdo->prepare("UPDATE usuarios SET senha = ?, reset_token = NULL, reset_expires = NULL WHERE id = ?");
-        $stmt->execute([$hash, $user['id']]);
-
-        $mensagem = "Senha alterada com sucesso!";
-        $tipo_msg = 'success';
-        $token_valido = false; // Esconde o formulário de senha após o sucesso
+        $update = $pdo->prepare("UPDATE usuarios SET senha=?,reset_token=NULL,reset_expires=NULL WHERE id=? AND reset_token=? AND reset_expires>NOW() AND status='ativo'");
+        $update->execute([password_hash($senha,PASSWORD_DEFAULT),$id,hash('sha256',$token)]);
+        if ($update->rowCount()!==1) abort_request(409,'Este link já foi utilizado ou expirou.');
+        $mensagem='Senha alterada com sucesso!'; $tipo_msg='success'; $token_valido=false;
     }
 }
 ?>
@@ -61,8 +37,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $token_valido) {
 </head>
 <body>
     <form action="" method="post">
+        <?php echo csrf_field(); ?>
         <h2>Criar Nova Senha</h2>
-        
+
         <?php if ($mensagem): ?>
             <div class="alert alert-<?php echo $tipo_msg; ?>">
                 <?php echo $mensagem; ?>
@@ -82,7 +59,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $token_valido) {
                 <label for="confirmar_senha">Confirmar Nova Senha</label>
                 <input type="password" id="confirmar_senha" name="confirmar_senha" placeholder="Repita a nova senha" required>
             </div>
-            
+
             <button type="submit" style="margin-top: 20px;">Salvar Nova Senha</button>
         <?php endif; ?>
     </form>

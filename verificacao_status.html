@@ -30,7 +30,7 @@
             margin-bottom: 20px;
             display: block;
         }
-        .error { 
+        .error {
             color: #dc3545; /* Vermelho padrão para erros */
         }
         .success {
@@ -74,10 +74,10 @@
             const status = params.get('status');
             const mensagem = params.get('mensagem');
             const contentDiv = document.getElementById('statusContent');
-            
+
             // Decodifica a mensagem de erro/sucesso da URL
-            const decodedMensagem = mensagem ? decodeURIComponent(mensagem) : 'Nenhuma mensagem detalhada fornecida.';
-            
+            const decodedMensagem = mensagem || 'Nenhuma mensagem detalhada fornecida.';
+
             // Link de retorno ajustado para .php (coerente com o backend)
             const returnLink = '<a href="login.php" class="btn-login">Retornar à Página de Login</a>';
 
@@ -85,16 +85,16 @@
                 contentDiv.innerHTML = `
                     <i class="fa-solid fa-circle-xmark status-icon error"></i>
                     <h2>Falha no Processo</h2>
-                    <p>${decodedMensagem}</p>
+                    <p class="operation-message"></p>
                     ${returnLink}
                 `;
             } else if (status === 'sucesso') {
-                // Embora o fluxo de sucesso possa ir direto para login.php, 
+                // Embora o fluxo de sucesso possa ir direto para login.php,
                 // mantemos esta opção caso o fluxo mude.
                 contentDiv.innerHTML = `
                     <i class="fa-solid fa-circle-check status-icon success"></i>
                     <h2>Sucesso!</h2>
-                    <p>${decodedMensagem}</p>
+                    <p class="operation-message"></p>
                     ${returnLink}
                 `;
             } else {
@@ -106,6 +106,8 @@
                     ${returnLink}
                 `;
             }
+            const messageNode = contentDiv.querySelector('.operation-message');
+            if (messageNode) messageNode.textContent = decodedMensagem;
         });
     </script>
 </body>

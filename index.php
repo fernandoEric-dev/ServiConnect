@@ -43,7 +43,7 @@
 
                 <div class="user-actions">
                     <a href="login.php" class="login-link">Entrar</a>
-                    <a href="cadastro_empresa.php" class="btn btn-header">Cadastrar Empresa</a>
+                    <a href="cadastro_empresa.php" class="btn btn-header">Criar conta</a>
                 </div>
                 
                 </div>
@@ -65,8 +65,8 @@
 
     <section class="hero">
         <div class="container">
-            <h1>A Conexão Certa para Sua Empresa</h1>
-            <p class="frase">Encontre os melhores serviços terceirizados, como limpeza, segurança e muitas outras opções, reunidos em um só lugar.</p>
+            <h1>Serviços para sua casa ou empresa</h1>
+            <p class="frase">Encontre MEIs e empresas terceirizadas para serviços como jardinagem, limpeza e manutenção.</p>
         </div>
     </section>
 

@@ -1,11 +1,12 @@
 <?php
 // solicitacao_orcamento.php
-session_start();
+require_once __DIR__ . '/backend/security.php';
 
 // ... (Restante do código de verificação de segurança) ...
 
-require_once 'backend/conexao.php';
-require_once 'backend/models/UsuarioModel.php'; 
+require_once __DIR__ . '/backend/conexao.php';
+require_role($pdo, ['contratante']);
+require_once 'backend/models/UsuarioModel.php';
 
 $contratante_id = $_SESSION['user_id'];
 $terceirizada_id = $_GET['terceirizada_id'] ?? null;
@@ -16,11 +17,12 @@ if (!$terceirizada_id || !is_numeric($terceirizada_id)) {
 }
 
 // Buscamos a coluna 'nome'
-$stmt = $pdo->prepare("SELECT nome AS nome_empresa FROM empresas WHERE usuario_id = ?"); 
+$stmt = $pdo->prepare("SELECT e.nome AS nome_empresa FROM empresas e JOIN usuarios u ON u.id=e.usuario_id WHERE e.usuario_id=? AND e.tipo_empresa IN ('terceirizada','mei') AND u.status='ativo'");
 $stmt->execute([$terceirizada_id]);
 $terceirizada_info = $stmt->fetch(PDO::FETCH_ASSOC);
 
-$terceirizada_nome = $terceirizada_info['nome_empresa'] ?? "Empresa Não Encontrada"; 
+if (!$terceirizada_info) abort_request(404, 'Prestador indisponível.');
+$terceirizada_nome = $terceirizada_info['nome_empresa'] ?? "Empresa Não Encontrada";
 ?>
 <!DOCTYPE html>
 <html lang="pt-BR">
@@ -28,15 +30,15 @@ $terceirizada_nome = $terceirizada_info['nome_empresa'] ?? "Empresa Não Encontr
     <meta charset="UTF-8">
     <title>Solicitar Orçamento - ServiConnect</title>
     <link rel="stylesheet" href="css/style.css">
-    
+
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-    
+
     <style>
         body {
             background-color: var(--light-grey);
             font-family: 'Poppins', sans-serif;
         }
-        
+
         /* Container principal do formulário (Formato de Cartão/Card) */
         .orcamento-container {
             max-width: 850px;
@@ -54,19 +56,19 @@ $terceirizada_nome = $terceirizada_info['nome_empresa'] ?? "Empresa Não Encontr
             padding: 30px;
             text-align: center;
         }
-        
+
         .orcamento-header h2 {
             color: var(--secondary-yellow);
             margin-bottom: 10px;
             font-size: 2.2em;
         }
-        
+
         .orcamento-header p {
             font-size: 1.1em;
             margin: 0;
             color: #d1d5db;
         }
-        
+
         .orcamento-header p strong {
             color: var(--white-color);
             font-size: 1.2em;
@@ -189,18 +191,19 @@ $terceirizada_nome = $terceirizada_info['nome_empresa'] ?? "Empresa Não Encontr
 <body>
     <div class="container">
         <div class="orcamento-container">
-            
+
             <div class="orcamento-header">
                 <h2>Solicitar Orçamento</h2>
                 <p>Enviando solicitação para:<br><strong><?php echo htmlspecialchars($terceirizada_nome); ?></strong></p>
             </div>
-            
+
             <div class="orcamento-body">
                 <form action="backend/controllers/SolicitacaoController.php" method="POST" id="formSolicitacao">
-                    
+                <?php echo csrf_field(); ?>
+
                     <input type="hidden" name="contratante_id" value="<?php echo $contratante_id; ?>">
                     <input type="hidden" name="terceirizada_id" value="<?php echo $terceirizada_id; ?>">
-                    
+
                     <input type="hidden" name="descricao_servico" id="descricao_servico_real">
 
                     <div class="form-row">
@@ -236,11 +239,11 @@ $terceirizada_nome = $terceirizada_info['nome_empresa'] ?? "Empresa Não Encontr
                         <label for="detalhes_opcionais"><i class="fa-solid fa-circle-info"></i> Detalhes Adicionais (Opcional):</label>
                         <textarea id="detalhes_opcionais" class="form-control" rows="3" placeholder="Ex: Preciso que os produtos de limpeza estejam inclusos, será no período noturno, etc..."></textarea>
                     </div>
-                    
+
                     <button type="submit" class="btn-submit">
                         <i class="fa-solid fa-paper-plane"></i> Enviar Pedido de Orçamento
                     </button>
-                    
+
                     <a href="dashboard_contratante.php" class="btn-back"><i class="fa-solid fa-arrow-left"></i> Voltar ao Feed</a>
                 </form>
             </div>
@@ -252,16 +255,16 @@ $terceirizada_nome = $terceirizada_info['nome_empresa'] ?? "Empresa Não Encontr
             // Pega o valor do dropdown e o que a pessoa digitou na caixa de texto
             const frequencia = document.getElementById('frequencia').value;
             const detalhes = document.getElementById('detalhes_opcionais').value;
-            
+
             // Pega o input escondido que o backend do PHP está esperando
             const campoReal = document.getElementById('descricao_servico_real');
-            
+
             // Monta o texto bonitinho
             let textoFinal = "Frequência: " + frequencia;
             if (detalhes.trim() !== "") {
                 textoFinal += " | Detalhes: " + detalhes;
             }
-            
+
             // Atribui o texto final ao input escondido
             campoReal.value = textoFinal;
         });

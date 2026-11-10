@@ -1,0 +1,5 @@
+/backend/config.local.php
+/.local/
+*.log
+*.sql.gz
+/foto/upload_*

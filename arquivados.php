@@ -1,62 +1,9 @@
 <?php
-session_start();
-require_once 'backend/conexao.php';
-
-// Verifica se o usuário está logado e se é admin
-if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'admin') {
-    header('Location: login.php');
-    exit;
-}
-
-$mensagem = '';
-
-// --- LÓGICA PARA RESTAURAR (DESARQUIVAR) ---
-if (isset($_GET['acao']) && isset($_GET['id'])) {
-    $id_alvo = (int)$_GET['id'];
-    $acao = $_GET['acao'];
-
-    try {
-        if ($acao === 'desarquivar') {
-            // 1. Busca o usuário nos arquivados
-            $stmtBusca = $pdo->prepare("SELECT * FROM usuarios_arquivados WHERE id = ?");
-            $stmtBusca->execute([$id_alvo]);
-            $userArq = $stmtBusca->fetch(PDO::FETCH_ASSOC);
-
-            if ($userArq) {
-                $pdo->beginTransaction();
-                
-                // 2. Insere ele de volta na tabela principal de usuários (com status ativo)
-                $stmtInsert = $pdo->prepare("INSERT INTO usuarios (cpf_cnpj, email, senha, tipo_conta, status) VALUES (?, ?, ?, ?, 'ativo')");
-                $stmtInsert->execute([
-                    $userArq['cpf_cnpj'], 
-                    $userArq['email'], 
-                    $userArq['senha'], 
-                    $userArq['tipo_conta']
-                ]);
-                
-                // 3. Deleta da tabela de arquivados
-                $stmtDel = $pdo->prepare("DELETE FROM usuarios_arquivados WHERE id = ?");
-                $stmtDel->execute([$id_alvo]);
-                
-                $pdo->commit();
-                $mensagem = "<div class='alert alert-success'>Usuário restaurado com sucesso! O acesso dele foi liberado.</div>";
-            } else {
-                $mensagem = "<div class='alert alert-error'>Usuário não encontrado nos arquivos.</div>";
-            }
-        }
-    } catch (\PDOException $e) {
-        if ($pdo->inTransaction()) { $pdo->rollBack(); }
-        $mensagem = "<div class='alert alert-error'>Erro ao restaurar ação: " . $e->getMessage() . "</div>";
-    }
-}
-
-// --- BUSCAR DADOS PARA A TABELA DE ARQUIVADOS ---
-try {
-    $stmtArquivados = $pdo->query("SELECT id, cpf_cnpj, email, tipo_conta, data_arquivamento FROM usuarios_arquivados ORDER BY id DESC");
-    $listaArquivados = $stmtArquivados->fetchAll(PDO::FETCH_ASSOC);
-} catch (\PDOException $e) {
-    die("Erro ao carregar dados para a tabela: " . $e->getMessage());
-}
+require_once __DIR__ . '/backend/conexao.php';
+require_role($pdo, ['admin']);
+require_once __DIR__ . '/backend/admin_actions.php';
+$listaArquivados = $pdo->query("SELECT u.id,u.cpf_cnpj,u.email,u.tipo_conta,u.tipo_pessoa,u.arquivado_em AS data_arquivamento,e.tipo_empresa FROM usuarios u LEFT JOIN empresas e ON e.usuario_id=u.id WHERE u.status='arquivado' ORDER BY u.id DESC")->fetchAll();
+$legacyCount = (int)$pdo->query('SELECT COUNT(*) FROM usuarios_arquivados')->fetchColumn();
 ?>
 <!DOCTYPE html>
 <html lang="pt-BR">
@@ -64,8 +11,8 @@ try {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ServiConnect | Usuários Arquivados</title>
-    <link rel="stylesheet" href="css/style.css"> 
-    <link rel="stylesheet" href="css/admin.css"> 
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/admin.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
     <style>
         .admin-table { width: 100%; border-collapse: collapse; margin-top: 20px; background: #fff; text-align: left; }
@@ -81,13 +28,13 @@ try {
 <body>
 
     <div class="admin-container">
-        
+
         <aside class="sidebar">
             <div class="logo-area">
-                <img src="foto/logo.jpg" alt="Logo ServiConnect" class="logo-admin"> 
+                <img src="foto/logo.jpg" alt="Logo ServiConnect" class="logo-admin">
                 <h3>Painel de Gestão</h3>
             </div>
-            
+
             <nav class="admin-nav">
                 <ul id="adminNavigation">
                     <li><a href="admin.php"><i class="fa-solid fa-gauge"></i> Dashboard & Gestão</a></li>
@@ -99,7 +46,7 @@ try {
 
         <main class="main-content">
             <header class="content-header">
-                <h1 id="pageTitle">Contas Arquivadas (Restrição LGPD)</h1>
+                <h1 id="pageTitle">Contas Arquivadas (Acesso inativo)</h1>
                 <div class="user-info">
                     <span id="userName">Olá, Administrador!</span>
                     <i class="fa-solid fa-user-circle user-icon"></i>
@@ -110,7 +57,8 @@ try {
 
             <section class="recent-activity card-panel">
                 <p style="color: #666; margin-bottom: 20px;">Estes usuários tiveram suas contas encerradas e bloqueadas. Clicar em "Restaurar" os devolverá à plataforma, permitindo que façam login novamente.</p>
-                
+
+                <?php if ($legacyCount): ?><p>Existem <?php echo $legacyCount; ?> registros do arquivamento antigo. Os perfis já excluídos exigem recuperação por backup; esta tela restaura os novos arquivamentos preservados.</p><?php endif; ?>
                 <table class="admin-table">
                     <thead>
                         <tr>
@@ -131,10 +79,10 @@ try {
                                     <td><?php echo $user['id']; ?></td>
                                     <td><?php echo htmlspecialchars($user['cpf_cnpj']); ?></td>
                                     <td><?php echo htmlspecialchars($user['email']); ?></td>
-                                    <td><?php echo htmlspecialchars(ucfirst($user['tipo_conta'])); ?></td>
+                                    <td><?php echo htmlspecialchars(account_type_label($user['tipo_empresa'] ?? $user['tipo_conta'], $user['tipo_pessoa'])); ?></td>
                                     <td><?php echo date('d/m/Y H:i', strtotime($user['data_arquivamento'])); ?></td>
                                     <td>
-                                        <a href="arquivados.php?acao=desarquivar&id=<?php echo $user['id']; ?>" class="btn-acao btn-success" onclick="return confirm('Tem certeza que deseja RESTAURAR este usuário? O login dele voltará a funcionar.')"><i class="fa-solid fa-rotate-left"></i> Restaurar</a>
+                                        <?php echo admin_action_form((int)$user['id'], 'desarquivar', 'Restaurar', 'btn-success'); ?>
                                     </td>
                                 </tr>
                             <?php endforeach; ?>

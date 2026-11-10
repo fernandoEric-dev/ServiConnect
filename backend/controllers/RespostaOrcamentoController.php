@@ -1,64 +1,20 @@
 <?php
-// backend/controllers/RespostaOrcamentoController.php
-
-session_start();
-
-require_once '../conexao.php';
-
-// ⚠️ SEGURANÇA: Verifica se o usuário é Terceirizada
-if ($_SERVER['REQUEST_METHOD'] !== 'POST' || $_SESSION['user_role'] !== 'terceirizada') {
-    header('Location: ../../login.php');
-    exit;
-}
-
-$solicitacao_id = $_POST['solicitacao_id'] ?? null;
-$action = $_POST['action'] ?? null; // 'orcamento' ou 'recusa'
-$valor_orcamento = $_POST['valor_orcamento'] ?? null;
-
-if (!$solicitacao_id || !is_numeric($solicitacao_id) || empty($action)) {
-    header('Location: ../../dashboard_tercerizada.php?status=dados_invalidos');
-    exit;
-}
-
+require_once __DIR__ . '/../conexao.php';
+require_post();
+require_role($pdo, ['prestador']);
+require_csrf();
+$id = filter_var($_POST['solicitacao_id'] ?? '', FILTER_VALIDATE_INT, ['options'=>['min_range'=>1]]);
+$action = $_POST['action'] ?? '';
+$value = $_POST['valor_orcamento'] ?? '';
+if (!$id || !in_array($action, ['orcamento','recusa'], true)) abort_request(422, 'Resposta inválida.');
+if ($action === 'orcamento' && (!is_string($value) || !preg_match('/^\d{1,8}(?:\.\d{1,2})?$/D', $value) || (float)$value <= 0)) abort_request(422, 'Informe um valor positivo de até duas casas decimais.');
+$status = $action === 'orcamento' ? 'orçada' : 'recusada';
 try {
-    // 1. Prepara a base da query
-    $sql = "UPDATE solicitacoes SET status = ?, valor_orcamento = ? WHERE id = ? AND terceirizada_id = ?";
-    $params = [];
-    $terceirizada_id = $_SESSION['user_id'];
-
-    // 2. Determina a Ação (Orçar ou Recusar)
-    if ($action === 'orcamento') {
-        // Se orçar, deve haver um valor
-        if (!is_numeric($valor_orcamento) || $valor_orcamento <= 0) {
-            header('Location: ../../responder_orcamento.php?id=' . $solicitacao_id . '&status=valor_ausente');
-            exit;
-        }
-        $status = 'orçada';
-        $params = [$status, $valor_orcamento, $solicitacao_id, $terceirizada_id];
-        $msg = 'orcamento_enviado';
-        
-    } elseif ($action === 'recusa') {
-        // Se recusar, o valor é nulo (ou zero)
-        $status = 'recusada';
-        $params = [$status, null, $solicitacao_id, $terceirizada_id];
-        $msg = 'solicitacao_recusada';
-        
-   } else {
-        // Ação inválida
-        header('Location: ../../dashboard_tercerizada.php?status=acao_invalida');
-        exit;
-    }
-
-    // 3. Executa o UPDATE
-    $stmt = $pdo->prepare($sql);
-    $stmt->execute($params);
-
-    // 4. Redireciona com sucesso
-    header('Location: ../../dashboard_tercerizada.php?status=' . $msg);
-    exit;
-
-} catch (\PDOException $e) {
-    error_log("Erro ao responder solicitação: " . $e->getMessage());
-    header('Location: ../../dashboard_tercerizada.php?status=erro_banco');
-    exit;
+    $stmt = $pdo->prepare("UPDATE solicitacoes SET status=?,valor_orcamento=? WHERE id=? AND terceirizada_id=? AND status='aberta'");
+    $stmt->execute([$status,$action === 'orcamento' ? $value : null,$id,$_SESSION['user_id']]);
+    if ($stmt->rowCount() !== 1) abort_request(409, 'Pedido indisponível ou já respondido.');
+    header('Location: /dashboard_tercerizada.php?status=resposta_enviada', true, 303);
+} catch (PDOException $e) {
+    error_log('Resposta ao orçamento: '.$e->getMessage());
+    abort_request(500, 'Não foi possível responder. Tente novamente.');
 }

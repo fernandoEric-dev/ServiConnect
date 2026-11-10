@@ -19,6 +19,8 @@
 
 ## 📖 Sobre o Projeto
 
+Para iniciar o banco separado e executar as verificações locais, consulte [Ambiente de desenvolvimento](docs/DESENVOLVIMENTO.md).
+
 O **ServiConnect** é um sistema web desenvolvido para otimizar e centralizar o processo de contratação de serviços B2B (Business-to-Business). Seja para serviços de limpeza, segurança, manutenção ou TI, a plataforma oferece um ambiente dedicado onde as necessidades encontram as soluções certas.
 
 ---

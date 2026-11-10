@@ -20,6 +20,9 @@ jobs:
               with:
                   php-version: '8.2'
 
+            - name: Verificar sintaxe antes de publicar
+              run: find . -type f -name "*.php" -print0 | xargs -0 -n1 php -l
+
             # 2. Envia tudo para o InfinityFree
             - name: FTP Deploy
               uses: SamKirkland/FTP-Deploy-Action@v4.3.4
@@ -38,3 +41,12 @@ jobs:
                       */.git/**
                       */.github/*
                       */node_modules/*
+                      **/backend/config.local.php
+                      **/backend/config.example.php
+                      **/database/**
+                      **/docs/**
+                      **/tests/**
+                      **/tools/**
+                      **/.local/**
+                      **/*.sql
+                      **/*.log

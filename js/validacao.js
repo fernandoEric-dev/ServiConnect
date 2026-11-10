@@ -1,209 +1,212 @@
 document.addEventListener('DOMContentLoaded', () => {
+    const normalizeDocument = value => value.toUpperCase().replace(/[.\/\-\s]/g, '');
 
-    function applyMask(input, pattern) {
-        let value = input.value.replace(/\D/g, "");
-        let maskedValue = "";
-        let i = 0;
-        for (let j = 0; j < pattern.length; j++) {
-            if (i >= value.length) break;
+    function formatDocument(value, type) {
+        const clean = normalizeDocument(value);
+        if (type === 'cpf') {
+            if (!/^\d*$/.test(clean) || clean.length > 11) return value.toUpperCase();
+            return clean.slice(0, 11).replace(/(\d{3})(\d)/, '$1.$2').replace(/(\d{3})(\d)/, '$1.$2').replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+        }
+        if (!/^[A-Z0-9]*$/.test(clean) || clean.length > 14) return value.toUpperCase();
+        return clean.slice(0, 14).replace(/^([A-Z0-9]{2})([A-Z0-9])/, '$1.$2').replace(/^([A-Z0-9]{2})\.([A-Z0-9]{3})([A-Z0-9])/, '$1.$2.$3').replace(/\.([A-Z0-9]{3})([A-Z0-9])/, '.$1/$2').replace(/([A-Z0-9]{4})([A-Z0-9]{1,2})$/, '$1-$2');
+    }
 
-            if (pattern[j] === "9") {
-                maskedValue += value[i];
-                i++;
-            } else {
-                maskedValue += pattern[j];
+    function validCpf(document) {
+        if (!/^\d{11}$/.test(document) || /^(\d)\1{10}$/.test(document)) return false;
+        for (const length of [9, 10]) {
+            let sum = 0;
+            for (let index = 0; index < length; index++) sum += Number(document[index]) * (length + 1 - index);
+            const digit = ((sum * 10) % 11) % 10;
+            if (Number(document[length]) !== digit) return false;
+        }
+        return true;
+    }
+
+    function validCnpj(document) {
+        if (!/^[A-Z0-9]{12}\d{2}$/.test(document) || /^(\d)\1{13}$/.test(document)) return false;
+        for (const length of [12, 13]) {
+            let sum = 0;
+            let weight = length - 7;
+            for (let index = 0; index < length; index++) {
+                sum += (document.charCodeAt(index) - 48) * weight;
+                weight = weight === 2 ? 9 : weight - 1;
             }
+            const digit = sum % 11 < 2 ? 0 : 11 - sum % 11;
+            if (Number(document[length]) !== digit) return false;
         }
-        input.value = maskedValue;
+        return true;
     }
 
-    function validarCNPJ(cnpj) {
-        cnpj = cnpj.replace(/[^\d]/g, '');
-        if (cnpj.length !== 14 || /^(\d)\1{13}$/.test(cnpj)) return false;
-
-        let tamanho = cnpj.length - 2;
-        let numeros = cnpj.substring(0, tamanho);
-        let digitos = cnpj.substring(tamanho);
-        let soma = 0;
-        let pos = tamanho - 7;
-
-        for (let i = tamanho; i >= 1; i--) {
-            soma += numeros.charAt(tamanho - i) * pos--;
-            if (pos < 2) pos = 9;
-        }
-
-        let resultado = soma % 11 < 2 ? 0 : 11 - soma % 11;
-        if (resultado !== parseInt(digitos.charAt(0))) return false;
-
-        tamanho = tamanho + 1;
-        numeros = cnpj.substring(0, tamanho);
-        soma = 0;
-        pos = tamanho - 7;
-
-        for (let i = tamanho; i >= 1; i--) {
-            soma += numeros.charAt(tamanho - i) * pos--;
-            if (pos < 2) pos = 9;
-        }
-
-        resultado = soma % 11 < 2 ? 0 : 11 - soma % 11;
-        return resultado === parseInt(digitos.charAt(1));
+    function clearFeedback(form, feedback) {
+        feedback.hidden = true;
+        feedback.textContent = '';
+        form.querySelectorAll('[aria-invalid]').forEach(field => field.removeAttribute('aria-invalid'));
     }
 
-    function validarSenhas(senha, confirmarSenha) {
-        return senha === confirmarSenha && senha.length >= 6;
+    function showFeedback(feedback, message, field = null) {
+        feedback.textContent = message;
+        feedback.hidden = false;
+        if (field) {
+            field.setAttribute('aria-invalid', 'true');
+            field.focus();
+        } else feedback.focus();
     }
 
-    async function verificarCNPJ_API(cnpj) {
-        const cnpjLimpo = cnpj.replace(/[^\d]/g, ''); 
-        try {
-            const response = await fetch(`https://api.opencnpj.org/${cnpjLimpo}`);
-            if (response.ok) {
-                const data = await response.json();
-                return { status: 'ativo', mensagem: `CNPJ encontrado. Razão Social: ${data.razao_social}`, dados: data };
+    function validPassword(value) {
+        return value.length >= 6 && new TextEncoder().encode(value).length <= 72;
+    }
+
+    async function sendJson(url, data) {
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+            credentials: 'same-origin',
+            body: JSON.stringify(data)
+        });
+        const result = await response.json();
+        if (!response.ok || !result.success) throw new Error(result.message || 'Não foi possível concluir. Tente novamente.');
+        return result;
+    }
+
+    const registration = document.getElementById('formCadastroEmpresa');
+    if (registration) {
+        const type = document.getElementById('tipo');
+        const personType = document.getElementById('tipoPessoa');
+        const personGroup = document.getElementById('tipoPessoaGrupo');
+        const documentField = document.getElementById('documento');
+        const nameField = document.getElementById('nome');
+        const passwordField = document.getElementById('senha');
+        const confirmationField = document.getElementById('confirmarSenha');
+        const submit = document.getElementById('submitCadastro');
+        const feedback = document.getElementById('cadastroFeedback');
+        let documentType = null;
+
+        function updateAccountFields() {
+            const contractor = type.value === 'contratante';
+            const individual = contractor && personType.value === 'fisica';
+            const nextDocumentType = individual ? 'cpf' : 'cnpj';
+            if (documentType && documentType !== nextDocumentType) documentField.value = '';
+            documentType = nextDocumentType;
+            personGroup.hidden = !contractor;
+            personType.disabled = !contractor;
+            documentField.maxLength = individual ? 14 : 18;
+            documentField.inputMode = individual ? 'numeric' : 'text';
+            documentField.placeholder = individual ? '000.000.000-00' : '00.000.000/0000-00';
+            document.getElementById('documentoLabel').textContent = individual ? 'CPF' : 'CNPJ';
+            document.getElementById('documentoAjuda').textContent = individual
+                ? 'Use seu CPF para criar uma conta de pessoa física.'
+                : 'Use o CNPJ do seu negócio. Aceitamos documentos numéricos e alfanuméricos.';
+            document.getElementById('nomeLabel').textContent = individual ? 'Nome completo' : type.value === 'mei' ? 'Seu nome ou nome do negócio' : 'Nome da empresa';
+            nameField.autocomplete = individual ? 'name' : 'organization';
+            nameField.placeholder = individual ? 'Como você quer ser identificado' : 'Como seu negócio será apresentado';
+            document.getElementById('tipoAjuda').textContent = contractor
+                ? 'Busque prestadores e solicite orçamentos para o serviço de que precisa.'
+                : type.value === 'mei'
+                    ? 'Apresente seus serviços, como jardinagem, pintura ou manutenção, e receba pedidos de orçamento.'
+                    : 'Apresente os serviços da sua empresa e receba pedidos de orçamento.';
+            clearFeedback(registration, feedback);
+        }
+
+        type.addEventListener('change', updateAccountFields);
+        personType.addEventListener('change', updateAccountFields);
+        documentField.addEventListener('input', () => {
+            documentField.value = formatDocument(documentField.value, documentType);
+            documentField.removeAttribute('aria-invalid');
+        });
+        updateAccountFields();
+
+        registration.addEventListener('submit', async event => {
+            event.preventDefault();
+            clearFeedback(registration, feedback);
+            if (!registration.reportValidity()) return;
+            const documentValue = normalizeDocument(documentField.value);
+            if (!(documentType === 'cpf' ? validCpf(documentValue) : validCnpj(documentValue))) {
+                showFeedback(feedback, 'Confira o ' + (documentType === 'cpf' ? 'CPF' : 'CNPJ') + ' informado.', documentField);
+                return;
             }
-            return { status: 'inativo', mensagem: 'CNPJ não encontrado ou inativo.' };
-        } catch (error) {
-            return { status: 'erro_rede', mensagem: `Falha na comunicação: ${error.message}` };
-        }
-    }
-
-    const formEmpresa = document.getElementById('formCadastroEmpresa');
-
-    if (formEmpresa) {
-        const submitButton = formEmpresa.querySelector('button[type="submit"]');
-        const inputCnpj = document.getElementById('cnpj');
-        
-        if (inputCnpj) inputCnpj.addEventListener('input', () => applyMask(inputCnpj, '99.999.999/9999-99'));
-        
-        const getFormFields = () => {
-             return {
-                cnpj: document.getElementById('cnpj').value,
-                tipo: document.getElementById('tipo').value, 
-                email_acesso: document.getElementById('emailAcesso').value,
-                senha: document.getElementById('senha').value,
-                confirmarSenha: document.getElementById('confirmarSenha').value,
+            if (!validPassword(passwordField.value)) {
+                showFeedback(feedback, 'Use uma senha com pelo menos 6 caracteres. Se ela for muito longa, escolha uma menor.', passwordField);
+                return;
+            }
+            if (passwordField.value !== confirmationField.value) {
+                showFeedback(feedback, 'As senhas precisam ser iguais.', confirmationField);
+                return;
+            }
+            const data = {
+                csrf_token: registration.querySelector('[name="csrf_token"]').value,
+                tipo: type.value,
+                tipo_pessoa: type.value === 'contratante' ? personType.value : 'juridica',
+                documento: documentValue,
+                nome: nameField.value.trim(),
+                email_acesso: document.getElementById('emailAcesso').value.trim(),
+                senha: passwordField.value,
+                confirmar_senha: confirmationField.value
             };
-        };
-
-        formEmpresa.addEventListener('submit', async (e) => { 
-            e.preventDefault();
-            const dados = getFormFields();
-
-            if (!validarCNPJ(dados.cnpj)) {
-                alert('Erro: O CNPJ digitado é inválido no formato.');
-                document.getElementById('cnpj').focus(); return;
-            }
-            if (!validarSenhas(dados.senha, dados.confirmarSenha)) {
-                alert('Erro: As senhas não coincidem ou são curtas (mínimo 6 caracteres).');
-                document.getElementById('senha').focus(); return;
-            }
-            if (dados.tipo === "") {
-                 alert('Erro: Por favor, selecione o Tipo de Conta.');
-                 document.getElementById('tipo').focus(); return;
-            }
-            
-            submitButton.disabled = true; 
-            submitButton.textContent = 'Verificando CNPJ...';
-            
-            const resultadoCNPJ = await verificarCNPJ_API(dados.cnpj);
-            
-            if (resultadoCNPJ.status !== 'ativo') {
-                submitButton.disabled = false;
-                submitButton.textContent = 'Criar Conta e Continuar';
-                alert(`ERRO DE VERIFICAÇÃO: ${resultadoCNPJ.mensagem}`);
-                return;
-            }
-
-            dados.nome = resultadoCNPJ.dados.razao_social || 'Empresa em Configuração';
-
-            submitButton.textContent = 'Criando sua conta...';
-            
+            submit.disabled = true;
+            registration.setAttribute('aria-busy', 'true');
+            submit.textContent = 'Criando sua conta…';
             try {
-                const response = await fetch('backend/controllers/CadastroEmpresaController.php', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(dados)
-                });
-                
-                const resultadoCadastro = await response.json();
-
-                if (resultadoCadastro.success) {
-                    alert('Conta criada com sucesso! Faça login para completar seu perfil.');
-                    window.location.href = 'login.php'; 
-                } else {
-                    const msg = encodeURIComponent(resultadoCadastro.message);
-                    window.location.href = `verificacao_status.html?status=erro&mensagem=${msg}`;
-                }
-
+                await sendJson('backend/controllers/CadastroEmpresaController.php', data);
+                window.location.assign('login.php?status=conta_criada');
             } catch (error) {
-                alert('Erro na comunicação com o servidor.');
+                const message = error instanceof TypeError || error instanceof SyntaxError
+                    ? 'Não foi possível conectar ao servidor. Seus dados continuam no formulário; tente novamente.'
+                    : error.message;
+                showFeedback(feedback, message);
             } finally {
-                 submitButton.disabled = false;
-                 submitButton.textContent = 'Criar Conta e Continuar';
+                submit.disabled = false;
+                submit.textContent = 'Criar conta';
+                registration.removeAttribute('aria-busy');
             }
         });
     }
 
-    const formLogin = document.getElementById('formLogin');
-
-    if (formLogin) {
-        const inputIdentificacao = document.getElementById('identificacao');
-        const inputSenhaLogin = document.getElementById('senhaLogin');
-        const submitButtonLogin = document.getElementById('submitButtonLogin'); 
-
-        if (inputIdentificacao) {
-            inputIdentificacao.addEventListener('input', () => {
-                applyMask(inputIdentificacao, '99.999.999/9999-99');
-            });
-        }
-
-        formLogin.addEventListener('submit', async (e) => {
-            e.preventDefault();
-
-            const docValue = inputIdentificacao.value;
-            const docLimpo = docValue.replace(/\D/g, ''); 
-            const senhaValue = inputSenhaLogin.value;
-
-            if (docLimpo.length !== 14) { 
-                alert('Erro: O CNPJ deve conter 14 dígitos (sem formatação).');
-                inputIdentificacao.focus();
+    const login = document.getElementById('formLogin');
+    if (login) {
+        const documentField = document.getElementById('identificacao');
+        const passwordField = document.getElementById('senhaLogin');
+        const submit = document.getElementById('submitButtonLogin');
+        const feedback = document.getElementById('loginFeedback');
+        documentField.addEventListener('input', () => {
+            const clean = normalizeDocument(documentField.value);
+            documentField.value = formatDocument(documentField.value, /[A-Z]/.test(clean) || clean.length > 11 ? 'cnpj' : 'cpf');
+            documentField.removeAttribute('aria-invalid');
+        });
+        login.addEventListener('submit', async event => {
+            event.preventDefault();
+            clearFeedback(login, feedback);
+            if (!login.reportValidity()) return;
+            const documentValue = normalizeDocument(documentField.value);
+            if (!/^\d{11}$/.test(documentValue) && !/^[A-Z0-9]{12}\d{2}$/.test(documentValue)) {
+                showFeedback(feedback, 'Informe o CPF ou CNPJ completo usado no cadastro.', documentField);
                 return;
             }
-            if (senhaValue.length < 6) {
-                alert('Erro: A senha deve ter no mínimo 6 caracteres.');
-                inputSenhaLogin.focus();
+            if (!validPassword(passwordField.value)) {
+                showFeedback(feedback, 'Confira sua senha. Ela precisa ter pelo menos 6 caracteres.', passwordField);
                 return;
             }
-            
-            submitButtonLogin.disabled = true;
-            submitButtonLogin.textContent = 'Verificando Acesso...';
-
+            submit.disabled = true;
+            login.setAttribute('aria-busy', 'true');
+            submit.textContent = 'Entrando…';
             try {
-                const response = await fetch('backend/controllers/AuthController.php', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        identificacao: docLimpo,
-                        senha: senhaValue
-                    })
+                const result = await sendJson('backend/controllers/AuthController.php', {
+                    identificacao: documentValue,
+                    senha: passwordField.value,
+                    csrf_token: login.querySelector('[name="csrf_token"]').value
                 });
-
-                const result = await response.json();
-
-                if (result.success) {
-                    alert(result.message);
-                    window.location.href = result.redirect; 
-                } else {
-                    alert('Falha no Login: ' + result.message);
-                }
-
+                const destination = new URL(result.redirect, window.location.href);
+                if (destination.origin !== window.location.origin) throw new Error('Destino de acesso inválido. Atualize a página e tente novamente.');
+                window.location.assign(destination.href);
             } catch (error) {
-                alert('Ocorreu um erro ao conectar ao servidor. Tente novamente mais tarde.');
+                const message = error instanceof TypeError || error instanceof SyntaxError
+                    ? 'Não foi possível conectar ao servidor. Tente novamente em instantes.'
+                    : error.message;
+                showFeedback(feedback, message);
             } finally {
-                submitButtonLogin.disabled = false;
-                submitButtonLogin.textContent = 'Entrar';
+                submit.disabled = false;
+                submit.textContent = 'Entrar';
+                login.removeAttribute('aria-busy');
             }
         });
     }
-
 });

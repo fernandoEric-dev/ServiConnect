@@ -74,7 +74,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- CÓDIGO PARA O MENU HAMBURGER (Seu código original, sem alterações) ---
     const primaryNav = document.getElementById('primary-navigation');
     const navToggle = document.querySelector('.mobile-nav-toggle');
-    navToggle.addEventListener('click', () => {
+    if (navToggle && primaryNav) navToggle.addEventListener('click', () => {
         const visibility = primaryNav.getAttribute('data-visible');
         if (visibility === "false" || visibility === null) {
             primaryNav.setAttribute('data-visible', true);

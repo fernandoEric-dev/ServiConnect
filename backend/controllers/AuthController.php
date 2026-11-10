@@ -1,96 +1,40 @@
 <?php
-// backend/controllers/AuthController.php
-
-session_start();
-header('Content-Type: application/json');
-header('Access-Control-Allow-Origin: *'); 
-require_once '../conexao.php';
-require_once '../models/UsuarioModel.php'; 
-
-if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    http_response_code(405);
-    echo json_encode(['success' => false, 'message' => 'Método não permitido.']);
-    exit;
-}
-
-$json_data = file_get_contents('php://input');
-$data = json_decode($json_data, true);
-
-$identificacao = isset($data['identificacao']) ? preg_replace('/\D/', '', $data['identificacao']) : ''; 
-$senha = isset($data['senha']) ? $data['senha'] : '';
-
-// 1. VERIFICA PRIMEIRO SE É UM ADMINISTRADOR (NOVA TABELA)
-$stmtAdmin = $pdo->prepare("SELECT id, senha, login_cnpj FROM administradores WHERE login_cnpj = ?");
-$stmtAdmin->execute([$identificacao]);
-$admin = $stmtAdmin->fetch(PDO::FETCH_ASSOC);
-
-if ($admin) {
-    // É um admin! Vamos verificar a senha
-    if (password_verify($senha, $admin['senha'])) {
-        $_SESSION['user_id'] = $admin['id'];
-        $_SESSION['user_cnpj'] = $admin['login_cnpj'];
-        $_SESSION['user_role'] = 'admin'; 
-        
-        echo json_encode([
-            'success' => true,
-            'message' => 'Login de Administrador bem-sucedido!',
-            'redirect' => 'admin.php'
-        ]);
-    } else {
-        echo json_encode(['success' => false, 'message' => 'Senha incorreta.']);
-    }
-    exit; // Para a execução do script aqui para não buscar nos usuários comuns
-}
-
-// 2. SE NÃO FOR ADMIN, FAZ A BUSCA NORMAL NA TABELA DE USUÁRIOS
-$stmt = $pdo->prepare("
-    SELECT 
-        u.id, u.senha, u.cpf_cnpj, u.tipo_conta,
-        e.tipo_empresa 
-    FROM usuarios u
-    LEFT JOIN empresas e ON u.id = e.usuario_id
-    WHERE u.cpf_cnpj = ?
-");
+require_once __DIR__ . '/../conexao.php';
+header('Content-Type: application/json; charset=utf-8');
+require_post();
+$data = json_input();
+require_csrf($data);
+$identificacao = normalize_document(field_text($data, 'identificacao', 30, true));
+$senha = $data['senha'] ?? '';
+if (!is_string($senha) || strlen($senha) > 1024 || !preg_match('/^(?:[0-9]{11}|[A-Z0-9]{12}[0-9]{2})$/D', $identificacao)) abort_request(422, 'Dados de acesso inválidos.');
+$key = hash('sha256', ($_SERVER['REMOTE_ADDR'] ?? '') . ':' . $identificacao);
+$attempt = $pdo->prepare('SELECT tentativas FROM login_tentativas WHERE chave = ? AND janela_inicio > DATE_SUB(NOW(), INTERVAL 15 MINUTE)');
+$attempt->execute([$key]);
+if ((int)$attempt->fetchColumn() >= 10) { header('Retry-After: 900'); abort_request(429, 'Muitas tentativas. Tente novamente em 15 minutos.'); }
+$stmt = $pdo->prepare('SELECT id, senha, login_cnpj FROM administradores WHERE login_cnpj = ?');
 $stmt->execute([$identificacao]);
-$usuario = $stmt->fetch(PDO::FETCH_ASSOC);
-
-if (!$usuario) {
-    echo json_encode(['success' => false, 'message' => 'CNPJ/CPF não encontrado.']);
-    exit;
+$user = $stmt->fetch();
+$role = $user ? 'admin' : '';
+if (!$user) {
+    $stmt = $pdo->prepare('SELECT u.id,u.senha,u.status,u.tipo_pessoa,e.tipo_empresa FROM usuarios u LEFT JOIN empresas e ON e.usuario_id=u.id WHERE u.cpf_cnpj=?');
+    $stmt->execute([$identificacao]);
+    $user = $stmt->fetch();
+    $role = account_role($user['tipo_empresa'] ?? '');
 }
-
-if (password_verify($senha, $usuario['senha'])) {
-    
-    $role = $usuario['tipo_conta']; 
-
-    if ($role === 'empresa' && isset($usuario['tipo_empresa'])) {
-        $role = $usuario['tipo_empresa']; 
-    }
-
-    $_SESSION['user_id'] = $usuario['id'];
-    $_SESSION['user_cnpj'] = $usuario['cpf_cnpj'];
-    $_SESSION['user_role'] = $role; 
-
-    // REDIRECIONAMENTO SEPARADO
-    $redirect_url = '';
-    switch ($role) {
-        case 'contratante':
-            $redirect_url = 'dashboard_contratante.php'; 
-            break;
-        case 'terceirizada':
-            $redirect_url = 'dashboard_tercerizada.php'; 
-            break;
-        default:
-            $redirect_url = 'login.php';
-    }
-
-    echo json_encode([
-        'success' => true,
-        'message' => 'Login bem-sucedido!',
-        'redirect' => $redirect_url 
-    ]);
-
-} else {
-    echo json_encode(['success' => false, 'message' => 'Senha incorreta.']);
+if (!$user || !password_verify($senha, $user['senha']) || ($role !== 'admin' && ($user['status'] ?? '') !== 'ativo')
+    || !in_array($role, ['admin','contratante','prestador'], true)) {
+    $pdo->prepare('INSERT INTO login_tentativas (chave,tentativas,janela_inicio) VALUES (?,1,NOW()) ON DUPLICATE KEY UPDATE tentativas=IF(janela_inicio < DATE_SUB(NOW(),INTERVAL 15 MINUTE),1,tentativas+1), janela_inicio=IF(janela_inicio < DATE_SUB(NOW(),INTERVAL 15 MINUTE),NOW(),janela_inicio)')->execute([$key]);
+    abort_request(401, 'Documento ou senha inválidos, ou conta indisponível.');
 }
-?>
+$pdo->prepare('DELETE FROM login_tentativas WHERE chave=?')->execute([$key]);
+$_SESSION = [];
+session_regenerate_id(true);
+$_SESSION['user_id'] = (int)$user['id'];
+$_SESSION['user_cnpj'] = $identificacao;
+$_SESSION['user_document'] = $identificacao;
+$_SESSION['user_role'] = $role;
+$_SESSION['account_type'] = $user['tipo_empresa'] ?? 'admin';
+$_SESSION['person_type'] = $user['tipo_pessoa'] ?? 'juridica';
+csrf_token();
+$routes = ['admin'=>'admin.php','contratante'=>'dashboard_contratante.php','prestador'=>'dashboard_tercerizada.php'];
+echo json_encode(['success'=>true,'message'=>'Acesso autorizado.','redirect'=>$routes[$role]]);

@@ -1,11 +1,8 @@
 <?php
 // responder_orcamento.php
-session_start();
+require_once __DIR__ . '/backend/security.php';
 
-if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'terceirizada') {
-    header('Location: login.php');
-    exit;
-}
+
 
 $terceirizada_id = $_SESSION['user_id'];
 $solicitacao_id = $_GET['id'] ?? null;
@@ -15,12 +12,13 @@ if (!$solicitacao_id || !is_numeric($solicitacao_id)) {
     exit;
 }
 
-require_once 'backend/conexao.php';
+require_once __DIR__ . '/backend/conexao.php';
+require_role($pdo, ['prestador']);
 
 // Busca os detalhes da solicitação
 $sql = "
-    SELECT 
-        s.*, 
+    SELECT
+        s.*,
         e.nome AS nome_contratante,
         u.email AS email_contratante
     FROM solicitacoes s
@@ -47,16 +45,16 @@ $status_respondida = ($solicitacao['status'] !== 'aberta');
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Responder Orçamento #<?php echo htmlspecialchars($solicitacao_id); ?> - ServiConnect</title>
-    
+
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-    
+
     <style>
         body {
             background-color: var(--light-grey);
             font-family: 'Poppins', sans-serif;
         }
-        
+
         .orcamento-container {
             max-width: 800px;
             margin: 50px auto;
@@ -73,7 +71,7 @@ $status_respondida = ($solicitacao['status'] !== 'aberta');
             text-align: center;
             border-bottom: 4px solid var(--secondary-yellow);
         }
-        
+
         .orcamento-header h2 {
             color: var(--white-color);
             margin: 0;
@@ -180,7 +178,7 @@ $status_respondida = ($solicitacao['status'] !== 'aberta');
         .btn-success:hover { background: #218838; }
         .btn-danger { background: #dc3545; color: #fff; }
         .btn-danger:hover { background: #c82333; }
-        
+
         .btn-back {
             display: inline-block;
             margin-top: 15px;
@@ -197,7 +195,7 @@ $status_respondida = ($solicitacao['status'] !== 'aberta');
         <div class="orcamento-header">
             <h2>Detalhes da Solicitação #<?php echo $solicitacao['id']; ?></h2>
         </div>
-        
+
         <div class="orcamento-body">
             <div class="detalhes-pedido">
                 <h3>Informações do Pedido</h3>
@@ -234,20 +232,21 @@ $status_respondida = ($solicitacao['status'] !== 'aberta');
             <?php if (!$status_respondida): ?>
                 <div class="acao-form">
                     <form action="backend/controllers/RespostaOrcamentoController.php" method="POST">
+                <?php echo csrf_field(); ?>
                         <input type="hidden" name="solicitacao_id" value="<?php echo $solicitacao['id']; ?>">
-                        
+
                         <div class="form-group">
                             <label for="valor_orcamento_mask">Valor Estimado:</label>
                             <input type="text" id="valor_orcamento_mask" class="form-control" placeholder="R$ 0,00" required>
-                            
+
                             <input type="hidden" name="valor_orcamento" id="valor_orcamento">
                         </div>
 
                         <button type="submit" name="action" value="orcamento" class="btn btn-success">
                             <i class="fa-solid fa-check"></i> Enviar Orçamento
                         </button>
-                        
-                        <button type="submit" name="action" value="recusa" class="btn btn-danger" onclick="return confirm('Tem certeza que deseja recusar este pedido?');">
+
+                        <button type="submit" name="action" value="recusa" formnovalidate class="btn btn-danger" onclick="return confirm('Tem certeza que deseja recusar este pedido?');">
                             <i class="fa-solid fa-xmark"></i> Recusar Solicitação
                         </button>
                     </form>
@@ -272,7 +271,7 @@ $status_respondida = ($solicitacao['status'] !== 'aberta');
             inputMask.addEventListener('input', function(e) {
                 // Remove tudo o que não for número digitado pelo utilizador
                 let valor = e.target.value.replace(/\D/g, '');
-                
+
                 // Se apagar tudo, limpa ambos os campos
                 if (valor === '') {
                     e.target.value = '';
@@ -287,9 +286,9 @@ $status_respondida = ($solicitacao['status'] !== 'aberta');
                 inputReal.value = valorNumerico.toFixed(2);
 
                 // 2. Formata a tela para o utilizador em Reais (formato: R$ 10.000,00)
-                e.target.value = valorNumerico.toLocaleString('pt-BR', { 
-                    style: 'currency', 
-                    currency: 'BRL' 
+                e.target.value = valorNumerico.toLocaleString('pt-BR', {
+                    style: 'currency',
+                    currency: 'BRL'
                 });
             });
         }

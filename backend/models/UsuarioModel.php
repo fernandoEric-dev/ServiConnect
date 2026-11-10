@@ -30,7 +30,7 @@ public function buscarTerceirizadas() {
             e.regiao as area_atuacao
         FROM usuarios u
         JOIN empresas e ON u.id = e.usuario_id
-        WHERE u.tipo_conta = 'terceirizada'
+        WHERE u.tipo_conta = 'empresa' AND e.tipo_empresa IN ('terceirizada','mei') AND u.status = 'ativo'
     ";
     $stmt = $this->pdo->prepare($sql);
     $stmt->execute();
@@ -40,14 +40,15 @@ public function buscarTerceirizadas() {
     // 2. Insere na tabela 'usuarios' e retorna o ID
     public function cadastrarUsuario(array $data): ?int {
         // Certifique-se de que os nomes das colunas estão corretos:
-        $sql = "INSERT INTO usuarios (cpf_cnpj, email, senha, tipo_conta) VALUES (?, ?, ?, ?)";
+        $sql = "INSERT INTO usuarios (cpf_cnpj, email, senha, tipo_conta, tipo_pessoa) VALUES (?, ?, ?, ?, ?)";
         $stmt = $this->pdo->prepare($sql);
         
         $success = $stmt->execute([
             $data['cpf_cnpj'],
             $data['email'],
             $data['senha'],
-            $data['tipo_conta']
+            $data['tipo_conta'],
+            $data['tipo_pessoa'] ?? 'juridica'
         ]);
 
         // Retorna o ID da última inserção se a operação foi bem-sucedida

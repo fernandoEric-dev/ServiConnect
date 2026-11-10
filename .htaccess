@@ -1,0 +1,8 @@
+Options -Indexes
+RewriteEngine On
+RewriteRule (^|/)\. - [F,L]
+RewriteRule ^(database|docs|tests|tools)(/|$) - [F,L,NC]
+RewriteRule ^backend/(?!controllers/).* - [F,L,NC]
+<FilesMatch "\.(sql|log|ini|md|ps1)$">
+    Require all denied
+</FilesMatch>

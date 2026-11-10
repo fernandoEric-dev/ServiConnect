@@ -1,90 +1,33 @@
 <?php
-session_start();
-
-// Verifica se a sessão é válida
-if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'terceirizada') {
-    header('Location: ../../login.php');
-    exit;
+require_once __DIR__ . '/../conexao.php';
+require_once __DIR__ . '/../profile.php';
+require_post();
+require_role($pdo, ['prestador']);
+require_csrf();
+$userId = (int)$_SESSION['user_id'];
+$stmt = $pdo->prepare('SELECT * FROM empresas WHERE usuario_id=?');
+$stmt->execute([$userId]);
+$current = $stmt->fetch();
+if (!$current) abort_request(404, 'Perfil não encontrado.');
+$changes = [
+    'nome'=>profile_text($current,'nome','nome',150,true),
+    'responsavel'=>profile_text($current,'responsavel','responsavel',100),
+    'telefone'=>profile_phone($current),
+    'descricao'=>profile_text($current,'texto_perfil','descricao',10000),
+    'area_atuacao'=>profile_text($current,'area_atuacao','area_atuacao',100),
+    'regiao'=>profile_text($current,'regiao','regiao',255),
+    'horario'=>profile_text($current,'horario','horario',50),
+] + profile_address($current, true);
+if ($current['tipo_empresa'] === 'terceirizada' && array_key_exists('num_funcionarios',$_POST)) {
+    $people = filter_var($_POST['num_funcionarios'],FILTER_VALIDATE_INT,['options'=>['min_range'=>0,'max_range'=>100000]]);
+    if ($people === false) abort_request(422,'Informe uma quantidade de colaboradores válida.');
+    $changes['num_funcionarios'] = $people;
 }
-
-require_once '../conexao.php'; 
-
-if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    header('Location: ../../dashboard_terceirizada.php');
-    exit;
+foreach (['cep','logradouro','numero','complemento','bairro','cidade','estado'] as $field) {
+    if ($changes[$field] !== (string)($current[$field] ?? '')) { $changes['latitude']=null; $changes['longitude']=null; break; }
 }
-
-$user_id = $_SESSION['user_id'];
-
+$changes['foto_path'] = save_profile_photo('foto_perfil',$userId,$current['foto_path']);
 try {
-    // 1. TRATAMENTO DO UPLOAD DA FOTO
-    $caminho_foto = $_POST['foto_atual'] ?? '';
-
-    if (isset($_FILES['foto_perfil']) && $_FILES['foto_perfil']['error'] === UPLOAD_ERR_OK) {
-        $arquivo = $_FILES['foto_perfil'];
-        $extensao = pathinfo($arquivo['name'], PATHINFO_EXTENSION);
-        
-        $novo_nome = 'terceirizada_' . $user_id . '_' . time() . '.' . $extensao;
-        $diretorio_destino = '../../foto/'; 
-        
-        if (!is_dir($diretorio_destino)) {
-            mkdir($diretorio_destino, 0777, true);
-        }
-
-        $caminho_fisico = $diretorio_destino . $novo_nome;
-        
-        if (move_uploaded_file($arquivo['tmp_name'], $caminho_fisico)) {
-            $caminho_foto = 'foto/' . $novo_nome; // Caminho para salvar no banco
-        }
-    }
-
-    // 2. COLETA DOS DADOS DO FORMULÁRIO
-    $dados_form = [
-        'foto_path' => $caminho_foto,
-        'texto_perfil' => $_POST['texto_perfil'] ?? '',
-        'area_atuacao' => $_POST['area_atuacao'] ?? '',
-        'num_funcionarios' => (int)($_POST['num_funcionarios'] ?? 0),
-        'regiao' => $_POST['regiao'] ?? '',
-        'horario' => $_POST['horario'] ?? '',
-        'cep' => preg_replace('/\D/', '', $_POST['cep_empresa'] ?? ''),
-        'logradouro' => $_POST['logradouro_empresa'] ?? '',
-        'numero' => $_POST['numero_empresa'] ?? '',
-        'complemento' => $_POST['complemento_empresa'] ?? '',
-        'bairro' => $_POST['bairro_empresa'] ?? '',
-        'cidade' => $_POST['cidade_empresa'] ?? '',
-        'estado' => $_POST['estado_empresa'] ?? '',
-        'usuario_id' => $user_id,
-    ];
-
-    // 3. ATUALIZAÇÃO NO BANCO DE DADOS
-    $sql_update = "
-        UPDATE empresas SET
-            foto_path = :foto_path,
-            descricao = :texto_perfil,
-            area_atuacao = :area_atuacao,
-            num_funcionarios = :num_funcionarios,
-            regiao = :regiao,
-            horario = :horario,
-            cep = :cep,
-            logradouro = :logradouro,
-            numero = :numero,
-            complemento = :complemento,
-            bairro = :bairro,
-            cidade = :cidade,
-            estado = :estado
-        WHERE usuario_id = :usuario_id
-    ";
-
-    $stmt = $pdo->prepare($sql_update);
-    $stmt->execute($dados_form);
-
-    // 4. REDIRECIONA DE VOLTA PARA O PERFIL
-    header('Location: ../../dashboard_tercerizada.php#perfil');
-    exit;
-
-} catch (Exception $e) {
-    error_log("Erro ao salvar o perfil: " . $e->getMessage());
-    echo "<script>alert('Ocorreu um erro ao guardar os dados.'); window.history.back();</script>";
-    exit;
-}
-?>
+    profile_save($pdo,$userId,$changes);
+    header('Location: /dashboard_tercerizada.php?status=perfil_atualizado#perfil',true,303);
+} catch (PDOException $e) { error_log('Perfil: '.$e->getMessage()); abort_request(500,'Não foi possível salvar o perfil.'); }

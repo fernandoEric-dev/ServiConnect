@@ -1,61 +1,37 @@
 <?php
-require_once 'backend/conexao.php';
-
-// Auto-configuração: Cria as colunas de recuperação no banco de dados automaticamente
-try {
-    $checkToken = $pdo->query("SHOW COLUMNS FROM usuarios LIKE 'reset_token'")->rowCount();
-    if ($checkToken == 0) {
-        $pdo->exec("ALTER TABLE usuarios ADD COLUMN reset_token VARCHAR(100) DEFAULT NULL, ADD COLUMN reset_expires DATETIME DEFAULT NULL");
-    }
-} catch (\PDOException $e) {}
-
-$mensagem = '';
-$tipo_msg = '';
-
+require_once __DIR__ . '/backend/conexao.php';
+$mensagem = ''; $tipo_msg = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $email = trim($_POST['email']);
-
-    // Verifica se o e-mail existe
-    $stmt = $pdo->prepare("SELECT id FROM usuarios WHERE email = ?");
+    require_csrf();
+    $email = field_text($_POST,'email',100,true);
+    if (!filter_var($email,FILTER_VALIDATE_EMAIL)) abort_request(422,'Informe um e-mail válido.');
+    $key = hash('sha256','reset:'.($_SERVER['REMOTE_ADDR'] ?? '').':'.strtolower($email));
+    $check = $pdo->prepare('SELECT tentativas FROM login_tentativas WHERE chave=? AND janela_inicio>DATE_SUB(NOW(), INTERVAL 15 MINUTE)');
+    $check->execute([$key]);
+    if ((int)$check->fetchColumn() >= 5) abort_request(429,'Aguarde 15 minutos para uma nova solicitação.');
+    $pdo->prepare('INSERT INTO login_tentativas (chave,tentativas,janela_inicio) VALUES (?,1,NOW()) ON DUPLICATE KEY UPDATE tentativas=IF(janela_inicio<DATE_SUB(NOW(),INTERVAL 15 MINUTE),1,tentativas+1),janela_inicio=IF(janela_inicio<DATE_SUB(NOW(),INTERVAL 15 MINUTE),NOW(),janela_inicio)')->execute([$key]);
+    $mensagem = 'Se o e-mail estiver cadastrado e a conta disponível, as instruções serão enviadas.';
+    $tipo_msg = 'success';
+    $stmt = $pdo->prepare("SELECT id FROM usuarios WHERE email=? AND status='ativo'");
     $stmt->execute([$email]);
-    $user = $stmt->fetch(PDO::FETCH_ASSOC);
-
-    if ($user) {
-        // Gera um token secreto e define a validade para 1 hora
+    $id = $stmt->fetchColumn();
+    if ($id) {
         $token = bin2hex(random_bytes(32));
-        $expires = date('Y-m-d H:i:s', strtotime('+1 hour'));
-
-        $pdo->prepare("UPDATE usuarios SET reset_token = ?, reset_expires = ? WHERE id = ?")
-            ->execute([$token, $expires, $user['id']]);
-
-        // Monta o link mágico
-        $protocolo = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http";
-        $link = $protocolo . "://" . $_SERVER['HTTP_HOST'] . "/redefinir_senha.php?token=" . $token;
-
-        // Se for no seu PC (XAMPP), mostra na tela. Se for online, envia o E-mail.
-        if ($is_local) {
-            $mensagem = "<strong>AMBIENTE LOCAL:</strong><br>O XAMPP não envia e-mails. Clique no link abaixo para testar:<br><br><a href='$link' style='color:#004b87; word-break: break-all;'>$link</a>";
-            $tipo_msg = 'success';
-        } else {
-            $to = $email;
-            $subject = "Recuperacao de Senha - ServiConnect";
-            $message = "Olá!\n\nVocê solicitou a redefinição de senha.\nClique no link abaixo para criar uma nova senha:\n\n" . $link . "\n\nSe você não solicitou isso, ignore este e-mail.";
-            $headers = "From: suporte@" . $_SERVER['HTTP_HOST'] . "\r\n";
-            $headers .= "Reply-To: suporte@" . $_SERVER['HTTP_HOST'] . "\r\n";
-            $headers .= "X-Mailer: PHP/" . phpversion();
-
-            if (mail($to, $subject, $message, $headers)) {
-                $mensagem = "Instruções foram enviadas para o seu e-mail! (Verifique a caixa de Spam)";
-                $tipo_msg = 'success';
+        $pdo->prepare('UPDATE usuarios SET reset_token=?,reset_expires=DATE_ADD(NOW(),INTERVAL 1 HOUR) WHERE id=?')->execute([hash('sha256',$token),$id]);
+        $url = app_config()['app_url'];
+        if ($url === '') { error_log('Configure APP_URL para recuperação de senha.'); }
+        else {
+            $link = $url.'/redefinir_senha.php?token='.$token;
+            if ($is_local && in_array($_SERVER['REMOTE_ADDR'] ?? '',['127.0.0.1','::1'],true)) {
+                $mensagem .= '<br>Teste local: <a href="'.htmlspecialchars($link,ENT_QUOTES,'UTF-8').'">Criar nova senha</a>';
             } else {
-                $mensagem = "Erro do servidor ao tentar enviar o e-mail.";
-                $tipo_msg = 'error';
+                $domain = parse_url($url,PHP_URL_HOST);
+                if ($domain && preg_match('/^[a-z0-9.-]+$/iD',$domain)) {
+                    $sent = mail($email,'Recuperacao de Senha - ServiConnect',"Use este link para criar uma nova senha:\n".$link,"From: suporte@".$domain."\r\n");
+                    if (!$sent) error_log('Falha no envio de recuperação de senha.');
+                }
             }
         }
-    } else {
-        // Mensagem padrão por segurança (para hackers não descobrirem quais e-mails estão no banco)
-        $mensagem = "Se o e-mail estiver cadastrado, as instruções foram enviadas.";
-        $tipo_msg = 'success';
     }
 }
 ?>
@@ -74,6 +50,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </head>
 <body>
     <form action="" method="post">
+        <?php echo csrf_field(); ?>
         <h2>Recuperar Senha</h2>
         <p>Digite seu e-mail cadastrado para receber o link de redefinição.</p>
 
@@ -87,7 +64,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <label for="email">E-mail</label>
             <input type="email" id="email" name="email" placeholder="email@empresa.com" required>
         </div>
-        
+
         <button type="submit" style="margin-top: 20px;">Enviar Link de Recuperação</button>
 
         <p class="cadastro-link" style="margin-top: 20px;">
