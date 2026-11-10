@@ -1,5 +1,11 @@
 Options -Indexes
 RewriteEngine On
+# Padroniza o dominio de producao e evita acesso sem criptografia.
+RewriteCond %{HTTP_HOST} ^www\.serviconnect\.online$ [NC,OR]
+RewriteCond %{HTTPS} off
+RewriteCond %{HTTP_HOST} ^(?:www\.)?serviconnect\.online$ [NC]
+RewriteRule ^ https://serviconnect.online%{REQUEST_URI} [R=301,L]
+
 RewriteRule (^|/)\. - [F,L]
 RewriteRule ^(database|docs|tests|tools)(/|$) - [F,L,NC]
 RewriteRule ^backend/(?!controllers/).* - [F,L,NC]
