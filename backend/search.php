@@ -56,7 +56,12 @@ function search_providers(PDO $pdo, array $filters, bool $includeMap = false): a
     if ($filters['errors']) return $result;
     $where = ["u.tipo_conta='empresa'", "u.status='ativo'", "e.tipo_empresa IN ('mei','terceirizada')"];
     $params = [];
-    if ($filters['servico'] !== '') { $where[] = 'EXISTS(SELECT 1 FROM empresa_servicos es WHERE es.usuario_id=u.id AND es.servico_id=?)'; $params[] = $filters['servico']; }
+    if ($filters['servico'] !== '') {
+        $where[] = "(EXISTS(SELECT 1 FROM empresa_servicos es WHERE es.usuario_id=u.id AND es.servico_id=?) OR (NOT EXISTS(SELECT 1 FROM empresa_servicos es WHERE es.usuario_id=u.id) AND (e.area_atuacao LIKE ? ESCAPE '!' OR e.descricao LIKE ? ESCAPE '!' OR e.area_atuacao LIKE ? ESCAPE '!' OR e.descricao LIKE ? ESCAPE '!')))";
+        $name = search_like(str_replace('-',' ',$filters['servico']));
+        $label = search_like(service_catalog()[$filters['servico']]);
+        array_push($params,$filters['servico'],$name,$name,$label,$label);
+    }
     $terms = $filters['q'] === '' ? [] : explode(' ', $filters['q']);
     foreach ($terms as $term) {
         $where[] = "(e.nome LIKE ? ESCAPE '!' OR e.area_atuacao LIKE ? ESCAPE '!' OR e.descricao LIKE ? ESCAPE '!' OR e.cidade LIKE ? ESCAPE '!' OR e.regiao LIKE ? ESCAPE '!' OR e.cidades_atendidas LIKE ? ESCAPE '!' OR EXISTS(SELECT 1 FROM empresa_servicos es WHERE es.usuario_id=u.id AND es.nome LIKE ? ESCAPE '!'))";

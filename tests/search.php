@@ -91,6 +91,7 @@ try {
     search_check(search_providers($pdo, search_filters(['q'=>$marker, 'tipo'=>'terceirizada']))['total'] === 14, 'Filtro de empresa terceirizada funciona');
     search_check(search_providers($pdo, search_filters(['q'=>$marker . ' manutencao']))['total'] === 1, 'Busca ignora diferenças de acento e maiúsculas');
     search_check(search_providers($pdo, search_filters(['q'=>$marker . ' poda Suzano']))['total'] === 1, 'Múltiplos termos podem combinar serviço e região');
+    search_check(search_providers($pdo, search_filters(['q'=>$marker, 'servico'=>'poda']))['total'] === 1, 'Filtro de serviço respeita ofertas descritas nos perfis anteriores');
     search_check(search_providers($pdo, search_filters(['q'=>$marker . ' %_!']))['total'] === 1, 'Porcentagem, sublinhado e escape são literais');
     search_check(search_providers($pdo, search_filters(['q'=>"' OR 1=1 --"]))['total'] === 0, 'Texto de SQL não altera a consulta');
     search_check(search_providers($pdo, search_filters(['q'=>$marker, 'pagina'=>'999999999']))['page'] === 2, 'Página além do fim usa a última página válida');

@@ -36,7 +36,7 @@ O certificado foi verificado como ativo até 18/01/2027. O servidor redireciona 
 
 ## Verificação
 
-Suítes locais: `tests/security.php` (47), `tests/accounts.php` (90), `tests/search.php` (59) e `tests/workflow.php` (79): **275 verificações**. A suíte de exportações também confere instalação vazia, atualização/reaplicação, preservação de registros e dos novos estados, eventos e decisão de não publicar o mapa.
+Suítes locais: `tests/security.php` (47), `tests/accounts.php` (90), `tests/search.php` (60) e `tests/workflow.php` (79): **276 verificações**. O filtro de serviço também considera os serviços descritos nos perfis antigos que ainda não selecionaram o catálogo. A suíte de exportações confere instalação vazia, atualização/reaplicação, preservação de registros e dos novos estados, eventos e decisão de não publicar o mapa.
 
 Conferência no navegador: seleção de serviços e cidades, gravação de perfil comercial, mapa e marcador, pedido, proposta com condições, aceite e leitura do histórico. O celular foi verificado em 390 px, sem rolagem horizontal. Dados fictícios usados nessa conferência foram removidos do banco local após o teste.
 
