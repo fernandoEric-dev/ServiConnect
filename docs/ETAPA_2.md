@@ -32,6 +32,8 @@ O valor legado `usuarios.tipo_conta='empresa'` permanece por compatibilidade int
 
 ## Atualização no InfinityFree
 
+O painel confirmou o diretório do domínio como `serviconnect.online/htdocs`. O workflow FTP publica em `./serviconnect.online/htdocs/`, e a configuração privada fica em `serviconnect.online/htdocs/backend/config.local.php`. A pasta `htdocs` na raiz da conta não é o destino deste domínio.
+
 Como a etapa 1 já foi importada, usar **`database/infinityfree/ATUALIZAR_ETAPA_2_CADASTRO_PERFIS.sql`** no banco atual pelo phpMyAdmin, após exportar um backup. É uma atualização incremental, reaplicável, sem excluir registros. O arquivo consolidado `ATUALIZAR_BANCO_ATUAL.sql` também contém as duas etapas; `BANCO_NOVO_VAZIO.sql` continua exclusivo de instalação vazia.
 
 O pacote **`ServiConnect_Etapa_2_Site_e_SQL.zip`** contém:

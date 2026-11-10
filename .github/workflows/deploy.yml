@@ -32,14 +32,14 @@ jobs:
                   password: ${{ secrets.FTP_PASSWORD }}
 
                   # ---------------------
-                  server-dir: ./htdocs/
+                  server-dir: ./serviconnect.online/htdocs/
                   # ---------------------
                   protocol: ftp
 
                   exclude: |
-                      */.git
-                      */.git/**
-                      */.github/*
+                      **/.git*
+                      **/.git*/**
+                      **/.github/**
                       */node_modules/*
                       **/backend/config.local.php
                       **/backend/config.example.php
@@ -50,3 +50,6 @@ jobs:
                       **/.local/**
                       **/*.sql
                       **/*.log
+                      **/foto/upload_*
+                      **/foto/contratante_*
+                      **/foto/terceirizada_*

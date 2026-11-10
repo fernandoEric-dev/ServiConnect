@@ -2,6 +2,8 @@
 
 O pacote `ServiConnect_Etapa_2_Site_e_SQL.zip` não contém senhas nem contas de demonstração. A pasta `htdocs/` contém o código corrigido do site; `SQL/` contém a atualização incremental do banco para quem já importou a etapa 1.
 
+**Destino confirmado no painel:** `serviconnect.online/htdocs`. O `htdocs` da raiz da conta pertence a outra raiz de publicação e não é o destino deste domínio. O conteúdo de `htdocs/` do pacote deve ser enviado para `serviconnect.online/htdocs/`, sem criar um segundo `htdocs` dentro dele. O arquivo privado deve ficar em `serviconnect.online/htdocs/backend/config.local.php`.
+
 1. Exporte um backup atualizado do banco e guarde uma cópia dos arquivos atuais da hospedagem.
 2. No phpMyAdmin, selecione o banco atual e importe `SQL/ATUALIZAR_ETAPA_2_CADASTRO_PERFIS.sql` em UTF-8. Esse SQL preserva usuários, perfis, senhas e pedidos.
 3. Na hospedagem, prepare `htdocs/backend/config.local.php` conforme o exemplo abaixo, com os dados reais do painel. Use a nova credencial após trocar a antiga que foi exposta no repositório público. Não use a configuração de desenvolvimento.
