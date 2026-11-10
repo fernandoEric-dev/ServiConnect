@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Crie sua conta | ServiConnect</title>
-    <link rel="stylesheet" href="css/app.css?v=4"><link rel="stylesheet" href="css/cadastro_empresa.css?v=4">
+    <link rel="stylesheet" href="css/app.css?v=4"><link rel="stylesheet" href="css/cadastro_empresa.css?v=5">
 </head>
 <body>
     <main class="auth-shell">
@@ -46,6 +46,10 @@
                     <label for="documento" id="documentoLabel">CPF</label>
                     <input type="text" id="documento" name="documento" placeholder="000.000.000-00" inputmode="numeric" autocapitalize="characters" autocomplete="off" spellcheck="false" required maxlength="14" aria-describedby="documentoAjuda">
                     <p class="field-help" id="documentoAjuda">Use seu CPF para criar uma conta de pessoa física.</p>
+                    <div id="cnpjConsultaGrupo" hidden>
+                        <button type="button" id="consultarCnpj" class="cnpj-check">Consultar CNPJ</button>
+                        <p id="cnpjConsultaResultado" class="field-help" role="status" aria-live="polite" aria-atomic="true" hidden></p>
+                    </div>
                 </div>
             </fieldset>
 
@@ -70,6 +74,6 @@
             <p class="account-link">Já tem uma conta? <a href="login.php">Entrar</a></p>
         </form>
     </main>
-    <script src="js/validacao.js"></script>
+    <script src="js/validacao.js?v=5"></script>
 </body>
 </html>

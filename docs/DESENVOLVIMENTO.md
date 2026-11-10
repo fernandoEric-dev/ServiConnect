@@ -86,6 +86,8 @@ A conta da aplicação possui somente SELECT, INSERT, UPDATE e DELETE em `servic
 
 ## Verificação
 
+A [consulta obrigatória OpenCNPJ](CONSULTA_CNPJ.md) exige simulação para os CNPJs fictícios das suítes de cadastro. Execute `pwsh -NoProfile -File .\tools\test-cnpj.ps1` para rodar os testes OpenCNPJ, contas/perfis e segurança juntos, sem depender da API externa nem criar contas de empresas reais.
+
 Com o ambiente local ligado:
 
 ```powershell

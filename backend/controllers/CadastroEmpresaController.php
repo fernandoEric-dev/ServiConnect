@@ -1,7 +1,9 @@
 <?php
 require_once __DIR__ . '/../conexao.php';
 require_once __DIR__ . '/../models/UsuarioModel.php';
+require_once __DIR__ . '/../opencnpj.php';
 header('Content-Type: application/json; charset=utf-8');
+header('Cache-Control: no-store');
 require_post();
 $data = json_input();
 require_csrf($data);
@@ -21,6 +23,9 @@ if (!filter_var($email, FILTER_VALIDATE_EMAIL) || !is_string($senha) || strlen($
 if (($newPayload || $confirmation !== null) && (!is_string($confirmation) || $senha !== $confirmation)) abort_request(422, 'A confirmação da senha deve coincidir com a senha.');
 $model = new UsuarioModel($pdo);
 if ($model->existeUsuario($document, $email)) abort_request(409, 'Documento ou e-mail já cadastrado.');
+// A consulta é obrigatória no servidor, inclusive para payloads antigos.
+// Uma consulta anterior no navegador nunca autoriza a criação por si só.
+if ($personType === 'juridica') require_active_cnpj($pdo, $document);
 try {
     $pdo->beginTransaction();
     // tipo_conta mantém o valor legado; o papel vem do perfil e o documento de tipo_pessoa.

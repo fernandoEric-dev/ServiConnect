@@ -5,7 +5,8 @@ if (!$is_local || $config['db_name'] !== 'serviconnect_dev' || $config['db_host'
     throw new RuntimeException('Teste de contas restrito ao banco separado de desenvolvimento.');
 }
 
-$accountTestBase = 'http://127.0.0.1:8080';
+$accountTestBase = getenv('SERVICONNECT_TEST_BASE') ?: 'http://127.0.0.1:8080';
+if (!preg_match('~^http://127\.0\.0\.1:[0-9]{2,5}$~D', $accountTestBase)) throw new RuntimeException('Servidor de testes deve usar loopback.');
 $accountTestPassed = 0;
 $accountTestDocuments = [];
 $accountTestAdminIds = [];
@@ -299,6 +300,7 @@ try {
 
     echo "\n$accountTestPassed verificações de cadastro e perfis aprovadas.\n";
 } finally {
+    $pdo->prepare('DELETE FROM login_tentativas WHERE chave=?')->execute([hash('sha256','opencnpj:127.0.0.1')]);
     // Somente documentos gerados por esta execução, sem usar contas de demonstração.
     foreach ($accountTestDocuments as $document) {
         $stmt = $pdo->prepare('DELETE FROM usuarios WHERE cpf_cnpj=? AND email LIKE ?');

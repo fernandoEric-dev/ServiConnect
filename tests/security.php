@@ -4,7 +4,8 @@ require_once dirname(__DIR__) . '/backend/conexao.php';
 if (!$is_local || $config['db_name'] !== 'serviconnect_dev' || $config['db_host'] !== '127.0.0.1') {
     throw new RuntimeException('Estes testes só podem usar o banco local de desenvolvimento.');
 }
-$base = 'http://127.0.0.1:8080';
+$base = getenv('SERVICONNECT_TEST_BASE') ?: 'http://127.0.0.1:8080';
+if (!preg_match('~^http://127\.0\.0\.1:[0-9]{2,5}$~D', $base)) throw new RuntimeException('Servidor de testes deve usar loopback.');
 $passed = 0; $ids = []; $docs = []; $tempFiles = []; $uploadedFiles = [];
 function check(bool $condition, string $name): void {
     global $passed;
@@ -147,6 +148,7 @@ try {
     check(request($contractorClient,'/dashboard_contratante.php')['status']===303,'Sessão encerrada não acessa o painel');
     echo "\n$passed verificações aprovadas.\n";
 } finally {
+    $pdo->prepare('DELETE FROM login_tentativas WHERE chave=?')->execute([hash('sha256','opencnpj:127.0.0.1')]);
     foreach($ids as $id) $pdo->prepare('DELETE FROM usuarios WHERE id=?')->execute([$id]);
     foreach($docs as $doc) {
         foreach(['127.0.0.1:'.$doc,'reset:127.0.0.1:test_'.$doc.'@example.invalid'] as $key) $pdo->prepare('DELETE FROM login_tentativas WHERE chave=?')->execute([hash('sha256',$key)]);

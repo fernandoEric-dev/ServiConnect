@@ -63,7 +63,9 @@ document.addEventListener('DOMContentLoaded', () => {
             credentials: 'same-origin',
             body: JSON.stringify(data)
         });
-        const result = await response.json();
+        let result;
+        try { result = await response.json(); }
+        catch { throw new Error('Não foi possível concluir a solicitação agora. Aguarde um pouco e tente novamente.'); }
         if (!response.ok || !result.success) throw new Error(result.message || 'Não foi possível concluir. Tente novamente.');
         return result;
     }
@@ -79,7 +81,20 @@ document.addEventListener('DOMContentLoaded', () => {
         const confirmationField = document.getElementById('confirmarSenha');
         const submit = document.getElementById('submitCadastro');
         const feedback = document.getElementById('cadastroFeedback');
+        const cnpjGroup = document.getElementById('cnpjConsultaGrupo');
+        const cnpjButton = document.getElementById('consultarCnpj');
+        const cnpjResult = document.getElementById('cnpjConsultaResultado');
         let documentType = null;
+        let lookupVersion = 0;
+
+        function resetCnpjResult() {
+            lookupVersion++;
+            cnpjResult.hidden = true;
+            cnpjResult.textContent = '';
+            cnpjResult.removeAttribute('data-state');
+            cnpjButton.disabled = false;
+            cnpjButton.textContent = 'Consultar CNPJ';
+        }
 
         function updateAccountFields() {
             const contractor = type.value === 'contratante';
@@ -87,6 +102,8 @@ document.addEventListener('DOMContentLoaded', () => {
             const nextDocumentType = individual ? 'cpf' : 'cnpj';
             if (documentType && documentType !== nextDocumentType) documentField.value = '';
             documentType = nextDocumentType;
+            resetCnpjResult();
+            cnpjGroup.hidden = individual;
             personGroup.hidden = !contractor;
             personType.disabled = !contractor;
             documentField.maxLength = individual ? 14 : 18;
@@ -95,7 +112,7 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('documentoLabel').textContent = individual ? 'CPF' : 'CNPJ';
             document.getElementById('documentoAjuda').textContent = individual
                 ? 'Use seu CPF para criar uma conta de pessoa física.'
-                : 'Use o CNPJ do seu negócio. Aceitamos documentos numéricos e alfanuméricos.';
+                : 'Seu CNPJ será consultado na OpenCNPJ. Apenas empresas com situação cadastral ativa podem criar uma conta.';
             document.getElementById('nomeLabel').textContent = individual ? 'Nome completo' : type.value === 'mei' ? 'Seu nome ou nome do negócio' : 'Nome da empresa';
             nameField.autocomplete = individual ? 'name' : 'organization';
             nameField.placeholder = individual ? 'Como você quer ser identificado' : 'Como seu negócio será apresentado';
@@ -112,8 +129,42 @@ document.addEventListener('DOMContentLoaded', () => {
         documentField.addEventListener('input', () => {
             documentField.value = formatDocument(documentField.value, documentType);
             documentField.removeAttribute('aria-invalid');
+            resetCnpjResult();
         });
         updateAccountFields();
+
+        cnpjButton.addEventListener('click', async () => {
+            const documentValue = normalizeDocument(documentField.value);
+            if (documentType !== 'cnpj' || !validCnpj(documentValue)) {
+                showFeedback(feedback, 'Informe um CNPJ válido para consultar.', documentField);
+                return;
+            }
+            clearFeedback(registration, feedback);
+            const version = ++lookupVersion;
+            cnpjButton.disabled = true;
+            cnpjButton.textContent = 'Consultando…';
+            cnpjResult.hidden = false;
+            cnpjResult.removeAttribute('data-state');
+            cnpjResult.textContent = 'Consultando a situação cadastral na OpenCNPJ…';
+            try {
+                const result = await sendJson('backend/controllers/ConsultaCnpjController.php', {
+                    documento: documentValue,
+                    csrf_token: registration.querySelector('[name="csrf_token"]').value
+                });
+                if (version !== lookupVersion) return;
+                cnpjResult.dataset.state = 'success';
+                cnpjResult.textContent = result.message + (result.empresa.razao_social ? ' ' + result.empresa.razao_social : '');
+            } catch (error) {
+                if (version !== lookupVersion) return;
+                cnpjResult.dataset.state = 'error';
+                cnpjResult.textContent = error.message;
+            } finally {
+                if (version === lookupVersion) {
+                    cnpjButton.disabled = false;
+                    cnpjButton.textContent = 'Consultar CNPJ';
+                }
+            }
+        });
 
         registration.addEventListener('submit', async event => {
             event.preventDefault();
@@ -144,7 +195,7 @@ document.addEventListener('DOMContentLoaded', () => {
             };
             submit.disabled = true;
             registration.setAttribute('aria-busy', 'true');
-            submit.textContent = 'Criando sua conta…';
+            submit.textContent = documentType === 'cnpj' ? 'Verificando CNPJ e criando conta…' : 'Criando sua conta…';
             try {
                 await sendJson('backend/controllers/CadastroEmpresaController.php', data);
                 window.location.assign('login.php?status=conta_criada');
