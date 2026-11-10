@@ -85,6 +85,14 @@ function order_create(PDO $pdo, int $userId, array $data): int {
         $pdo->commit(); return $id;
     } catch (Throwable $e) { if ($pdo->inTransaction()) $pdo->rollBack(); throw $e; }
 }
+function order_proposal_fields(array $data): array {
+    $fields = ['valor_orcamento' => order_money($data['valor_orcamento'] ?? '')];
+    foreach (['prazo_execucao'=>150, 'condicoes_pagamento'=>1000, 'itens_inclusos'=>3000, 'itens_exclusos'=>3000, 'mensagem_proposta'=>3000] as $field=>$max) {
+        $fields[$field] = order_text($data, $field, $max);
+    }
+    $fields['validade_proposta'] = order_date($data, 'validade_proposta');
+    return $fields;
+}
 function order_transition(PDO $pdo, int $id, int $userId, string $action, array $data): void {
     try {
         $pdo->beginTransaction(); $order = order_fetch($pdo, $id, $userId, true);
@@ -96,9 +104,7 @@ function order_transition(PDO $pdo, int $id, int $userId, string $action, array 
             $allowed = $action === 'enviar_proposta' ? ['aberta'] : ['orçada','respondida','em_negociacao'];
             if (!$provider || !in_array($status, $allowed, true)) throw new OrderProblem('O pedido não permite enviar esta proposta agora.', 409);
             if ($order['status_contratante'] !== 'ativo') throw new OrderProblem('O contratante está indisponível.', 409);
-            $changes['valor_orcamento'] = order_money($data['valor_orcamento'] ?? '');
-            foreach (['prazo_execucao'=>150, 'condicoes_pagamento'=>1000, 'itens_inclusos'=>3000, 'itens_exclusos'=>3000, 'mensagem_proposta'=>3000] as $field=>$max) $changes[$field] = order_text($data, $field, $max);
-            $changes['validade_proposta'] = order_date($data, 'validade_proposta');
+            $changes = order_proposal_fields($data);
             $next = 'orçada'; $snapshot = $changes;
             $message = $action === 'enviar_proposta' ? 'Proposta enviada ao contratante.' : 'Proposta revisada. As condições anteriores permanecem no histórico.';
         } elseif ($action === 'recusar_pedido') {

@@ -29,11 +29,11 @@ try {
         if ($kind==='empty') {
             apply_sql($pdo,$root.'/database/infinityfree/BANCO_NOVO_VAZIO.sql');
             $tables=$pdo->query('SHOW TABLES')->fetchAll(PDO::FETCH_COLUMN);
-            if (count($tables)!==9) throw new RuntimeException('Estrutura nova incompleta.');
+            if (count($tables)!==11 || !in_array('chat_conversas',$tables,true) || !in_array('chat_mensagens',$tables,true)) throw new RuntimeException('Estrutura nova incompleta.');
             foreach (['usuarios','empresas','solicitacoes','administradores','usuarios_arquivados'] as $table) {
                 if ((int)$pdo->query("SELECT COUNT(*) FROM `$table`")->fetchColumn()!==0) throw new RuntimeException('Exportação contém dados inesperados.');
             }
-            echo "OK: instalação em banco vazio, nove tabelas, sem contas ou dados de produção.\n";
+            echo "OK: instalação em banco vazio, onze tabelas, sem contas ou dados de produção.\n";
             continue;
         }
         apply_sql($pdo,$root.'/database/migrations/001_base.sql');
@@ -59,10 +59,12 @@ try {
         $patch=$root.'/database/infinityfree/'.($kind === 'stage2' ? 'ATUALIZAR_ETAPA_2_CADASTRO_PERFIS.sql' : 'ATUALIZAR_BANCO_ATUAL.sql');
         apply_sql($pdo,$patch);
         apply_sql($pdo,$root.'/database/infinityfree/ATUALIZAR_ETAPAS_4_E_5.sql');
+        apply_sql($pdo,$root.'/database/infinityfree/ATUALIZAR_CHAT.sql');
         if (snapshot_rows($pdo,$columns)!==$before) throw new RuntimeException('Dados existentes foram alterados.');
         echo "OK: atualização preserva contas, perfis, senhas, IDs, pedidos, estados vazios e NULL.\n";
         apply_sql($pdo,$patch);
         apply_sql($pdo,$root.'/database/infinityfree/ATUALIZAR_ETAPAS_4_E_5.sql');
+        apply_sql($pdo,$root.'/database/infinityfree/ATUALIZAR_CHAT.sql');
         if (snapshot_rows($pdo,$columns)!==$before) throw new RuntimeException('Reaplicação alterou dados.');
         echo "OK: reaplicação não duplica colunas, tabelas ou índices.\n";
         $pdo->exec("UPDATE solicitacoes SET status='orçada' WHERE id=1");

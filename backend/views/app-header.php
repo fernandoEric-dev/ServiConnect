@@ -8,6 +8,7 @@ $homePanel = $appRole === 'contratante' ? 'dashboard_contratante.php' : 'dashboa
 <nav aria-label="Navegação principal" class="app-nav">
 <a href="busca.php"<?php if (($activeNav ?? '') === 'busca') echo ' aria-current="page"'; ?>>Buscar serviços</a>
 <?php if ($loggedIn && in_array($appRole, ['contratante','prestador'], true)): ?>
+<a href="conversas.php"<?php if (($activeNav ?? '') === 'conversas') echo ' aria-current="page"'; ?>>Conversas</a>
 <a href="orcamentos.php"<?php if (($activeNav ?? '') === 'orcamentos') echo ' aria-current="page"'; ?>>Meus orçamentos</a>
 <a href="<?php echo $homePanel; ?>#perfil"<?php if (($activeNav ?? '') === 'perfil') echo ' aria-current="page"'; ?>>Meu perfil</a>
 <form action="logout.php" method="post"><?php echo csrf_field(); ?><button class="button-quiet" type="submit">Sair</button></form>

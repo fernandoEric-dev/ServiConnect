@@ -24,12 +24,16 @@ foreach($tables[0] as $table)$sql.=str_replace('CREATE TABLE ','CREATE TABLE IF 
 $sql.="UPDATE empresas SET mapa_publico=1 WHERE tipo_empresa='terceirizada' AND latitude IS NOT NULL AND longitude IS NOT NULL AND NOT EXISTS(SELECT 1 FROM schema_migrations WHERE versao='005_orcamentos_perfis.sql');\n\n";
 $sql.="INSERT INTO solicitacoes_eventos(solicitacao_id,autor_nome,papel,tipo,status_para,mensagem)\n SELECT s.id,'Sistema','sistema','historico_iniciado',s.status,'Historico ativado para um pedido anterior. Movimentos anteriores nao foram registrados.' FROM solicitacoes s WHERE NOT EXISTS(SELECT 1 FROM solicitacoes_eventos e WHERE e.solicitacao_id=s.id);\n\nINSERT IGNORE INTO schema_migrations(versao) VALUES('005_orcamentos_perfis.sql');\n";
 file_put_contents($root.'/database/infinityfree/ATUALIZAR_ETAPAS_4_E_5.sql',$sql);
+$chat = "-- SERVICONNECT CHAT: CONVERSAS E MENSAGENS.\n-- Selecione o banco atual do site antes de importar.\nSET NAMES utf8mb4;\nCREATE TABLE IF NOT EXISTS schema_migrations (versao VARCHAR(100) PRIMARY KEY, aplicada_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP);\n\n";
+$chat .= rtrim(file_get_contents($root.'/database/migrations/006_chat.sql'))."\n\n";
+$chat .= "INSERT IGNORE INTO schema_migrations(versao) VALUES('006_chat.sql');\n";
+file_put_contents($root.'/database/infinityfree/ATUALIZAR_CHAT.sql',$chat);
 $current=file_get_contents($root.'/database/infinityfree/ATUALIZAR_BANCO_ATUAL.sql');
 $current=explode('-- SERVICONNECT ETAPAS 4 E 5:',$current)[0];
 $current=preg_replace("/ALTER TABLE solicitacoes MODIFY status ENUM\([^\r\n;]+\) DEFAULT 'aberta';/",$statusDdl,$current);
-file_put_contents($root.'/database/infinityfree/ATUALIZAR_BANCO_ATUAL.sql',rtrim($current)."\n\n".$sql);
+file_put_contents($root.'/database/infinityfree/ATUALIZAR_BANCO_ATUAL.sql',rtrim($current)."\n\n".$sql."\n".$chat);
 $empty="-- INSTALACAO NOVA. EXCLUSIVO PARA BANCO VAZIO. SEM USUARIOS DE DEMONSTRACAO.\nSET NAMES utf8mb4;\n\n";
 foreach(['001_base.sql','002_integridade.sql','003_preservar_status_legado.sql','004_cadastro_perfis.sql'] as $migration)$empty.=file_get_contents($root.'/database/migrations/'.$migration)."\n\n";
 $empty.="CREATE TABLE IF NOT EXISTS schema_migrations(versao VARCHAR(100) PRIMARY KEY,aplicada_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP);\nINSERT IGNORE INTO schema_migrations(versao) VALUES('001_base.sql'),('002_integridade.sql'),('003_preservar_status_legado.sql'),('004_cadastro_perfis.sql');\n\n".$sql;
-file_put_contents($root.'/database/infinityfree/BANCO_NOVO_VAZIO.sql',$empty);
+file_put_contents($root.'/database/infinityfree/BANCO_NOVO_VAZIO.sql',$empty."\n".$chat);
 echo "SQL incremental, consolidado e instalacao vazia preparados.\n";

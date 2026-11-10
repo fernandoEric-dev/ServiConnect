@@ -20,7 +20,12 @@ $website=$company['website']??'';$safeWebsite=filter_var($website,FILTER_VALIDAT
 <?php require __DIR__ . '/backend/views/app-header.php'; ?>
 <main class="app-container app-narrow"><a href="busca.php" class="app-back">← Voltar à busca</a>
 <article class="stack"><section class="surface"><div class="profile-overview"><img src="<?php echo order_escape(safe_photo($company['foto_path']??null)); ?>" alt="Foto de <?php echo order_escape($company['nome']); ?>"><div><span class="tag"><?php echo order_escape(account_type_label($company['tipo_empresa'],$company['tipo_pessoa'])); ?></span><h1 style="margin-top:10px"><?php echo order_escape($company['nome']); ?></h1><p class="muted"><?php echo order_escape($location ?: 'Cidade não informada'); ?></p></div></div>
-<?php if($own): ?><a class="button-secondary" href="<?php echo $provider?'dashboard_tercerizada.php':'dashboard_contratante.php'; ?>#perfil">Editar meu perfil</a><?php elseif($provider&&$_SESSION['user_role']==='contratante'): ?><a class="button" href="solicitacao_orcamento.php?terceirizada_id=<?php echo (int)$id; ?>">Solicitar orçamento</a><?php endif; ?></section>
+<?php if($own): ?><a class="button-secondary" href="<?php echo $provider?'dashboard_tercerizada.php':'dashboard_contratante.php'; ?>#perfil">Editar meu perfil</a><?php elseif($provider&&$_SESSION['user_role']==='contratante'): ?>
+<div class="actions">
+    <a class="button" href="conversas.php?prestador=<?php echo (int)$id; ?>">Conversar</a>
+    <a class="button-secondary" href="solicitacao_orcamento.php?terceirizada_id=<?php echo (int)$id; ?>">Solicitar orçamento</a>
+</div>
+<?php endif; ?></section>
 <section class="surface"><h2>Apresentação</h2><p class="text-block"><?php echo order_escape($company['descricao'] ?: 'Este perfil ainda não tem uma apresentação.'); ?></p></section>
 <?php if($provider): ?>
 <section class="surface"><h2>Serviços oferecidos</h2><?php if($services): ?><div class="chips"><?php foreach($services as $service): ?><span class="tag"><?php echo order_escape($catalog[$service]??$service); ?></span><?php endforeach; ?></div><?php else: ?><p><?php echo order_escape($company['area_atuacao']?:'O prestador ainda não detalhou seus serviços.'); ?></p><?php endif; ?>

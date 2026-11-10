@@ -137,7 +137,53 @@ try{
     $s->execute([$provider['id']]);$after=$s->fetch();
     wf_check($after['latitude']===null&&(int)$after['mapa_publico']===0,'Trocar o endereço invalida o ponto anterior');
     wf_check(count(provider_services($pdo,$provider['id']))===20,'Salvar novamente não duplica os serviços');
-    echo "\n$wfPassed verificações de orçamento, perfil e mapa aprovadas.\n";
+    $chatController = '/backend/controllers/ChatController.php';
+    $providerProfile = wf_request($client['client'], '/perfil_empresa.php?id=' . $provider['id']);
+    $draft = '/conversas.php?prestador=' . $provider['id'];
+    wf_check(strpos($providerProfile['body'], substr($draft, 1)) !== false, 'Perfil permite conversar antes de pedir orçamento');
+    wf_check(wf_request($client['client'], $draft)['status'] === 200, 'Contratante abre conversa pelo perfil');
+    $firstMessage = [
+        'csrf_token' => $client['csrf'], 'prestador_id' => $provider['id'], 'chave_envio' => bin2hex(random_bytes(16)),
+        'mensagem' => 'Vocês atendem neste bairro? <b>texto</b>',
+    ];
+    $started = wf_request($client['client'], $chatController, $firstMessage);
+    preg_match('~Location: /conversas\.php\?id=(\d+)~i', $started['headers'], $match);
+    $conversation = (int)($match[1] ?? 0);
+    wf_check($started['status'] === 303 && $conversation > 0, 'Primeira mensagem cria conversa sem criar orçamento');
+    wf_check(wf_request($client['client'], $chatController, $firstMessage)['status'] === 303, 'Reenvio da primeira mensagem é aceito');
+    $pollUrl = $chatController . '?id=' . $conversation;
+    $providerMessages = json_decode(wf_request($provider['client'], $pollUrl)['body'], true, 512, JSON_THROW_ON_ERROR)['messages'];
+    wf_check(count($providerMessages) === 1 && !$providerMessages[0]['mine'], 'Prestador recebe a mensagem uma vez');
+    $chatUrl = '/conversas.php?id=' . $conversation;
+    $inbox = wf_request($provider['client'], '/conversas.php');
+    wf_check(strpos($inbox['body'], substr($chatUrl, 1)) !== false, 'Caixa de conversas do prestador mostra o contato');
+    $conversationPage = wf_request($provider['client'], $chatUrl);
+    wf_check(strpos($conversationPage['body'], '&lt;b&gt;texto&lt;/b&gt;') !== false, 'Conversa mostra o texto da mensagem como texto');
+    wf_check(wf_request($outsider['client'], $chatUrl)['status'] === 404 && wf_request($otherClient['client'], $pollUrl)['status'] === 404, 'Somente participantes podem ler a conversa');
+    $reply = [
+        'conversa_id' => $conversation, 'chave_envio' => bin2hex(random_bytes(16)), 'mensagem' => 'Sim, podemos atender.',
+    ];
+    wf_check(wf_request($provider['client'], $chatController, $reply)['status'] === 403, 'Envio de chat exige CSRF');
+    wf_check(wf_request($outsider['client'], $chatController, $reply + ['csrf_token' => $outsider['csrf']])['status'] === 404, 'Só participantes podem responder');
+    wf_check(wf_request($provider['client'], $chatController, $reply + ['csrf_token' => $provider['csrf']])['status'] === 303, 'Prestador responde pela conversa');
+    $updates = json_decode(wf_request($client['client'], $pollUrl . '&depois=' . $providerMessages[0]['id'])['body'], true, 512, JSON_THROW_ON_ERROR)['messages'];
+    wf_check(count($updates) === 1 && $updates[0]['text'] === $reply['mensagem'] && !$updates[0]['mine'], 'Atualização retorna apenas novas mensagens');
+
+    $proposal = [
+        'acao' => 'proposta', 'conversa_id' => $conversation, 'chave_envio' => bin2hex(random_bytes(16)),
+        'area_servico_solicitada' => 'Jardinagem', 'descricao_servico' => 'Poda combinada na conversa.',
+        'valor_orcamento' => '249,90', 'prazo_execucao' => 'Dois dias', 'condicoes_pagamento' => 'A combinar',
+        'itens_inclusos' => 'Poda e limpeza', 'validade_proposta' => date('Y-m-d', strtotime('+7 days')),
+    ];
+    wf_check(wf_request($client['client'], $chatController, $proposal + ['csrf_token' => $client['csrf']])['status'] === 403, 'Contratante não pode enviar proposta como prestador');
+    $postedProposal = $proposal + ['csrf_token' => $provider['csrf']];
+    wf_check(wf_request($provider['client'], $chatController, $postedProposal)['status'] === 303, 'Prestador envia proposta pelo chat');
+    wf_check(wf_request($provider['client'], $chatController, $postedProposal)['status'] === 303, 'Reenvio de proposta é aceito');
+    $updates = json_decode(wf_request($client['client'], $pollUrl . '&depois=' . $updates[0]['id'])['body'], true, 512, JSON_THROW_ON_ERROR)['messages'];
+    $chatOrder = $updates[0]['order'] ?? 0;
+    wf_check(count($updates) === 1 && $chatOrder > 0 && wf_row($chatOrder)['valor_orcamento'] === '249.90', 'Chat recebe uma proposta com o valor esperado');
+    wf_check(wf_action($client, $chatOrder, 'aceitar_proposta', ['confirmacao' => '1'])['status'] === 303, 'Contratante aceita proposta do chat pelo fluxo de orçamento');
+    echo "\n$wfPassed verificações de orçamento, perfil, mapa e chat aprovadas.\n";
 }finally{
     foreach($wfIds as $id)$pdo->prepare('DELETE FROM usuarios WHERE id=? AND email LIKE ?')->execute([$id,'workflow_%@example.invalid']);
     foreach($wfDocs as $doc)$pdo->prepare('DELETE FROM login_tentativas WHERE chave=?')->execute([hash('sha256','127.0.0.1:'.$doc)]);
