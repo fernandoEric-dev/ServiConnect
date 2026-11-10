@@ -27,6 +27,8 @@ if (!$user || !password_verify($senha, $user['senha']) || ($role !== 'admin' && 
     abort_request(401, 'Documento ou senha inválidos, ou conta indisponível.');
 }
 $pdo->prepare('DELETE FROM login_tentativas WHERE chave=?')->execute([$key]);
+$appReturnTo = $_SESSION['app_return_to'] ?? '';
+if (!is_string($appReturnTo) || !in_array($appReturnTo, ['orcamentos.php','dashboard.php#perfil','dashboard.php'], true) || $role === 'admin') $appReturnTo = '';
 $_SESSION = [];
 session_regenerate_id(true);
 $_SESSION['user_id'] = (int)$user['id'];
@@ -39,5 +41,5 @@ csrf_token();
 $routes = ['admin'=>'admin.php','contratante'=>'dashboard_contratante.php','prestador'=>'dashboard_tercerizada.php'];
 $requestedProvider = isset($data['prestador']) && is_scalar($data['prestador'])
     ? (filter_var($data['prestador'], FILTER_VALIDATE_INT, ['options'=>['min_range'=>1]]) ?: 0) : 0;
-$destination = $requestedProvider ? 'perfil_empresa.php?id=' . $requestedProvider : $routes[$role];
+$destination = $requestedProvider ? 'perfil_empresa.php?id=' . $requestedProvider : ($appReturnTo ?: $routes[$role]);
 echo json_encode(['success'=>true,'message'=>'Acesso autorizado.','redirect'=>$destination]);

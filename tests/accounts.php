@@ -159,6 +159,16 @@ try {
         $accounts[$key] = ['client'=>$client,'document'=>$document,'row'=>$row,'data'=>$data,'dashboard'=>$dashboard];
     }
 
+    $appClient = account_client();
+    $appEntry = account_request($appClient,'/app_entrada.php?destino=orcamentos');
+    account_check($appEntry['status'] === 303 && strpos($appEntry['headers'],'/login.php') !== false,'Entrada do app exige login para orçamentos');
+    $appLogin = account_login($appClient,$accounts['pf']['document']);
+    account_check($appLogin['status'] === 200 && (json_decode($appLogin['body'],true)['redirect'] ?? '') === 'orcamentos.php','Após login do app abre o orçamento solicitado');
+    $appEntry = account_request($appClient,'/app_entrada.php?destino=perfil');
+    account_check($appEntry['status'] === 303 && strpos($appEntry['headers'],'/dashboard.php#perfil') !== false,'Entrada de perfil do app mantém a sessão autenticada');
+    account_check(account_request($appClient,'/app_entrada.php?destino=https://example.invalid')['status'] === 422,'Entrada do app não aceita redirecionamento externo');
+    account_check(account_request($appClient,'/app_entrada.php?destino[]=perfil')['status'] === 303,'Entrada estruturada inválida usa somente destino interno padrão');
+
     $anonymous = account_client();
     $invalidBase = account_registration('contratante','fisica',account_document('cpf'),'Nome de teste');
     account_check(account_request($anonymous,'/backend/controllers/CadastroEmpresaController.php',$invalidBase,true)['status'] === 403,'Novo cadastro continua exigindo CSRF');
