@@ -1,4 +1,5 @@
 <?php
+date_default_timezone_set('America/Sao_Paulo');
 
 function app_config(): array {
     static $config;
@@ -17,6 +18,7 @@ function app_config(): array {
         'db_name' => $value('DB_NAME', 'db_name'),
         'db_user' => $value('DB_USER', 'db_user'),
         'db_password' => $value('DB_PASSWORD', 'db_password'),
+        'map_tile_url' => $value('MAP_TILE_URL','map_tile_url','https://tile.openstreetmap.org/{z}/{x}/{y}.png'),
     ];
     return $config;
 }
@@ -31,7 +33,7 @@ if (PHP_SAPI !== 'cli' && session_status() === PHP_SESSION_NONE) {
     ]);
     session_start();
     header('X-Content-Type-Options: nosniff');
-    header('Referrer-Policy: same-origin');
+    header('Referrer-Policy: strict-origin-when-cross-origin');
     header('X-Frame-Options: SAMEORIGIN');
 }
 

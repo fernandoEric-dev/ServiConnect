@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Crie sua conta | ServiConnect</title>
-    <link rel="stylesheet" href="css/cadastro_empresa.css">
+    <link rel="stylesheet" href="css/app.css?v=4"><link rel="stylesheet" href="css/cadastro_empresa.css?v=4">
 </head>
 <body>
     <main class="auth-shell">
@@ -22,8 +22,8 @@
                     <label for="tipo">Seu objetivo</label>
                     <select id="tipo" name="tipo" required aria-describedby="tipoAjuda">
                         <option value="contratante">Quero contratar serviços</option>
-                        <option value="mei">Quero oferecer serviços como MEI</option>
-                        <option value="terceirizada">Quero oferecer serviços como empresa terceirizada</option>
+                        <option value="mei"<?php if (($_GET['perfil'] ?? '')==='mei') echo ' selected'; ?>>Quero oferecer serviços como MEI</option>
+                        <option value="terceirizada"<?php if (($_GET['perfil'] ?? '')==='terceirizada') echo ' selected'; ?>>Quero oferecer serviços como empresa terceirizada</option>
                     </select>
                     <p id="tipoAjuda" class="field-help">Busque prestadores e solicite orçamentos para o serviço de que precisa.</p>
                 </div>

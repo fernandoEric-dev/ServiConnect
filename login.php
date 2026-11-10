@@ -9,7 +9,7 @@ $requestedProvider = isset($_GET['prestador']) && is_string($_GET['prestador'])
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Entrar | ServiConnect</title>
-    <link rel="stylesheet" href="css/login.css">
+    <link rel="stylesheet" href="css/app.css?v=4"><link rel="stylesheet" href="css/login.css?v=4">
 </head>
 <body>
     <main class="auth-shell">

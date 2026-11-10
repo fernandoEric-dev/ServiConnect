@@ -41,14 +41,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Recuperar Senha - ServiConnect</title>
-    <link rel="stylesheet" href="css/login.css">
+    <link rel="stylesheet" href="css/app.css?v=4"><link rel="stylesheet" href="css/login.css?v=4">
     <style>
         .alert { padding: 15px; margin-bottom: 20px; border-radius: 4px; text-align: left; }
         .alert-success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
         .alert-error { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
     </style>
 </head>
-<body>
+<body><main class="auth-shell"><a href="index.php" class="auth-brand" aria-label="ServiConnect — página inicial">Servi<span>Connect</span></a>
     <form action="" method="post">
         <?php echo csrf_field(); ?>
         <h2>Recuperar Senha</h2>
@@ -71,5 +71,5 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <a href="login.php">Voltar para o Login</a>
         </p>
     </form>
-</body>
+</main></body>
 </html>

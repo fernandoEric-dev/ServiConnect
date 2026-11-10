@@ -1,273 +1,35 @@
 <?php
-// solicitacao_orcamento.php
-require_once __DIR__ . '/backend/security.php';
-
-// ... (Restante do código de verificação de segurança) ...
-
 require_once __DIR__ . '/backend/conexao.php';
 require_role($pdo, ['contratante']);
-require_once 'backend/models/UsuarioModel.php';
-
-$contratante_id = $_SESSION['user_id'];
-$terceirizada_id = $_GET['terceirizada_id'] ?? null;
-
-if (!$terceirizada_id || !is_numeric($terceirizada_id)) {
-    header('Location: dashboard_contratante.php');
-    exit;
-}
-
-// Buscamos a coluna 'nome'
-$stmt = $pdo->prepare("SELECT e.nome AS nome_empresa FROM empresas e JOIN usuarios u ON u.id=e.usuario_id WHERE e.usuario_id=? AND e.tipo_empresa IN ('terceirizada','mei') AND u.status='ativo'");
-$stmt->execute([$terceirizada_id]);
-$terceirizada_info = $stmt->fetch(PDO::FETCH_ASSOC);
-
-if (!$terceirizada_info) abort_request(404, 'Prestador indisponível.');
-$terceirizada_nome = $terceirizada_info['nome_empresa'] ?? "Empresa Não Encontrada";
+require_once __DIR__ . '/backend/app.php';
+$id = filter_var($_GET['terceirizada_id'] ?? '', FILTER_VALIDATE_INT, ['options'=>['min_range'=>1]]);
+if (!$id) abort_request(404, 'Prestador indisponível.');
+$stmt = $pdo->prepare("SELECT e.* FROM empresas e JOIN usuarios u ON u.id=e.usuario_id WHERE e.usuario_id=? AND e.tipo_empresa IN ('mei','terceirizada') AND u.status='ativo'");
+$stmt->execute([$id]); $provider = $stmt->fetch();
+if (!$provider) abort_request(404, 'Prestador indisponível.');
+$stmt = $pdo->prepare('SELECT * FROM empresas WHERE usuario_id=?'); $stmt->execute([$_SESSION['user_id']]); $clientProfile = $stmt->fetch();
+$address = trim(implode(', ', array_filter([$clientProfile['logradouro'] ?? '', $clientProfile['numero'] ?? '', $clientProfile['bairro'] ?? '', $clientProfile['cidade'] ?? '', $clientProfile['estado'] ?? ''])));
+$old = app_old(); $nonce = isset($old['chave_criacao']) && is_string($old['chave_criacao']) ? $old['chave_criacao'] : bin2hex(random_bytes(32));
+$services = provider_services($pdo, (int)$id); $catalog = service_catalog(); $activeNav = 'orcamentos';
+$defaultService = $old['servico_id'] ?? ($services[0] ?? '');
 ?>
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <title>Solicitar Orçamento - ServiConnect</title>
-    <link rel="stylesheet" href="css/style.css">
-
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-
-    <style>
-        body {
-            background-color: var(--light-grey);
-            font-family: 'Poppins', sans-serif;
-        }
-
-        /* Container principal do formulário (Formato de Cartão/Card) */
-        .orcamento-container {
-            max-width: 850px;
-            margin: 60px auto;
-            background: var(--white-color);
-            border-radius: 12px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1); /* Sombra mais bonita */
-            overflow: hidden;
-        }
-
-        /* Cabeçalho do Card */
-        .orcamento-header {
-            background: var(--primary-blue);
-            color: var(--white-color);
-            padding: 30px;
-            text-align: center;
-        }
-
-        .orcamento-header h2 {
-            color: var(--secondary-yellow);
-            margin-bottom: 10px;
-            font-size: 2.2em;
-        }
-
-        .orcamento-header p {
-            font-size: 1.1em;
-            margin: 0;
-            color: #d1d5db;
-        }
-
-        .orcamento-header p strong {
-            color: var(--white-color);
-            font-size: 1.2em;
-        }
-
-        /* Corpo do Card */
-        .orcamento-body {
-            padding: 40px;
-        }
-
-        .form-row {
-            display: flex;
-            gap: 20px;
-            margin-bottom: 20px;
-        }
-
-        .form-group {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .form-group label {
-            font-weight: 600;
-            margin-bottom: 8px;
-            color: var(--primary-blue);
-            font-size: 0.95em;
-        }
-
-        .form-group label i {
-            color: var(--secondary-yellow); /* Destaque amarelo nos ícones */
-            margin-right: 5px;
-        }
-
-        /* Estilização dos Inputs e Selects */
-        .form-control {
-            width: 100%;
-            padding: 12px 15px;
-            border: 1px solid #ccc;
-            border-radius: 8px;
-            font-family: 'Poppins', sans-serif;
-            font-size: 1em;
-            transition: all 0.3s ease;
-            box-sizing: border-box;
-            background-color: #f9fafa;
-        }
-
-        .form-control:focus {
-            outline: none;
-            border-color: var(--secondary-yellow);
-            background-color: var(--white-color);
-            box-shadow: 0 0 0 3px rgba(255, 196, 0, 0.2); /* Efeito de brilho ao focar */
-        }
-
-        /* Ajuste do ícone na caixa de seleção */
-        select.form-control {
-            appearance: none;
-            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%230a192f' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
-            background-repeat: no-repeat;
-            background-position: right 15px center;
-            background-size: 15px;
-            cursor: pointer;
-        }
-
-        /* Botão de Enviar */
-        .btn-submit {
-            width: 100%;
-            padding: 15px;
-            background: var(--primary-blue);
-            color: var(--white-color);
-            border: none;
-            border-radius: 8px;
-            font-size: 1.1em;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            margin-top: 15px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .btn-submit:hover {
-            background: var(--secondary-yellow);
-            color: var(--primary-blue);
-            transform: translateY(-3px);
-            box-shadow: 0 5px 15px rgba(255, 196, 0, 0.4);
-        }
-
-        /* Botão de Voltar */
-        .btn-back {
-            display: block;
-            text-align: center;
-            margin-top: 20px;
-            color: var(--primary-blue);
-            text-decoration: none;
-            font-weight: 500;
-            transition: color 0.3s ease;
-        }
-
-        .btn-back:hover {
-            color: var(--secondary-yellow);
-        }
-
-        /* Responsividade para celular */
-        @media (max-width: 768px) {
-            .form-row {
-                flex-direction: column;
-                gap: 0;
-                margin-bottom: 0;
-            }
-            .form-group {
-                margin-bottom: 20px;
-            }
-            .orcamento-body {
-                padding: 25px 20px;
-            }
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <div class="orcamento-container">
-
-            <div class="orcamento-header">
-                <h2>Solicitar Orçamento</h2>
-                <p>Enviando solicitação para:<br><strong><?php echo htmlspecialchars($terceirizada_nome); ?></strong></p>
-            </div>
-
-            <div class="orcamento-body">
-                <form action="backend/controllers/SolicitacaoController.php" method="POST" id="formSolicitacao">
-                <?php echo csrf_field(); ?>
-
-                    <input type="hidden" name="contratante_id" value="<?php echo $contratante_id; ?>">
-                    <input type="hidden" name="terceirizada_id" value="<?php echo $terceirizada_id; ?>">
-
-                    <input type="hidden" name="descricao_servico" id="descricao_servico_real">
-
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="numero_funcionarios"><i class="fa-solid fa-users"></i> Quantidade de Pessoas:</label>
-                            <input type="number" id="numero_funcionarios" name="numero_funcionarios" class="form-control" min="1" placeholder="Ex: 6 funcionários" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="area_servico_solicitada"><i class="fa-solid fa-briefcase"></i> Área Solicitada:</label>
-                            <input type="text" id="area_servico_solicitada" name="area_servico_solicitada" class="form-control" placeholder="Ex: Limpeza, Segurança, TI" required>
-                        </div>
-                    </div>
-
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="frequencia"><i class="fa-solid fa-calendar-days"></i> Frequência do Serviço:</label>
-                            <select id="frequencia" class="form-control" required>
-                                <option value="" disabled selected>Selecione uma opção...</option>
-                                <option value="Serviço Único (1 dia)">Serviço Único (1 dia)</option>
-                                <option value="Diário">Diário (Todos os dias)</option>
-                                <option value="Semanal">Semanal (Toda semana)</option>
-                                <option value="Quinzenal">Quinzenal (A cada 15 dias)</option>
-                                <option value="Mensal">Mensal (1 vez ao mês)</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="localizacao_servico"><i class="fa-solid fa-map-location-dot"></i> Localização / CEP:</label>
-                            <input type="text" id="localizacao_servico" name="localizacao_servico" class="form-control" placeholder="Endereço onde será executado" required>
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="detalhes_opcionais"><i class="fa-solid fa-circle-info"></i> Detalhes Adicionais (Opcional):</label>
-                        <textarea id="detalhes_opcionais" class="form-control" rows="3" placeholder="Ex: Preciso que os produtos de limpeza estejam inclusos, será no período noturno, etc..."></textarea>
-                    </div>
-
-                    <button type="submit" class="btn-submit">
-                        <i class="fa-solid fa-paper-plane"></i> Enviar Pedido de Orçamento
-                    </button>
-
-                    <a href="dashboard_contratante.php" class="btn-back"><i class="fa-solid fa-arrow-left"></i> Voltar ao Feed</a>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        document.getElementById('formSolicitacao').addEventListener('submit', function(e) {
-            // Pega o valor do dropdown e o que a pessoa digitou na caixa de texto
-            const frequencia = document.getElementById('frequencia').value;
-            const detalhes = document.getElementById('detalhes_opcionais').value;
-
-            // Pega o input escondido que o backend do PHP está esperando
-            const campoReal = document.getElementById('descricao_servico_real');
-
-            // Monta o texto bonitinho
-            let textoFinal = "Frequência: " + frequencia;
-            if (detalhes.trim() !== "") {
-                textoFinal += " | Detalhes: " + detalhes;
-            }
-
-            // Atribui o texto final ao input escondido
-            campoReal.value = textoFinal;
-        });
-    </script>
-</body>
-</html>
+<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Solicitar orçamento | ServiConnect</title><link rel="stylesheet" href="css/app.css?v=4"></head><body>
+<?php require __DIR__ . '/backend/views/app-header.php'; ?>
+<main class="app-container app-narrow"><a href="perfil_empresa.php?id=<?php echo (int)$id; ?>" class="app-back">← Voltar ao perfil</a><div class="page-intro"><p class="eyebrow">NOVO PEDIDO</p><h1>Solicitar orçamento</h1><p>Para <strong><?php echo order_escape($provider['nome']); ?></strong>. Conte o que precisa para receber uma proposta com preço e condições.</p></div>
+<?php app_feedback(); ?>
+<form class="surface" action="backend/controllers/SolicitacaoController.php" method="post" id="formSolicitacao">
+<?php echo csrf_field(); ?><input type="hidden" name="ui" value="1"><input type="hidden" name="terceirizada_id" value="<?php echo (int)$id; ?>"><input type="hidden" name="chave_criacao" value="<?php echo order_escape($nonce); ?>">
+<fieldset class="form-section"><legend>Qual serviço você precisa?</legend><div class="form-grid">
+<div class="field full-width"><label for="requestedService">Serviço</label><select id="requestedService" name="servico_id"><option value="">Outro serviço / descrever abaixo</option>
+<?php foreach (service_groups() as $group=>$items): $allowed = $services ? array_intersect_key($items, array_flip($services)) : $items; if (!$allowed) continue; ?><optgroup label="<?php echo order_escape($group); ?>"><?php foreach ($allowed as $key=>$label): ?><option value="<?php echo $key; ?>"<?php if ($defaultService === $key) echo ' selected'; ?>><?php echo order_escape($label); ?></option><?php endforeach; ?></optgroup><?php endforeach; ?></select><small>Escolha um serviço oferecido pelo prestador ou descreva uma necessidade diferente.</small></div>
+<div class="field full-width" id="customServiceField"><label for="customService">Se escolheu outro serviço, qual?</label><input id="customService" name="area_servico_solicitada" maxlength="100" value="<?php echo app_value($old,'area_servico_solicitada'); ?>" placeholder="Descreva o tipo de serviço"></div>
+<div class="field full-width"><label for="descricaoServico">O que precisa ser feito?</label><textarea id="descricaoServico" name="descricao_servico" rows="5" required maxlength="10000" placeholder="Ex.: cortar a grama, podar seis plantas e retirar os resíduos."><?php echo app_value($old,'descricao_servico'); ?></textarea></div>
+<div class="field"><label for="frequencia">Frequência</label><select id="frequencia" name="frequencia"><?php foreach (['a_combinar'=>'A combinar','unico'=>'Uma única vez','diario'=>'Diário','semanal'=>'Semanal','quinzenal'=>'Quinzenal','mensal'=>'Mensal'] as $key=>$label): ?><option value="<?php echo $key; ?>"<?php if (($old['frequencia'] ?? 'a_combinar') === $key) echo ' selected'; ?>><?php echo $label; ?></option><?php endforeach; ?></select></div>
+<div class="field"><label for="dataPreferida">Data desejada (opcional)</label><input type="date" id="dataPreferida" name="data_preferida" min="<?php echo date('Y-m-d'); ?>" value="<?php echo app_value($old,'data_preferida'); ?>"><small>A data final será combinada com o prestador.</small></div>
+<?php if ($provider['tipo_empresa']==='mei'): ?><input type="hidden" name="numero_funcionarios" value="1"><?php else: ?><div class="field"><label for="numeroFuncionarios">Quantidade de profissionais</label><input type="number" id="numeroFuncionarios" name="numero_funcionarios" min="1" max="100000" value="<?php echo app_value($old,'numero_funcionarios','1'); ?>"><small>Se não souber, mantenha 1 e descreva sua necessidade.</small></div><?php endif; ?>
+</div></fieldset>
+<fieldset class="form-section"><legend>Local do atendimento</legend><div class="field"><label for="localServico">Endereço ou indicação de atendimento remoto</label><textarea id="localServico" name="localizacao_servico" rows="3" maxlength="255" required><?php echo app_value($old,'localizacao_servico',mb_substr($address,0,255)); ?></textarea><small>Este local será compartilhado apenas com o prestador destinatário do pedido.</small></div></fieldset>
+<p class="form-help">Enviar um pedido não realiza pagamento. Aguarde a proposta e confira as condições antes de aceitar.</p><div class="actions" style="margin-top:20px"><button class="button" type="submit">Enviar solicitação</button><a href="busca.php" class="button-secondary">Voltar à busca</a></div>
+</form></main>
+<script>document.addEventListener('DOMContentLoaded',()=>{const service=document.getElementById('requestedService'),field=document.getElementById('customServiceField'),input=document.getElementById('customService');function update(){field.hidden=service.value!=='';input.required=service.value==='';}service.addEventListener('change',update);update();});</script>
+</body></html>

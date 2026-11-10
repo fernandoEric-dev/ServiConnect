@@ -246,8 +246,9 @@ try {
     $ownPfView = account_request($pf['client'],'/perfil_empresa.php?id='.$pf['row']['id']);
     account_check(strpos($ownPfView['body'],'Rua de teste') !== false, 'Titular continua vendo o próprio endereço');
     $pdo->prepare('UPDATE empresas SET latitude=-23.58,longitude=-46.33 WHERE usuario_id=?')->execute([$mei['row']['id']]);
-    $listing=account_request($pf['client'],$pf['dashboard']);
-    preg_match('/const empresas\s*=\s*(\[[\s\S]*?\]);/', $listing['body'], $mapData);
+    $nameStmt=$pdo->prepare('SELECT nome FROM empresas WHERE usuario_id=?'); $nameStmt->execute([$mei['row']['id']]);
+    $listing=account_request($pf['client'],$pf['dashboard'].'?q='.rawurlencode($nameStmt->fetchColumn()));
+    preg_match('/<script type="application\/json" id="mapProviders">([\s\S]*?)<\/script>/', $listing['body'], $mapData);
     $mapRows=json_decode($mapData[1] ?? '',true) ?: [];
     $meiMap=array_values(array_filter($mapRows,static fn($row)=>(int)$row['usuario_id']===(int)$mei['row']['id']));
     account_check(count($meiMap)===1 && $meiMap[0]['latitude']===null && $meiMap[0]['longitude']===null

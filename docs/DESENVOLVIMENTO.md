@@ -48,6 +48,8 @@ Os cadastros CPF/CNPJ e os perfis MEI/terceirizada estão implementados. Consult
 
 A [Etapa 3](ETAPA_3.md) acrescenta busca pública e no painel, filtros e paginação com os dados existentes, sem nova importação de banco. A suíte específica é `tests/search.php`.
 
+As [etapas 4 e 5](ETAPAS_4_E_5.md) acrescentam propostas e histórico completo, perfis com seleção de serviços/cidades, mapas e visual responsivo. A migração incremental 005 foi preparada para preservar os registros. A suíte específica é `tests/workflow.php`.
+
 ## Estrutura e configurações
 
 - `database/migrations/001_base.sql`: estrutura do banco atual, sem INSERTs de produção, sem nome do banco de produção e sem contadores de IDs reais.

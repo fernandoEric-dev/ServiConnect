@@ -8,4 +8,5 @@ return [
     'db_name' => 'serviconnect_dev',
     'db_user' => 'serviconnect_dev',
     'db_password' => 'CONFIGURE_LOCALMENTE',
+    'map_tile_url' => 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
 ];

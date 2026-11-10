@@ -29,11 +29,11 @@ try {
         if ($kind==='empty') {
             apply_sql($pdo,$root.'/database/infinityfree/BANCO_NOVO_VAZIO.sql');
             $tables=$pdo->query('SHOW TABLES')->fetchAll(PDO::FETCH_COLUMN);
-            if (count($tables)!==7) throw new RuntimeException('Estrutura nova incompleta.');
+            if (count($tables)!==9) throw new RuntimeException('Estrutura nova incompleta.');
             foreach (['usuarios','empresas','solicitacoes','administradores','usuarios_arquivados'] as $table) {
                 if ((int)$pdo->query("SELECT COUNT(*) FROM `$table`")->fetchColumn()!==0) throw new RuntimeException('Exportação contém dados inesperados.');
             }
-            echo "OK: instalação em banco vazio, sete tabelas, sem contas ou dados de produção.\n";
+            echo "OK: instalação em banco vazio, nove tabelas, sem contas ou dados de produção.\n";
             continue;
         }
         apply_sql($pdo,$root.'/database/migrations/001_base.sql');
@@ -58,9 +58,11 @@ try {
         $before=snapshot_rows($pdo,$columns);
         $patch=$root.'/database/infinityfree/'.($kind === 'stage2' ? 'ATUALIZAR_ETAPA_2_CADASTRO_PERFIS.sql' : 'ATUALIZAR_BANCO_ATUAL.sql');
         apply_sql($pdo,$patch);
+        apply_sql($pdo,$root.'/database/infinityfree/ATUALIZAR_ETAPAS_4_E_5.sql');
         if (snapshot_rows($pdo,$columns)!==$before) throw new RuntimeException('Dados existentes foram alterados.');
         echo "OK: atualização preserva contas, perfis, senhas, IDs, pedidos, estados vazios e NULL.\n";
         apply_sql($pdo,$patch);
+        apply_sql($pdo,$root.'/database/infinityfree/ATUALIZAR_ETAPAS_4_E_5.sql');
         if (snapshot_rows($pdo,$columns)!==$before) throw new RuntimeException('Reaplicação alterou dados.');
         echo "OK: reaplicação não duplica colunas, tabelas ou índices.\n";
         $pdo->exec("UPDATE solicitacoes SET status='orçada' WHERE id=1");
@@ -72,6 +74,15 @@ try {
         if ($pdo->query('SELECT tipo_pessoa FROM usuarios WHERE id=3')->fetchColumn()!=='fisica'
             || $pdo->query('SELECT tipo_empresa FROM empresas WHERE usuario_id=2')->fetchColumn()!=='mei') throw new RuntimeException('Novos tipos não estão disponíveis.');
         echo "OK: $kind suporta CPF e MEI, preservando pessoas jurídicas anteriores.\n";
+        $pdo->exec("UPDATE solicitacoes SET status='concluida' WHERE id=1");
+        $pdo->exec("UPDATE empresas SET tipo_empresa='terceirizada',mapa_publico=0,latitude=-23.5,longitude=-46.5 WHERE usuario_id=2");
+        $historyCount=(int)$pdo->query('SELECT COUNT(*) FROM solicitacoes_eventos')->fetchColumn();
+        apply_sql($pdo,$patch);
+        apply_sql($pdo,$root.'/database/infinityfree/ATUALIZAR_ETAPAS_4_E_5.sql');
+        if ($pdo->query('SELECT status FROM solicitacoes WHERE id=1')->fetchColumn()!=='concluida') throw new RuntimeException('Atualização perdeu o novo estado de orçamento.');
+        if ((int)$pdo->query('SELECT mapa_publico FROM empresas WHERE usuario_id=2')->fetchColumn()!==0) throw new RuntimeException('Reaplicação republicou o mapa sem autorização.');
+        if ((int)$pdo->query('SELECT COUNT(*) FROM solicitacoes_eventos')->fetchColumn()!==$historyCount) throw new RuntimeException('Reaplicação duplicou eventos.');
+        echo "OK: novos estados, privacidade do mapa e eventos permanecem estáveis na reaplicação.\n";
     }
 } finally {
     // Somente bancos temporários criados com sucesso por esta execução.

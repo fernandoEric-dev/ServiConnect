@@ -12,6 +12,7 @@ try {
         [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION, PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
          PDO::ATTR_EMULATE_PREPARES => false]
     );
+    $pdo->exec("SET time_zone = '+00:00'");
 } catch (Throwable $e) {
     error_log('Falha de configuração/conexão do banco: ' . $e->getMessage());
     abort_request(503, 'Serviço temporariamente indisponível. Tente novamente mais tarde.');
