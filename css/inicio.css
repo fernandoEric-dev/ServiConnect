@@ -1,3 +1,13 @@
+.home-page .app-header-inner {
+    padding-block: 8px;
+}
+
+.home-page .app-brand img {
+    width: clamp(58px, 6vw, 76px);
+    height: auto;
+    aspect-ratio: 4 / 5;
+}
+
 .home-hero {
     background: #0a192f;
     color: #fff
@@ -105,6 +115,23 @@
 .home-categories>a:hover {
     border-color: #c39a00;
     box-shadow: 0 4px 16px #0a192f0a
+}
+
+@media (hover: hover) and (pointer: fine) {
+    .home-highlights > .surface:hover {
+        border-color: #d4ac31;
+        box-shadow: 0 12px 28px rgb(10 25 47 / 13%);
+    }
+}
+
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+    .home-highlights > .surface {
+        transition: transform .18s ease-out, border-color .18s ease-out, box-shadow .18s ease-out;
+    }
+
+    .home-highlights > .surface:hover {
+        transform: scale(1.025);
+    }
 }
 
 .home-categories h3 {
